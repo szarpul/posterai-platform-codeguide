@@ -1,0 +1,143 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+# Project Requirements Document
+
+## 1. Project Overview
+
+We are building a web platform that lets anyone design and order custom posters without needing design skills or complex prompts. Instead of free-form text input, users simply answer a short questionnaire—choosing a style (modern, vintage, abstract, minimalist), a theme (nature, urban, fantasy, futuristic), a mood (calm, energetic, mysterious, joyful), a color palette (warm, cool, monochrome, vibrant), and a subject (landscapes, portraits, animals, architecture). The system uses those selections to call an external text-to-image API (OpenAI by default) and generate a unique poster draft. Users can preview, save as drafts in their account, then customize paper size and finish, pay, and have the poster printed and shipped.
+
+This platform solves two core problems: it removes the barrier of writing effective image-generation prompts, and it streamlines the end-to-end process of turning AI-generated art into a physical product. Success will be measured by user engagement (drafts saved per session), conversion rate (orders placed vs. posters generated), average order value (through upsells like premium finishes), and delivery reliability (orders fulfilled and delivered on time).
+
+## 2. In-Scope vs. Out-of-Scope
+
+### In-Scope (Version 1)
+
+*   **Landing page** with clear call-to-action and three-step explanation.
+*   **User authentication**: email/password + social login (Google, Facebook).
+*   **Questionnaire-driven image generation**: predefined style/theme/mood/color/subject options.
+*   **Integration with OpenAI Image API** (and placeholder for additional providers).
+*   **Preview & draft management**: save, list, revisit drafts in “My Drafts.”
+*   **Poster customization**: select sizes (A4, A3, A2), materials (200 gsm Matte, 200 gsm Glossy), finishes (matte, glossy).
+*   **Checkout & payment**: Stripe and PayPal integrations, secure payment flow.
+*   **Shipping**: default to Poland, with API hooks for future global print-and-ship partners.
+*   **External printing partner integration**: send final assets and specs to the partner’s API.
+*   **Admin dashboard**: order management, user support tickets, template library management for questionnaire options.
+
+### Out-of-Scope (Version 1)
+
+*   Poster framing or framing options.
+*   In-house printing and fulfillment.
+*   Multi-language support or localization.
+*   Subscription or bulk-order pricing models.
+*   Mobile-only or native apps (web-only).
+*   Detailed analytics beyond basic KPIs.
+*   Custom branding or theme support (no user-supplied logos/fonts).
+
+## 3. User Flow
+
+When a first-time visitor lands on the platform, they see a simple homepage describing how to create a poster in three steps: choose style options, generate a preview, and place an order. The header offers “Log In” and “Sign Up” via email/password or Google/Facebook. A big “Start Designing” button takes them directly into the questionnaire. If they click “Save as Draft” at any point without an account, a modal prompts them to register or log in, then returns them to the same spot.
+
+Once signed in, users complete the five-item questionnaire, click “Generate Poster Preview,” and watch the AI create the image. They can then “Save as Draft” or move on to “Customize & Order.” In customization, they pick paper size and finish, see an instant price update, and click “Proceed to Checkout.” They enter or confirm shipping details (Poland by default), choose Stripe or PayPal, and finalize payment. After checkout, they see an order confirmation page with tracking info. Behind the scenes, our backend calls the external printer API, and the user gets email updates as the order moves from “In Production” to “Shipped.”
+
+## 4. Core Features
+
+*   **User Onboarding & Authentication**\
+    ­– Email/password signup, social login (Google, Facebook)\
+    ­– Password reset, account settings, session handling
+*   **Questionnaire-Driven Image Generation**\
+    ­– Predefined options for style, theme, mood, color palette, subject\
+    ­– Live preview panel updates as choices change
+*   **Text-to-Image API Integration**\
+    ­– Modular connector for OpenAI by default\
+    ­– Automatic retries, error handling, performance logging
+*   **Draft Management**\
+    ­– Save, list, revisit, regenerate poster drafts in “My Drafts”\
+    ­– Drafts tied to authenticated user accounts
+*   **Poster Customization**\
+    ­– Sizes: A4, A3, A2 (expandable)\
+    ­– Materials: 200 gsm matte or glossy paper\
+    ­– Finish: matte or glossy\
+    ­– Real-time price calculation
+*   **Checkout & Payment**\
+    ­– Stripe and PayPal integrations\
+    ­– Order summary, invoicing, email receipts
+*   **Shipping & Fulfillment**\
+    ­– Default Poland shipping\
+    ­– External printing partner API calls with image file & specs\
+    ­– Order status tracking (In Production → Shipped)
+*   **Administrative Dashboard**\
+    ­– Order Management: filter, view, update statuses\
+    ­– User Support: ticket list, conversation threads\
+    ­– Template Library: add/edit/remove questionnaire options
+
+## 5. Tech Stack & Tools
+
+*   **Frontend**: React (with Hooks), React Router, Tailwind CSS (or CSS-in-JS)
+*   **Backend**: Node.js, Express.js
+*   **Database**: PostgreSQL (user, draft, order management)
+*   **Storage**: AWS S3 (for storing generated images)
+*   **AI & APIs**:\
+    ­– OpenAI Image API (default)\
+    ­– Pluggable service connectors for future providers
+*   **Payments**: Stripe API, PayPal REST APIs
+*   **Authentication**: OAuth 2.0 (Google, Facebook), JWT sessions
+*   **Printing Partner**: External printing service REST API
+*   **Infrastructure**: Hosted on AWS (EC2/Elastic Beanstalk or ECS), RDS for PostgreSQL
+*   **Dev Tools & IDE**:\
+    ­– Cursor (AI-powered coding assistant)\
+    ­– Lovable.dev (code generation for front-end/full-stack)
+*   **Monitoring & Logging**: AWS CloudWatch, Sentry
+
+## 6. Non-Functional Requirements
+
+*   **Performance**:\
+    ­– Page load time ≤ 2 s on 3G/4G network\
+    ­– AI image generation response ≤ 5 s (excluding network delays)
+*   **Scalability**:\
+    ­– Support 1,000 concurrent users on MVP infra\
+    ­– Horizontal scaling of backend workers for API calls
+*   **Security & Compliance**:\
+    ­– HTTPS everywhere, secure headers (HSTS, CSP)\
+    ­– Passwords hashed (bcrypt) and stored securely\
+    ­– GDPR-compliant data handling and privacy policy
+*   **Reliability & Availability**:\
+    ­– 99.9% uptime SLA\
+    ­– Automatic retry logic for transient API failures
+*   **Usability & Accessibility**:\
+    ­– WCAG 2.1 AA compliance\
+    ­– Responsive design for desktop/tablet/mobile
+*   **Maintainability**:\
+    ­– Clean code structure, documented API contracts\
+    ­– Automated tests (unit, integration) and CI/CD pipeline
+
+## 7. Constraints & Assumptions
+
+*   **Constraints**:\
+    ­– Reliance on external OpenAI API and printing partner APIs\
+    ­– Shipping limited to Poland initially (carrier API coverage)\
+    ­– Questionnaire options must be curated by admins—no free-form input
+*   **Assumptions**:\
+    ­– Users have basic digital literacy and a stable internet connection\
+    ­– OpenAI API keys and printing partner credentials are available\
+    ­– Social login quotas with Google/Facebook are sufficient\
+    ­– Stripe and PayPal support Polish currency and payouts
+
+## 8. Known Issues & Potential Pitfalls
+
+*   **API Rate Limits**:\
+    ­– OpenAI or printing partner could throttle requests. Mitigation: queue system with back-off retries, request batching.
+*   **Image Generation Latency**:\
+    ­– Slow responses impact UX. Mitigation: show progress spinner, provide fallback “try again” option.
+*   **Print Quality Variability**:\
+    ­– Generated art may not meet print DPI requirements. Mitigation: enforce minimum resolution, run pre-flight checks before sending to printer.
+*   **Shipping Errors**:\
+    ­– Incorrect address or carrier failures. Mitigation: address validation, clear error messages, manual overrides in admin dashboard.
+*   **User Drop-off**:\
+    ­– Complex checkout or long waits might reduce conversion. Mitigation: simplify steps, show progress indicators, preserve state on errors.
+
+This document lays out the full scope, user journey, features, technologies, and guardrails for the AI-driven poster platform. All subsequent technical specifications (frontend guidelines, backend structure, security rules, etc.) will reference this PRD to ensure consistency and clarity.

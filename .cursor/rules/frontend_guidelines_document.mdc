@@ -1,0 +1,136 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+# Frontend Guideline Document
+
+This document explains how our poster-design web platform works on the frontend. It covers the tools we use, the way we build and organize code, and the guidelines we follow to keep everything fast, easy to understand, and reliable.
+
+## 1. Frontend Architecture
+
+### Overview
+- We build a Single Page Application (SPA) using React. This lets users move between pages quickly without reloading the browser.
+- We use **React Router** for navigation and **Tailwind CSS** for styling.
+- Our code lives in a Git repository and gets deployed as static files (HTML, CSS, JS) to AWS (S3 + CloudFront) or a similar CDN.
+
+### How It Scales and Stays Maintainable
+- **Modular Structure**: Code is split into small, focused components. Teams can work on different pieces without stepping on each other’s toes.
+- **Reusable Components**: Common UI elements (buttons, inputs, dialogs) live in a shared folder, so we build once and use everywhere.
+- **Theming & Config**: All colors and fonts are defined in one place (Tailwind config), making global changes quick and consistent.
+- **Performance**: Code splitting and lazy loading ensure users only download what they need for each page.
+
+## 2. Design Principles
+
+### Usability
+- Clear calls to action (big buttons, straightforward labels like “Generate Image” or “Checkout”).
+- Simple, step-by-step flows for creating a poster: questionnaire → draft → customization → payment.
+
+### Accessibility
+- Sufficient color contrast for text and interactive elements.
+- Semantic HTML (proper use of `<button>`, `<nav>`, `<form>`).
+- ARIA labels for custom controls (e.g., color pickers).
+
+### Responsiveness
+- Mobile-first breakpoints ensure the site works on phones, tablets, and desktops.
+- Layout adjusts: single-column on mobile, multi-column on larger screens.
+
+## 3. Styling and Theming
+
+### Approach
+- **Tailwind CSS** with JIT (just-in-time) compilation.
+- Utility-first styling means we write classes like `p-4`, `text-center`, or `bg-primary` directly in markup.
+
+### Visual Style
+- **Flat, Modern Design**: clean shapes, minimal shadows, clear typography.
+- **Subtle Glassmorphism** (for overlays and modals): semi-transparent backgrounds with light blur.
+
+### Color Palette
+- Primary Blue: `#1E3A8A`
+- Secondary Teal: `#0D9488`
+- Accent Yellow: `#FBBF24`
+- Neutral Dark: `#111827`
+- Neutral Light: `#F3F4F6`
+- Error Red: `#DC2626`
+
+### Typography
+- **Font Family**: “Poppins”, sans-serif (imported via Google Fonts).
+- **Headings**: bold, clear hierarchy (H1 2rem, H2 1.5rem, etc.).
+- **Body Text**: 1rem with line-height 1.5 for readability.
+
+## 4. Component Structure
+
+### Directory Layout (example)
+```
+src/
+├── components/       # Reusable UI parts (buttons, inputs, cards)
+├── features/         # Business-specific components (Questionnaire, DraftList)
+├── pages/            # Top-level views mapped to routes (Home, Login, Checkout)
+├── hooks/            # Custom React hooks (useAuth, useDrafts)
+├── context/          # React Context providers (AuthContext)
+├── utils/            # Helper functions (API calls, formatting)
+└── App.jsx           # Root component with Router
+```
+
+### Why Components Matter
+- Each component does one thing. This makes them easy to test and reuse.
+- Changes in one component don’t break others if interfaces (props) stay the same.
+
+## 5. State Management
+
+### Approach
+- **React Context + Hooks**: we use Context for global data (user session, current draft) and custom hooks (`useAuth`, `useDraft`) to read/write that data.
+- Local component state (via `useState`) handles UI details (open/close modals, form inputs).
+
+### Data Flow
+1. **AuthContext** provides the current user and login/logout functions.
+2. **DraftContext** manages a list of poster drafts fetched from our backend.
+3. Components subscribe to only the contexts they need, minimizing unnecessary re-renders.
+
+## 6. Routing and Navigation
+
+### Library
+- **React Router v6** handles route definitions and navigation links.
+
+### Route Structure
+```
+/                → Home (landing page)
+/signup          → Sign Up
+/login           → Login
+/questionnaire   → Step-by-step question flow
+/customize       → Poster size, material, finish options
+/checkout        → Payment with Stripe or PayPal
+/dashboard       → Admin order management (protected)
+```
+
+### Navigation Patterns
+- Use `<Link>` and `<NavLink>` for internal links.
+- Redirect unauthenticated users to `/login` when they try to access protected routes.
+
+## 7. Performance Optimization
+
+- **Code Splitting**: each page is loaded on demand via `React.lazy` + `Suspense`.
+- **Tailwind Purge**: unused CSS classes are removed in production builds.
+- **Image Lazy Loading**: posters and gallery images use the `loading="lazy"` attribute.
+- **Minification & Compression**: build pipeline (e.g., Vite or Create React App) handles JS/CSS minification and gzipping.
+- **CDN Delivery**: static assets served from AWS CloudFront or similar.
+
+## 8. Testing and Quality Assurance
+
+### Unit & Integration Tests
+- **Jest** + **React Testing Library** for components and hooks.
+- Tests live alongside code in a `__tests__` folder or with `.test.jsx` suffix.
+
+### End-to-End Tests
+- **Cypress** to simulate user flows: sign up, generate image, customize, and checkout.
+
+### Linting & Formatting
+- **ESLint** with a shared config for code quality.
+- **Prettier** for consistent code style.
+- Pre-commit hooks (Husky) run lint and tests before pushing.
+
+## 9. Conclusion and Overall Frontend Summary
+
+Our frontend stack (React, React Router, Tailwind CSS) gives us a maintainable, performant, and user-friendly application. We follow clear design principles—usability, accessibility, responsiveness—and keep our code organized in reusable components. State is handled through Context and hooks for a seamless experience, while routing and lazy loading make navigation smooth and efficient. Finally, rigorous testing and automated linting ensure we ship reliable code. This setup aligns perfectly with our goal: letting anyone design, preview, and order a custom AI-generated poster with ease and speed.

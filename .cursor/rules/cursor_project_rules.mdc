@@ -1,0 +1,163 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+## Project Overview
+
+*   **Type:** cursor_project_rules
+*   **Description:** I want to create a web platform where users can create a poster for themselves. The platform generates an image using an external text-to-image service (like OpenAI) based on a simple questionnaire of predefined options. Users can save drafts when signed in and order the poster to be printed and shipped via an external printing service.
+*   **Primary Goal:** Remove the barrier of writing free-form prompts by guiding users through a structured questionnaire and streamline the end-to-end process of generating, saving, customizing, and ordering AI-generated posters.
+
+## Project Structure
+
+### Framework-Specific Routing
+
+*   **Directory Rules:**
+
+    *   React Router 6: `src/routes/` with `createBrowserRouter` and `<RouterProvider>` for nested route definitions.
+    *   Example 1: Next.js 14 (App Router) → `app/[route]/page.tsx`
+    *   Example 2: Next.js (Pages Router) → `pages/[route].tsx`
+    *   Example 3: React Router 6 → `src/routes/` with `createBrowserRouter`
+
+### Core Directories
+
+*   **Versioned Structure:**
+
+    *   src/components: React 18 function components with Hooks
+    *   src/routes: React Router 6 route definitions
+    *   backend/controllers: Express.js v4 controller modules
+    *   backend/routes: Express.js v4 route handlers
+    *   backend/models: PostgreSQL model definitions (using an ORM)
+    *   storage: AWS S3 utilities for image upload and retrieval
+
+### Key Files
+
+*   **Stack-Versioned Patterns:**
+
+    *   src/routes/App.tsx: React Router 6 root routing setup
+    *   src/index.tsx: React 18 `createRoot` render entrypoint
+    *   backend/app.js: Express.js v4 application initialization and middleware
+    *   backend/routes/api.js: REST API endpoint registrations
+
+## Tech Stack Rules
+
+*   **Version Enforcement:**
+
+    *   react@18: Use function components and Hooks; no class components
+    *   react-router-dom@6: Enforce `createBrowserRouter` and `<RouterProvider>` usage
+    *   node@16: Use ES modules syntax and top-level await where needed
+    *   express@4: Structure routes with `Router()` instances
+    *   pg@8: Always use parameterized queries or an ORM for safety
+    *   @aws-sdk/client-s3@3: Import only required S3 clients
+    *   openai@3: Store API keys in environment variables; implement retries
+    *   stripe@10: Use versioned API initialization and webhooks for status sync
+    *   paypal-rest-sdk: Keep payment credential logic server-side
+    *   passport@0.6: Implement OAuth2 strategies for Google and Facebook
+    *   external-print-api@1: Ensure idempotent order creation
+
+## PRD Compliance
+
+*   **Non-Negotiable:**
+
+    *   "Questionnaire options must be curated by admins—no free-form input": Enforce an admin-managed schema for question and option entities; prevent user-supplied text fields in the questionnaire.
+
+## App Flow Integration
+
+*   **Stack-Aligned Flow:**
+
+    *   React Router 6 Flow → `src/routes/CreatePoster.tsx` orchestrates the five-step questionnaire and preview generation.
+    *   `src/routes/Drafts.tsx` → Fetches and displays user drafts via Express.js API endpoints.
+
+## Best Practices
+
+*   React
+
+    *   Use function components with Hooks; avoid class components
+    *   Manage global state with Context API or Redux Toolkit
+    *   Use React Query or SWR for data fetching and cache invalidation
+    *   Adopt TypeScript for type safety
+
+*   Node.js
+
+    *   Structure code as ES modules; prefer async/await
+    *   Centralize configuration via environment variables
+    *   Enforce linting (ESLint) and code formatting (Prettier)
+
+*   Express.js
+
+    *   Modularize routes using `Router()` instances
+    *   Implement centralized error-handling middleware
+    *   Validate request bodies with Joi or Zod
+    *   Sanitize inputs to prevent injection attacks
+
+*   PostgreSQL
+
+    *   Use parameterized queries or an ORM (TypeORM/Sequelize)
+    *   Manage schema changes via migrations
+    *   Index frequently queried columns (user_id, draft_id)
+
+*   AWS S3
+
+    *   Use presigned URLs for secure uploads
+    *   Organize buckets by environment and feature
+    *   Define lifecycle rules for old draft images
+
+*   OpenAI API
+
+    *   Handle rate limits with exponential backoff
+    *   Validate and sanitize all responses
+    *   Abstract provider integration for multi-provider support
+
+*   Stripe
+
+    *   Sync payment status via webhooks
+    *   Use Stripe Elements for PCI compliance
+    *   Test thoroughly in test mode
+
+*   PayPal
+
+    *   Perform payment execution server-side
+    *   Verify webhook signatures
+    *   Gracefully handle payment declines
+
+*   OAuth (Google & Facebook)
+
+    *   Use Passport.js strategies
+    *   Secure callback endpoints and refresh tokens
+    *   Store only essential profile data
+
+*   External Printing Service API
+
+    *   Implement idempotent POST requests for order creation
+    *   Retry transient errors with exponential backoff
+    *   Log all requests/responses for audit
+
+## Rules
+
+*   Derive folder and file patterns directly from the provided techStackDoc versions.
+*   For React Router 6, enforce use of `src/routes/` with nested routers; do not create a `pages/` directory.
+*   Separate frontend (`src/`) and backend (`backend/`) directories clearly.
+*   Enforce version-specific conventions (e.g., React 18 Hooks, Node.js ES modules).
+*   Never mix routing paradigms (e.g., no Next.js pages in a React Router project).
+
+## Rules Metrics
+
+Before starting project development, create a metrics file in the root of the project named `cursor_metrics.md`.
+
+### Instructions:
+
+*   Each time a cursor rule is used as context, update `cursor_metrics.md`.
+*   Use the following format for `cursor_metrics.md`:
+
+# Rules Metrics
+
+## Usage
+
+The number of times rules is used as context
+
+*   rule-name.mdc: 5
+*   another-rule.mdc: 2
+*   ...other rules

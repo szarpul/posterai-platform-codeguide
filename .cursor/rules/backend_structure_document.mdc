@@ -1,0 +1,167 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+# Backend Structure Document
+
+## 1. Backend Architecture
+
+### Overall Design
+
+The backend is built as a set of stateless services running on Node.js with Express.js. We follow a layered pattern:
+
+*   **Routes Layer** handles incoming HTTP requests and delegates to controllers.
+*   **Controllers Layer** parses requests, invokes business logic, and returns responses.
+*   **Services Layer** contains the core logic for authentication, image generation, order processing, etc.
+*   **Data Access Layer** abstracts database operations (using an ORM or query builder).
+*   **Middleware** enforces cross-cutting concerns (authentication, logging, error handling).
+
+### Support for Scalability, Maintainability, and Performance
+
+*   **Stateless Services**: Each backend instance holds no session in memory; sessions are JWT-based, stored client-side.
+*   **Horizontal Scaling**: Deploy multiple instances behind a load balancer to handle spikes in traffic.
+*   **Modular Code**: Clear separation of concerns makes it easy to add new features (e.g., support for another image API).
+*   **Asynchronous Processing**: Long-running tasks (e.g., sending orders to the printing partner) pushed to a job queue.
+*   **Caching**: Frequently accessed data (questionnaire options, price tables) stored in Redis to reduce database load.
+
+## 2. Database Management
+
+### Technologies
+
+*   **Type**: Relational (SQL)
+*   **System**: PostgreSQL, hosted on AWS RDS
+*   **Storage for Generated Images**: AWS S3
+
+### Data Structure and Practices
+
+*   **Normalized Schema**: User, Draft, Order, ProductOption, PrintJob tables to avoid duplication.
+*   **Connection Pooling**: Managed by the ORM/driver to efficiently reuse database connections.
+*   **Backups**: Automated daily snapshots of RDS.
+*   **Migrations**: Controlled via a migration tool (e.g., Sequelize CLI or Knex migrations).
+*   **Access Patterns**: Reads for questionnaire options heavy but infrequent changes; writes on draft save and checkout.
+
+## 3. Database Schema
+
+### Human-Readable Overview
+
+*   **User**: Stores account info (email, password hash, OAuth IDs).
+*   **Draft**: Temporary storage for user poster designs (questionnaire choices and generated image URL).
+*   **ProductOption**: Predefined sizes, materials, finishes with pricing.
+*   **Order**: Checkout details, shipping address, payment info, status.
+*   **PrintJob**: Tracks communication with the printing partner (external job ID, status updates).
+
+### PostgreSQL Schema (DDL)
+
+`-- Users table CREATE TABLE users ( id SERIAL PRIMARY KEY, email VARCHAR(255) UNIQUE NOT NULL, password_hash VARCHAR(255), oauth_provider VARCHAR(50), oauth_id VARCHAR(255), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ); -- Drafts table CREATE TABLE drafts ( id SERIAL PRIMARY KEY, user_id INT REFERENCES users(id) ON DELETE CASCADE, questionnaire JSONB NOT NULL, image_url TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ); -- Product options (sizes, materials, finishes) CREATE TABLE product_options ( id SERIAL PRIMARY KEY, category VARCHAR(50) NOT NULL, -- e.g., size, material, finish name VARCHAR(100) NOT NULL, price_cents INT NOT NULL, UNIQUE(category, name) ); -- Orders table CREATE TABLE orders ( id SERIAL PRIMARY KEY, user_id INT REFERENCES users(id), draft_id INT REFERENCES drafts(id), shipping_address JSONB NOT NULL, payment_method VARCHAR(50) NOT NULL, -- stripe or paypal total_cents INT NOT NULL, status VARCHAR(50) DEFAULT 'pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ); -- Print jobs table CREATE TABLE print_jobs ( id SERIAL PRIMARY KEY, order_id INT REFERENCES orders(id) ON DELETE CASCADE, external_job_id VARCHAR(255), status VARCHAR(50) DEFAULT 'created', updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP );`
+
+## 4. API Design and Endpoints
+
+We follow a RESTful style. All payloads and responses use JSON.
+
+### Authentication
+
+*   **POST /api/auth/signup**: Register with email/password.
+*   **POST /api/auth/login**: Obtain JWT.
+*   **GET /api/auth/oauth/:provider**: Initiate Google/Facebook login.
+*   **GET /api/auth/oauth/:provider/callback**: OAuth callback.
+
+### Questionnaire & Image Generation
+
+*   **GET /api/questionnaire/options**: Fetch styles, themes, moods, colors, subjects.
+*   **POST /api/images/generate**: Send selected options to OpenAI (or another provider) and return the image URL.
+
+### Draft Management
+
+*   **GET /api/drafts**: List user drafts.
+*   **POST /api/drafts**: Save a new draft.
+*   **PUT /api/drafts/:id**: Update an existing draft.
+*   **DELETE /api/drafts/:id**: Remove a draft.
+
+### Product Customization & Checkout
+
+*   **GET /api/product-options**: List sizes, materials, finishes.
+*   **POST /api/orders**: Create a new order (includes payment processing via Stripe or PayPal).
+*   **GET /api/orders/:id**: Retrieve order status.
+
+### Admin Endpoints
+
+*   **GET /api/admin/orders**: List all orders.
+*   **PUT /api/admin/orders/:id/status**: Update order status.
+*   **GET /api/admin/users**: List users.
+*   **GET /api/admin/templates**: Manage questionnaire option templates.
+
+## 5. Hosting Solutions
+
+*   **Compute**: AWS Elastic Beanstalk or AWS ECS Fargate to run containers.
+*   **Database**: AWS RDS for PostgreSQL with Multi-AZ for high availability.
+*   **Storage**: AWS S3 buckets for storing generated images.
+
+### Benefits
+
+*   **Reliability**: Managed services with SLAs and automatic failover.
+*   **Scalability**: Auto-scaling groups or ECS tasks that grow with demand.
+*   **Cost-Effectiveness**: Pay-as-you-go; reserve capacity for predictable loads.
+
+## 6. Infrastructure Components
+
+*   **Load Balancer**: AWS Application Load Balancer (ALB) distributes traffic.
+*   **Cache**: AWS ElastiCache (Redis) for questionnaire options and price lookups.
+*   **CDN**: Amazon CloudFront to serve images quickly worldwide.
+*   **CI/CD**: GitHub Actions for building, testing, and deploying code automatically.
+*   **Logging & Tracing**: AWS CloudWatch logs, X-Ray for tracing requests.
+
+## 7. Security Measures
+
+*   **Transport Security**: HTTPS/TLS enforced at the load balancer.
+
+*   **Authentication & Authorization**:
+
+    *   JWT for stateless sessions.
+    *   OAuth 2.0 for Google and Facebook sign-in.
+    *   Role checks for admin vs. regular endpoints.
+
+*   **Password Protection**: bcrypt hashing with salt.
+
+*   **HTTP Hardening**: Helmet middleware sets secure headers.
+
+*   **Rate Limiting**: Protects against brute-force attacks.
+
+*   **Data Encryption**:
+
+    *   At rest: RDS and S3 encryption using AWS KMS.
+    *   In transit: TLS for all service-to-service communication.
+
+*   **Compliance**: GDPR considerations (data export, deletion upon request).
+
+## 8. Monitoring and Maintenance
+
+*   **Performance Monitoring**: AWS CloudWatch metrics for CPU, memory, and RDS performance.
+
+*   **Error Tracking**: Sentry captures exceptions and alerts the team.
+
+*   **Alerting**: CloudWatch Alarms notify via email or Slack on thresholds.
+
+*   **Backups & Recovery**:
+
+    *   Automated daily database snapshots.
+    *   Versioned S3 bucket to recover overwritten images.
+
+*   **Operational Tasks**:
+
+    *   Regular dependency updates.
+    *   Security patches applied via CI/CD pipelines.
+    *   Database migrations run automatically on deploy.
+
+## 9. Conclusion and Overall Backend Summary
+
+This backend is a modular, scalable, and secure foundation for your AI-powered custom poster platform. By using Node.js, Express, and PostgreSQL on AWS, we ensure:
+
+*   **High Availability** through managed services and auto-scaling.
+*   **Maintainability** via clear layering, migrations, and CI/CD workflows.
+*   **Performance** with caching, CDN, and asynchronous job queues.
+*   **Security** with strong authentication, encryption, and best practices.
+
+Unique aspects include a pluggable image-generation interface (easily add new AI providers) and tight integration with external print-and‐ship services. This structure aligns perfectly with the project goals: smooth user experience, reliable order fulfillment, and room to grow worldwide.

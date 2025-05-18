@@ -1,0 +1,27 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+flowchart TD
+  Landing[Landing Page] --> Start[Start Create Poster]
+  Landing --> Auth[Login SignUp]
+  Start --> Questionnaire[Questionnaire]
+  Auth --> Landing
+  Questionnaire --> Generate[Generate Poster Preview]
+  Generate --> Preview[Image Preview]
+  Preview --> Action{Choose Action}
+  Action -->|Save Draft| Save[Save as Draft]
+  Action -->|Customize Order| Customize[Customization]
+  Save --> Preview
+  Customize --> Options[Select Size Material Finish]
+  Options --> Checkout[Proceed to Checkout]
+  Checkout --> Shipping[Enter Shipping Details]
+  Shipping --> Payment[Select Payment Gateway]
+  Payment --> Confirmation[Order Confirmation]
+  Confirmation --> Print[Send to Printing Service]
+  Print --> InProd[Order In Production]
+  InProd --> Shipped[Order Shipped]
+  Shipped --> Notify[Send Email Notifications]

@@ -1,0 +1,50 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+# App Flow Document
+
+## Onboarding and Sign-In/Sign-Up
+
+A new visitor arrives at the platform by clicking the main website URL or through a shared link. They land on a clean homepage that explains in simple terms how they can create and order a custom poster. The header always shows options to start designing, sign in, or sign up. When the visitor clicks the sign-up button, a modal window prompts them to either enter their email and password or use a social login with Google or Facebook. After they submit their credentials, the system sends a confirmation email and automatically logs them in once they verify their address. Returning users can click the sign-in link and enter their email and password, or they can choose Google or Facebook to authenticate. If they forget their password, a “Forgot Password” link leads to a page where they enter their email. The system emails them a secure link to reset the password. Once the password is reset, they can sign in normally. When users want to sign out, they click a logout link in the top right of every page, and they are immediately returned to the landing page as a guest.
+
+## Main Dashboard or Home Page
+
+After signing in, users land on their personalized home page, which greets them by name. At the top they see a header with a logo on the left and navigation links on the right for My Drafts, Create Poster, Orders, Account Settings, and Support. Below the header, a large banner invites them to start a new poster design by clicking “Create Poster.” Under the banner, a preview of their recent drafts appears as small cards, each showing a thumbnail of the generated image and the date it was created. At the bottom of the page there is a brief overview of the three-step poster creation process, reminding users how they select options, generate an image, and place an order. This home page serves as the hub from which they can move to any part of the app by clicking the relevant navigation link or by clicking the create button in the banner.
+
+## Detailed Feature Flows and Page Transitions
+
+### Questionnaire and Image Generation
+
+When users click “Create Poster,” they are taken to the Questionnaire page. Here a series of dropdown fields and radio buttons appear, one at a time. The first field asks for the poster style: modern, vintage, abstract, or minimalist. Once they choose a style, they click “Next” to see theme options like nature, urban, fantasy, or futuristic. Each step shows the current selection in a small summary panel on the right. After themes, they select a mood such as calm, energetic, mysterious, or joyful, and then pick a color palette from warm, cool, monochrome, or vibrant. Finally they choose a subject like landscapes, portraits, animals, or architecture. When all options are filled, the page shows a prominent “Generate Poster Preview” button. Clicking it sends the combined choices to the external text-to-image API. A spinning loader appears in the preview area until the image returns.
+
+### Preview and Draft Management
+
+Once the AI service returns the image, it appears at full resolution in the preview area with two buttons below: “Save as Draft” and “Customize & Order.” If the user is not signed in, clicking either button opens the sign-in modal so they can authenticate. After signing in, the app automatically returns them to the preview with their generated image intact. If they click “Save as Draft,” the image and all chosen options are stored in the database under their account. They see a confirmation message that the draft is saved, and they can navigate to “My Drafts” at any time to review or regenerate that draft.
+
+### Poster Customization and Checkout
+
+Choosing “Customize & Order” takes users to the customization page. Here they see the same generated image alongside dropdowns for poster size—A4, A3, or A2—and radio buttons for material choice: 200 gsm matte or 200 gsm glossy. A finish toggle lets them pick matte or glossy, and the price updates in real time below the options. When satisfied, they click “Proceed to Checkout.” The app transitions to the Checkout page where a form requests their shipping address. By default the form is set to Poland only, but a country selector can expand to global locations if external printing partners are configured. After they confirm the address, they choose a payment method—Stripe or PayPal. If they select Stripe, they enter card details in a secure iframe. If they select PayPal, they are redirected to PayPal’s site to log in and confirm payment. Once payment succeeds, the app transitions to an Order Confirmation page.
+
+### Order Confirmation and Fulfillment
+
+On the Order Confirmation page, users see a summary with their poster image, selected options, shipping address, payment details, and an order number. The page displays an estimated delivery date. At the same time, the back-end system automatically sends the final image file and print specifications to the external printing service API. As the printing partner updates order status, the app’s back end records each stage—In Production, Shipped—and sends the user an email notification. Users can also click “Track Order” from the confirmation page to see the real-time status pulled from the printing partner’s API.
+
+### Administrative Dashboard
+
+Administrators log in via a separate admin URL that leads to the Admin Dashboard. They begin on an overview page showing key metrics like pending orders, open support tickets, and recent drafts. From the sidebar they navigate to Order Management to see a table of all orders, filterable by status, date, or user. Clicking any order row reveals detailed information and allows status updates or manual resend of printing instructions. The User Support section shows messages from customers, and clicking a ticket opens a conversation view where admins can reply. The Template Library page lists all questionnaire options grouped by category. Admins can click an option to edit its label or add new options to any category. All changes take effect immediately in the user-facing questionnaire.
+
+## Settings and Account Management
+
+Users access Account Settings from the header menu on any page. This page has tabs for Profile, Password, Notifications, and Billing. Under Profile they can update their email address or name. The Password tab asks for the old password and the new one, with validation to ensure it meets security rules. Notifications lets them toggle email updates for order status changes or support replies. Under Billing they see a history of paid orders with amounts and dates. Although there is no subscription model in version one, users can manage saved payment methods here if they used Stripe’s card vault. After saving any changes, a small banner confirms success, and a link returns them to the home page to continue designing posters.
+
+## Error States and Alternate Paths
+
+If users submit invalid data anywhere, such as an incorrectly formatted email or expired payment method, the form fields highlight the error and display a clear message explaining how to fix it. During image generation, if the external API fails or times out, a friendly dialog appears saying “Unable to generate image right now. Please try again,” with a button to retry. If the internet connection is lost, the app shows an offline banner and saves unsent form data locally so that users can continue once connectivity returns. In the checkout flow, if payment is declined by Stripe or PayPal, the app displays the decline reason and allows the user to enter new payment details or choose the other gateway. For admin actions, if the printing partner’s API is unreachable, orders are queued for retry and admins see a yellow warning icon next to the affected orders.
+
+## Conclusion and Overall App Journey
+
+From landing on the inviting homepage to completing payment for a custom poster, users enjoy a clear, step-by-step path. They sign up quickly with email or social login, select from predefined creative options, preview AI-generated images, and save promising ideas as drafts. When ready, they customize poster size and finish, checkout securely via Stripe or PayPal, and receive real-time tracking as their art goes from digital concept to printed poster at their door. Admins oversee orders, customer support, and questionnaire templates, ensuring the platform runs smoothly. This flow delivers a smooth end-to-end experience that takes users from first curiosity to a beautifully printed poster in hand.

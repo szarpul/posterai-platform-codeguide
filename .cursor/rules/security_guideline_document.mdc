@@ -1,0 +1,164 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+# Security Guidelines for AI-Powered Poster Platform
+
+This document outlines the security principles and implementation recommendations tailored to the AI-driven poster creation and ordering platform. It covers controls across authentication, input validation, data protection, API security, web application hygiene, infrastructure, and dependency management.
+
+---
+
+## 1. Authentication & Access Control
+
+### 1.1 Robust Authentication
+- Enforce strong password policy: minimum 12 characters, mix of upper/lowercase letters, numbers, and symbols.  
+- Store passwords using Argon2 or bcrypt with unique per‐user salts.  
+- Implement account lockout or exponential back-off after repeated failed login attempts.
+
+### 1.2 Secure Session Management
+- Use HTTP-only, Secure, SameSite=strict cookies for session tokens.  
+- Implement both idle and absolute session timeouts (e.g., 30 min idle, 24 h absolute).  
+- Issue CSRF tokens (synchronizer-token pattern) for all state-changing requests.
+
+### 1.3 OAuth & Social Login
+- Validate OAuth state parameters to prevent CSRF on social logins (Google, Facebook).  
+- Verify and decode JWT tokens server-side: check signature, `exp`, `iat`, `aud`, `iss`.  
+- Never accept `alg: none`; pin allowed signing algorithms (e.g., RS256).
+
+### 1.4 Role-Based Access Control (RBAC)
+- Define minimal roles (e.g., **user**, **admin**).  
+- Enforce server-side permission checks on every protected endpoint: draft management, order status updates, template library modifications.  
+- Apply least-privilege principle to both code paths and database queries.
+
+---
+
+## 2. Input Handling & Processing
+
+### 2.1 Validation & Sanitization
+- Treat all inputs—questionnaire selections, shipping address fields—as untrusted.  
+- Enforce strict server-side schemas (e.g., JSON Schema, Joi) for API payloads.  
+- Reject unknown fields; use allow-lists for questionnaire options.
+
+### 2.2 Prevent Injection Attacks
+- Use parameterized queries or ORM methods (e.g., Sequelize, TypeORM) for PostgreSQL.  
+- Avoid dynamic string concatenation for SQL or OS commands.
+
+### 2.3 Secure File Handling
+- Validate image MIME types (e.g., `image/png`, `image/jpeg`) and enforce size limits.  
+- Store files on AWS S3 outside the webroot; generate pre-signed URLs with short TTLs for upload/download.  
+- Normalize filenames; strip path characters to prevent traversal.
+
+---
+
+## 3. Data Protection & Privacy
+
+### 3.1 Encryption in Transit & At Rest
+- Enforce HTTPS (TLS 1.2+) for all client–server and server–to–external-API communications.  
+- Enable encryption at rest for AWS S3 and RDS (AES-256).
+
+### 3.2 Secure Secrets Management
+- Store API keys (OpenAI, Stripe, PayPal, printing partner) in AWS Secrets Manager or HashiCorp Vault—never in code or config repos.  
+- Rotate keys periodically and on suspected compromise.
+
+### 3.3 PII Minimization & GDPR Compliance
+- Collect only necessary PII: email, shipping address.  
+- Provide users the ability to view, export, and delete their data in compliance with GDPR/CCPA.  
+- Mask or redact sensitive fields (e.g., payment method metadata) in logs and error messages.
+
+---
+
+## 4. API & Service Security
+
+### 4.1 HTTPS & Certificate Validation
+- All external API calls (OpenAI, Stripe, PayPal, printing partner) must use HTTPS and validate certificates.  
+- Pin known CA certificates if feasible.
+
+### 4.2 Rate Limiting & Throttling
+- Apply per-IP and per-user rate limits on endpoints like `/generate`, `/login`, and payment webhooks.  
+- Implement exponential back-off or CAPTCHA on repeated failures.
+
+### 4.3 CORS & CSRF
+- Configure CORS to allow only trusted origins (your production domain, admin subdomain).  
+- Protect state-changing endpoints with CSRF tokens, even for AJAX calls.
+
+### 4.4 Error Handling
+- Return generic error messages to clients (e.g., “Failed to generate image, please try again”).  
+- Log detailed errors internally (including stack traces) but sanitize logs before exposing them to support staff.
+
+---
+
+## 5. Web Application Security Hygiene
+
+### 5.1 Security Headers
+- `Strict-Transport-Security: max-age=31536000; includeSubDomains`  
+- `Content-Security-Policy` restricting scripts/styles to trusted sources and enabling nonces or hashes.  
+- `X-Frame-Options: DENY` or `frame-ancestors 'self'` via CSP.  
+- `X-Content-Type-Options: nosniff` and `Referrer-Policy: no-referrer-when-downgrade`.
+
+### 5.2 Cookie Security
+- Mark session and CSRF cookies as `Secure; HttpOnly; SameSite=Strict`.  
+- Do not store JWT tokens or PII in localStorage or sessionStorage.
+
+### 5.3 Subresource Integrity (SRI)
+- Apply SRI hashes for any third-party scripts or styles loaded via CDN.
+
+---
+
+## 6. Infrastructure & Configuration Management
+
+### 6.1 Network & Host Hardening
+- Deploy services in a VPC with private subnets for databases and backend.  
+- Restrict EC2/ECS security groups to necessary ports (e.g., 443 for web, 5432 for RDS from app layer only).  
+- Disable unnecessary OS services; apply CIS benchmarks.
+
+### 6.2 Secrets & Configuration
+- Use environment variables populated from secure stores.  
+- Audit configuration drift; enforce immutable infrastructure (e.g., Terraform).
+
+### 6.3 Logging & Monitoring
+- Centralize logs in AWS CloudWatch or ELK; monitor for suspicious patterns (e.g., login brute-force).  
+- Configure AWS GuardDuty and VPC Flow Logs for threat detection.
+
+### 6.4 Vulnerability & Patch Management
+- Scan OS and container images for vulnerabilities (e.g., Amazon Inspector, Aqua).  
+- Apply security patches automatically or through a controlled release process.
+
+---
+
+## 7. Dependency Management
+
+- Maintain strict lockfiles (`package-lock.json`) for deterministic builds.  
+- Use SCA tools (e.g., Dependabot, Snyk) to identify vulnerable NPM packages and update promptly.  
+- Remove unused dependencies to minimize attack surface.
+
+---
+
+## 8. CI/CD & DevOps Security
+
+- Enforce developer commit signing and pull-request reviews.  
+- Scan code for secrets (e.g., GitHub secret scanning) before merge.  
+- Run automated security and unit tests in CI pipeline; prevent deployment on test failures.  
+- Limit CI/CD credentials to only necessary deployment permissions (principle of least privilege).
+
+---
+
+## 9. Third-Party & Supply-Chain Considerations
+
+- Vet external services (OpenAI, Stripe, PayPal, printing API) for compliance certifications (e.g., SOC 2, ISO 27001).  
+- Monitor vendor security advisories for changes in APIs or breach notifications.  
+- Maintain contractual SLAs and data-processing agreements where PII is exchanged.
+
+---
+
+## 10. Incident Response & Recovery
+
+- Establish an incident response plan: detection, containment, eradication, recovery, and post-mortem.  
+- Backup critical data daily with encrypted snapshots; regularly test restore procedures.  
+- Define communication protocols: who to notify internally, customers, and regulators under GDPR.
+
+---
+
+**By adhering to these layered controls, the platform will ensure robust protection of user data, maintain service availability, and uphold trust throughout the AI-driven poster creation and ordering journey.**

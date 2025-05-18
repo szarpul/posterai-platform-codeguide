@@ -1,0 +1,143 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+# Tech Stack Document
+
+This document explains, in simple terms, the main technologies we’re using to build our custom poster platform. It shows how each piece fits together to create a smooth experience—from choosing style options to receiving a printed poster at home.
+
+## Frontend Technologies
+
+On the user-facing side, we’ve chosen tools that make the website fast, responsive, and easy to update:
+
+*   **React**
+
+    *   A popular JavaScript framework that lets us build reusable pieces of the interface (components) such as buttons, forms, and preview panels.
+    *   Helps keep the site snappy—only the parts of the page that need to change are updated when users make selections.
+
+*   **React Router**
+
+    *   Manages navigation on the site without full page reloads.
+    *   Makes transitions between pages (Questionnaire, Preview, Checkout, etc.) feel smooth and instantaneous.
+
+*   **Tailwind CSS**
+
+    *   A utility-first styling framework that lets us design layouts quickly and consistently.
+    *   Ensures the platform looks good on desktop, tablet, or phone without writing lots of custom CSS.
+
+How this enhances the user experience:
+
+*   Instant feedback in the style questionnaire—users see choices reflected immediately in a preview.
+*   Consistent look and feel across all pages, with clear buttons, forms, and readable fonts.
+*   Responsive design ensures the site adapts to any screen size.
+
+## Backend Technologies
+
+Behind the scenes, these technologies power our data storage, business logic, and integrations:
+
+*   **Supabase**
+
+    *   A backend-as-a-service platform that provides a PostgreSQL database, authentication, and storage.
+    *   Handles user accounts, poster drafts, and order records efficiently.
+    *   Offers real-time capabilities and easy integration with our frontend.
+
+*   **Node.js & Express.js**
+
+    *   The server runs on Node.js, a JavaScript environment that handles requests like “generate an image” or “place an order.”
+    *   Express.js is a lightweight framework that organizes our API endpoints (for example: `/api/generate`, `/api/orders`).
+
+*   **Authentication & Sessions**
+
+    *   JSON Web Tokens (JWT) for secure, stateless user sessions.
+    *   OAuth 2.0 integrations with Google and Facebook so users can log in without creating a new password.
+    *   Passwords hashed using bcrypt to safeguard user credentials.
+
+How these components work together:
+
+1.  User submits a questionnaire → Frontend calls our Express API.
+2.  Server takes the answers, calls the AI service, saves the returned image to Supabase storage, and records a draft in the Supabase database.
+3.  When the user places an order, the server creates an order entry, charges the payment gateway, and sends printing instructions.
+
+## Infrastructure and Deployment
+
+We host and maintain the platform using services that ensure reliability and smooth updates:
+
+*   **Version Control: Git with GitHub**
+
+    *   All code changes are tracked in GitHub repositories.
+    *   Pull requests and code reviews keep the code quality high.
+
+*   **Continuous Integration / Continuous Deployment (CI/CD)**
+
+    *   GitHub Actions automatically builds and tests changes whenever code is pushed.
+    *   Successful builds are deployed to our staging or production environment without manual steps.
+
+*   **Hosting on Supabase**
+
+    *   Application servers and databases are managed by Supabase, which provides automatic scaling and backups.
+
+*   **Monitoring and Logging**
+
+    *   Supabase provides built-in monitoring and logging tools to track performance and errors.
+
+These choices make it easy to push updates, roll back if needed, and handle traffic spikes without downtime.
+
+## Third-Party Integrations
+
+Our platform leverages several external services to add functionality without rebuilding it all from scratch:
+
+*   **OpenAI Image API (and future AI providers)**
+
+    *   Generates the poster images based on questionnaire answers.
+    *   Modular design means we can add Stability AI or other services later.
+
+*   **Payment Gateways: Stripe & PayPal**
+
+    *   Secure payment processing for credit cards and PayPal accounts.
+    *   Automatic invoicing and receipts sent to customers.
+
+*   **External Printing Service API**
+
+    *   Sends finalized image files and print specifications directly to a print partner for fulfillment.
+    *   Receives status updates (“In Production”, “Shipped”) that we relay back to users.
+
+*   **OAuth with Google & Facebook**
+
+    *   Simplifies sign-up and login by letting users authenticate with existing accounts.
+
+Each integration handles a specialized task—AI generation, payments, or printing—so we can focus on delivering a great user experience.
+
+## Security and Performance Considerations
+
+We’ve built in safeguards and optimizations to keep data safe and the experience smooth:
+
+Security Measures:
+
+*   HTTPS everywhere ensures data in transit is encrypted.
+*   Secure headers (HSTS, Content Security Policy) to protect against common web attacks.
+*   Passwords hashed with bcrypt; JWT tokens signed securely.
+*   Supabase roles restrict access to storage and database instances.
+*   GDPR-compliant data handling with clear privacy policies.
+
+Performance Optimizations:
+
+*   Code splitting and lazy loading in React to reduce initial page load times.
+*   Caching API responses where appropriate (e.g., questionnaire options).
+*   Supabase's real-time capabilities for fast data updates.
+*   Auto-scaling backend workers for AI requests to handle busy periods without slowdowns.
+*   Monitoring thresholds and alerts so we can spot and fix performance issues quickly.
+
+## Conclusion and Overall Tech Stack Summary
+
+Our technology choices align perfectly with the project goals:
+
+*   **Fast and Friendly Frontend:** React, React Router, and Tailwind CSS give users a modern, responsive interface.
+*   **Powerful and Flexible Backend:** Supabase, Node.js, and Express handle data and business logic reliably.
+*   **Scalable Infrastructure:** Supabase services and CI/CD pipelines ensure we can grow without outages.
+*   **Specialized Integrations:** OpenAI for image generation, Stripe/PayPal for payments, and a printing partner’s API for fulfillment.
+*   **Security & Performance Focus:** From encrypted connections to auto-scaling, the platform remains secure and responsive under all conditions.
+
+Together, these technologies create a seamless journey: users pick from simple options, get AI-generated poster previews in seconds, save drafts, and place orders that are printed and shipped with minimal fuss. This setup keeps development efficient, operations smooth, and customers satisfied.

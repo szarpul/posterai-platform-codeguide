@@ -1,0 +1,270 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+# Unified Project Documentation
+
+## Project Requirements Document
+
+### 1. Project Overview
+
+We are building a web platform that lets anyone design and order custom posters without needing design skills or complex prompts. Instead of free-form text input, users simply answer a short questionnaire—choosing a style (modern, vintage, abstract, minimalist), a theme (nature, urban, fantasy, futuristic), a mood (calm, energetic, mysterious, joyful), a color palette (warm, cool, monochrome, vibrant), and a subject (landscapes, portraits, animals, architecture). The system uses those selections to call an external text-to-image API (OpenAI by default) and generate a unique poster draft. Users can preview, save as drafts in their account, then customize paper size and finish, pay, and have the poster printed and shipped.
+
+This platform removes the barrier of writing effective image-generation prompts and streamlines the end-to-end process of turning AI-generated art into a physical product. Success will be measured by user engagement (drafts saved per session), conversion rate (orders placed vs. posters generated), average order value (through upsells like premium finishes), and delivery reliability (orders fulfilled and delivered on time).
+
+### 2. In-Scope vs. Out-of-Scope
+
+**In-Scope (Version 1)**
+
+*   Landing page with clear call-to-action and three-step explanation.
+*   User authentication: email/password plus Google and Facebook social login.
+*   Questionnaire-driven image generation with predefined style, theme, mood, color, and subject options.
+*   Integration with OpenAI Image API (and placeholder for additional providers).
+*   Preview & draft management: save, list, revisit drafts in “My Drafts.”
+*   Poster customization: select sizes (A4, A3, A2), materials (200 gsm matte or glossy), finishes (matte, glossy).
+*   Checkout & payment via Stripe and PayPal.
+*   Shipping limited to Poland, with API hooks for future global print-and-ship partners.
+*   External printing partner integration: send final image and specs via REST API.
+*   Admin dashboard: order management, support tickets, questionnaire template library.
+
+**Out-of-Scope (Version 1)**
+
+*   Framing options or in-house printing.
+*   Multi-language support or localization.
+*   Subscription or bulk-order pricing models.
+*   Mobile-only or native apps (web-only).
+*   Advanced analytics beyond basic KPIs.
+*   Custom branding uploads (user logos or fonts).
+
+### 3. User Flow
+
+When a new visitor lands on the site, they see a simple homepage that explains in three steps how to create a custom poster: choose style options, generate a preview, and place an order. The header always shows “Sign In” and “Sign Up” (with email/password or Google/Facebook). A big “Start Designing” button takes them into the questionnaire. If they try to save a draft before signing in, a modal prompts them to register or log in, then returns them exactly where they left off.
+
+After signing in, users go through the five-step questionnaire, click “Generate Poster Preview,” and watch the AI create the image. They can then “Save as Draft” or move on to “Customize & Order.” In customization, they pick paper size and finish, see a live price update, and click “Proceed to Checkout.” They confirm shipping details (Poland by default), choose Stripe or PayPal for payment, and finalize the purchase. After checkout, they see an order confirmation page with a tracking link. Behind the scenes, our backend sends the image and print specs to the external printing partner, and the user receives email updates as the order moves through “In Production” to “Shipped.”
+
+### 4. Core Features
+
+*   User Onboarding & Authentication: email/password signup, social login, password reset, account settings.
+*   Questionnaire-Driven Image Generation: five categories of predefined options, live preview panel.
+*   Text-to-Image API Integration: modular connector for OpenAI, retry logic, error handling.
+*   Draft Management: save, list, revisit, regenerate drafts tied to user accounts.
+*   Poster Customization: sizes (A4, A3, A2), materials (200 gsm matte/glossy), finishes (matte/glossy), real-time price updates.
+*   Checkout & Payment: Stripe and PayPal integration, order summary, invoicing, email receipts.
+*   Shipping & Fulfillment: Poland shipping default, external printing API calls, status tracking (In Production → Shipped).
+*   Administrative Dashboard: order management, support tickets, questionnaire template library management.
+
+### 5. Tech Stack & Tools
+
+*   Frontend: React with Hooks, React Router, Tailwind CSS or CSS-in-JS.
+
+*   Backend: Node.js and Express.js.
+
+*   Database: PostgreSQL for users, drafts, and orders.
+
+*   Storage: AWS S3 for generated image files.
+
+*   AI & APIs:
+
+    *   OpenAI Image API (default)
+    *   Pluggable connectors for other providers.
+
+*   Payments: Stripe API and PayPal REST API.
+
+*   Authentication: OAuth 2.0 (Google, Facebook), JWT sessions.
+
+*   Printing Partner: External printing service REST API.
+
+*   Infrastructure: AWS (EC2/ECS/Elastic Beanstalk), RDS for PostgreSQL.
+
+*   Dev Tools: Cursor (AI coding assistant), Lovable.dev for rapid prototyping.
+
+*   Monitoring & Logging: AWS CloudWatch, Sentry.
+
+### 6. Non-Functional Requirements
+
+*   Performance: page load ≤ 2 s on 3G/4G, image generation response ≤ 5 s (excluding network delays).
+*   Scalability: support 1,000 concurrent users, horizontal scaling for API worker processes.
+*   Security & Compliance: HTTPS everywhere, HSTS/CSP headers, bcrypt-hashed passwords, GDPR-compliant data handling.
+*   Reliability & Availability: 99.9% uptime SLA, automatic retry logic for transient failures.
+*   Usability & Accessibility: WCAG 2.1 AA compliance, responsive design for desktop/tablet/mobile.
+*   Maintainability: clean folder structure, documented APIs, automated tests and CI/CD pipeline.
+
+### 7. Constraints & Assumptions
+
+*   Constraints:
+
+    *   Reliance on external OpenAI and printing partner APIs.
+    *   Shipping initially limited to Poland.
+    *   Fixed set of questionnaire options (no free-form input).
+
+*   Assumptions:
+
+    *   Users have basic internet connectivity and digital literacy.
+    *   API keys for OpenAI and printing partner are provisioned.
+    *   Social login rate limits are sufficient.
+    *   Stripe and PayPal support Polish currency and payouts.
+
+### 8. Known Issues & Potential Pitfalls
+
+*   API Rate Limits: OpenAI or printing partner throttling. Mitigation: implement request queue with exponential back-off.
+*   Image Generation Latency: slow responses hurt UX. Mitigation: show progress spinners, allow retry.
+*   Print Quality Variability: AI images may not meet DPI needs. Mitigation: enforce minimum resolution checks before sending.
+*   Shipping Errors: invalid addresses or carrier issues. Mitigation: address validation, clear error messages, admin overrides.
+*   User Drop-off: too many steps or long waits. Mitigation: state preservation on errors, progress indicators, simplified flows.
+
+## App Flow Document
+
+### Onboarding and Sign-In/Sign-Up
+
+A new visitor arrives by typing the website URL or clicking a shared link. They land on a clean homepage that explains how to generate and order a poster in three simple steps. The header always shows options to “Start Designing,” “Sign In,” or “Sign Up.” Clicking “Sign Up” opens a modal where the user can enter their email and password or choose Google or Facebook as a social login provider. After submitting, they receive a confirmation email with a verification link. Once they verify their address, the system logs them in and redirects back to the homepage. Returning users click “Sign In,” enter their credentials or use a social login, and gain immediate access. If someone forgets their password, they click “Forgot Password,” enter their email on a separate page, and receive a secure reset link. After resetting, they can sign in with their new password. To sign out, users click “Logout” in the top right corner, instantly returning them to the homepage as guests.
+
+### Main Dashboard or Home Page
+
+Once signed in, users see a personalized home page greeting them by name. At the top is a header with the logo on the left and navigation links on the right for My Drafts, Create Poster, Orders, Account Settings, and Support. Below the header is a banner inviting them to start a new poster design. Under that, thumbnail cards show their recent drafts with small previews and timestamps. At the bottom is a quick reminder of the three-step process. From here, users click any navigation link or the “Create Poster” button to move to the next part of the app.
+
+### Detailed Feature Flows and Page Transitions
+
+When users click “Create Poster,” they arrive at the Questionnaire page. A series of fields and radio buttons appear one at a time: style, theme, mood, color palette, and subject. As selections are made, a summary panel on the right updates in real time. After all five are chosen, a “Generate Poster Preview” button becomes active. Clicking it sends the data to the AI service; a spinner shows during processing, then the generated image appears in the preview area. Below the image are two buttons: “Save as Draft” and “Customize & Order.” If the user isn’t signed in, clicking either brings up the sign-in modal. Once authenticated, the app returns them to the preview with their image intact. Saving stores the draft in their account; customizing moves them to the next screen.
+
+On the customization page, the image appears alongside options for poster size (A4, A3, A2) and material choice (200 gsm matte or glossy). A finish toggle and live price update show how each choice affects cost. Clicking “Proceed to Checkout” leads to a secure checkout page where they confirm or enter shipping details—defaulting to Poland with an optional country selector for future global shipping. They then choose Stripe or PayPal; Stripe opens a secure card entry iframe, while PayPal redirects to its login page. Successful payment brings them to an Order Confirmation page.
+
+The confirmation page shows the poster image, chosen options, shipping address, payment summary, and an estimated delivery date. Simultaneously, the backend calls the external printing partner’s API, sending the final image and print specs. As the printer updates the order status (In Production → Shipped), the user receives email notifications and can view real-time updates via a “Track Order” link.
+
+Administrators access the Admin Dashboard via a special URL. They land on an overview page with metrics for pending orders, open support tickets, and recent drafts. A sidebar links to Order Management (filterable table with detailed views and manual status updates), User Support (ticket list and conversation threads), and Template Library (add, edit, or remove questionnaire options). Changes in the Template Library take effect immediately for all users.
+
+### Settings and Account Management
+
+Users click “Account Settings” in the header to open a page with tabs for Profile, Password, Notifications, and Billing. Under Profile they update their name or email. Password requires entering the old and new passwords with real-time validation. Notifications let them toggle email alerts for order updates or support replies. Billing shows a history of completed orders with amounts and dates; if they’ve used Stripe’s card vault, they can manage saved payment methods here. After any change, a banner confirms the update, and a link takes them back to the home page.
+
+### Error States and Alternate Paths
+
+If users enter wrong data—like a bad email format or expired card—the relevant field highlights in red and an inline message explains the fix. During image generation, if the API fails or times out, a friendly dialog says “Unable to generate image right now. Please try again,” with a retry button. If the network disconnects, an offline banner appears and unsent form data is saved locally until connection returns. In checkout, Stripe or PayPal declines show the decline reason and let users re-enter or switch payment methods. On the admin side, if the printing API is unreachable, orders are queued and a warning icon appears next to them in the order list.
+
+### Conclusion and Overall App Journey
+
+From arriving on the inviting homepage to receiving a printed poster, users follow a clear, guided path. They sign up easily with email or social login, select from predefined creative options, preview AI-generated artwork, and save drafts for later. When ready, they choose poster size and finish, complete a secure checkout via Stripe or PayPal, and receive real-time tracking as their custom poster moves from digital preview to printed deliverable. Administrators oversee orders, support tickets, and questionnaire templates in one unified dashboard, ensuring smooth operations and a great user experience.
+
+## Tech Stack Document
+
+### Frontend Technologies
+
+*   React with Hooks: builds a fast, component-based UI.
+*   React Router: handles client-side navigation smoothly.
+*   Tailwind CSS (or CSS-in-JS): provides utility-first styling for rapid, consistent design.
+*   Axios or Fetch API: performs HTTP requests to backend and external APIs.
+
+### Backend Technologies
+
+*   Node.js with Express.js: serves RESTful endpoints and handles business logic.
+*   PostgreSQL: stores users, drafts, orders, and admin data reliably.
+*   AWS S3: stores and serves generated image files at scale.
+*   Sequelize or TypeORM (optional): ORM for cleaner database interactions.
+
+### Infrastructure and Deployment
+
+*   AWS EC2 or Elastic Beanstalk/ECS: hosts the backend and scales with demand.
+*   AWS RDS (PostgreSQL): managed database service for high availability.
+*   AWS S3: durable object storage for images.
+*   GitHub Actions (or CircleCI): automates builds, tests, and deployments.
+*   Git for version control with trunk-based or Gitflow branching.
+
+### Third-Party Integrations
+
+*   OpenAI Image API: generates poster previews from questionnaire data.
+*   Stripe API: secure credit card payments and saved payment methods.
+*   PayPal REST API: alternative payment option through PayPal accounts.
+*   OAuth 2.0 (Google, Facebook): simplifies user authentication.
+*   External Printing Service API: sends print jobs and tracks order status.
+*   Sentry: captures and reports runtime errors.
+*   AWS CloudWatch: monitors infrastructure health and logs.
+
+### Security and Performance Considerations
+
+*   HTTPS for all traffic, HSTS and Content Security Policy headers.
+*   JWT-based sessions or secure HTTP-only cookies.
+*   bcrypt for password hashing and secure credential storage.
+*   Rate limiting and request throttling on critical APIs.
+*   Lazy loading and code splitting to reduce initial bundle size.
+*   Caching static assets via a CDN for faster page loads.
+*   Database connection pooling and optimized queries.
+
+### Conclusion and Overall Tech Stack Summary
+
+The chosen stack—React, Node.js/Express, PostgreSQL, and AWS—delivers a scalable, reliable, and secure platform. Integration with OpenAI, Stripe, PayPal, and an external printing API enables seamless AI-driven poster creation, secure payments, and efficient fulfillment. Automated CI/CD, monitoring, and robust security practices ensure fast development cycles and a smooth user experience.
+
+## Frontend Guidelines Document
+
+### Frontend Architecture
+
+Our frontend uses a component-driven architecture built with React and React Router. Components are organized into feature-based folders, separating pages (route components) from shared UI elements (buttons, cards, forms). This structure supports scalability by making it easy to add new features or modify existing ones without affecting unrelated code. Tailwind CSS (or a CSS-in-JS solution) handles styling, enabling consistent themes and quick adjustments. We bundle with tools like Webpack or Vite, allowing code splitting and lazy loading to keep the initial load light.
+
+### Design Principles
+
+We follow these core principles:
+
+*   Usability: intuitive flows, clear labels, and form validations guide users smoothly.
+*   Accessibility: WCAG 2.1 AA compliance, semantic HTML, keyboard navigation, and ARIA attributes.
+*   Responsiveness: layouts adapt to desktop, tablet, and mobile with flexible grids and breakpoints.
+*   Consistency: reusable design tokens for colors, spacing, and typography ensure a unified look.
+
+### Styling and Theming
+
+We use a utility-first approach with Tailwind CSS (or CSS-in-JS) for rapid styling. A centralized theme file defines the color palette (warm oranges, cool blues, monochrome grays, vibrant accents) and font stack (system font for performance and readability). For visual style, we lean toward a clean, modern look with subtle shadows and rounded corners. Variables store theme values, so switching colors or adjusting the style across the app is straightforward.
+
+### Component Structure
+
+Components live in a `src/components` folder, grouped by type:
+
+*   `common/`: buttons, inputs, modals, icons.
+*   `layout/`: header, footer, sidebar, grid systems.
+*   `poster/`: questionnaire fields, preview panel, draft cards.
+
+Each component is self-contained with its own styles, logic, and tests. Props and context manage data flow, promoting reusability and reducing duplication. Feature pages import and compose these components, keeping page code clean.
+
+### State Management
+
+We use React’s built-in state and context for local and global state. The questionnaire process uses component state, while user authentication, drafts list, and order status live in a global context or Redux store if complexity grows. API calls update state via async actions or hooks, ensuring the UI reflects current data in real time.
+
+### Routing and Navigation
+
+React Router manages routes in a `src/routes.js` file. Public routes include `/`, `/signin`, `/signup`, and password reset. Protected routes—like `/create`, `/drafts`, `/orders`, and `/account`—require authentication. A 404 page catches unknown URLs. Navigation links live in a shared `Header` component, and route guards redirect unauthorized users to the sign-in page.
+
+### Performance Optimization
+
+We apply these strategies:
+
+*   Code splitting by route: only load code needed for each page.
+*   Lazy loading non-critical components (e.g., admin panel).
+*   Minifying and compressing assets in production builds.
+*   Caching images and static files using a CDN.
+*   Debouncing user input in forms to reduce re-renders.
+
+### Testing and Quality Assurance
+
+We write unit tests for components using Jest and React Testing Library, focusing on key user interactions and form validations. Integration tests cover API calls and routing flows. End-to-end tests with Cypress simulate full user journeys: sign-up, poster generation, checkout. Linting (ESLint) and formatting (Prettier) enforce consistent code style.
+
+### Conclusion and Overall Frontend Summary
+
+These guidelines ensure a clean, maintainable, and performant frontend. The component-based architecture and utility-first styling support rapid feature development, while accessibility and testing practices guarantee a reliable user experience. This setup aligns with our goal of letting anyone create and order custom posters in a seamless, accessible way.
+
+## Implementation Plan
+
+1.  Initialize the project repo with React and Node/Express boilerplate.
+2.  Define folder structure and set up CI/CD with GitHub Actions.
+3.  Implement authentication service (JWT, OAuth) and database schema in PostgreSQL.
+4.  Build questionnaire API endpoints and admin template management.
+5.  Integrate OpenAI Image API connector with retry logic.
+6.  Create frontend questionnaire UI and live preview panel.
+7.  Develop draft management pages (save, list, regenerate).
+8.  Implement poster customization UI and real-time price calculation.
+9.  Build checkout flow with Stripe and PayPal integrations.
+10. Integrate external printing partner API and order status webhooks.
+11. Create admin dashboard for orders, support tickets, and templates.
+12. Set up AWS infrastructure: EC2/ECS, RDS, S3, and deploy initial services.
+13. Add monitoring and logging (CloudWatch, Sentry).
+14. Write automated tests (unit, integration, e2e) and perform security reviews.
+15. Conduct internal QA, address bugs, and prepare for beta release.
+16. Launch MVP, monitor performance and user feedback, and iterate on improvements.

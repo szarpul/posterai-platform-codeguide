@@ -1,0 +1,139 @@
+---
+description: Apply these rules when making changes to the project
+globs:
+alwaysApply: true
+---
+
+Update this rule if user requested changes to the project requirement, etc.
+# Implementation plan
+
+## Phase 1: Environment Setup
+
+1.  **Prevalidation**: Check if the current directory is already a Git repository and contains a `package.json`. If neither exist, initialize a new Node.js project. **Validation**: Run `git rev-parse --is-inside-work-tree` and `ls package.json`. (Project Description)
+2.  Install **Node.js v20.2.1**. **Validation**: Run `node -v` and confirm `v20.2.1`. (Tech Stack: Core Tools)
+3.  Install **Git** and ensure GitHub CLI (`gh`) is available. **Validation**: Run `git --version` and `gh --version`. (Tech Stack: Version control)
+4.  Create a new GitHub repository (or connect to an existing one) via `gh repo create your-org/ai-poster-platform --public`. (Tech Stack: Version control)
+5.  Create `cursor_metrics.md` in the project root and add a comment: `<!-- see cursor_project_rules.mdc for usage -->`. (Dev Tools: Cursor)
+6.  Create a `.cursor` directory and a `.cursor/mcp.json` file. Add `.cursor/mcp.json` to `.gitignore`. (Dev Tools: Cursor)
+7.  Add Supabase MCP configuration to `.cursor/mcp.json` with placeholders:
+
+`{ "mcpServers": { "supabase": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-postgres", "<connection-string>"] } } } `**Link** for connection string: <https://supabase.com/docs/guides/getting-started/mcp#connect-to-supabase-using-mcp> **(Tech Stack: Backend Database)**
+
+1.  Ask the user to obtain their Supabase **MCP connection string** from the link in Step 7 and replace `<connection-string>` in `.cursor/mcp.json`. **Validation**: Run `npx @modelcontextprotocol/server-postgres` and confirm `Connected to Supabase` in the Cursor **Settings/MCP**. (Tech Stack: Backend Database)
+2.  Install project-wide dev dependencies:
+
+`npm install --save-dev eslint prettier husky lint-staged `**Validation**: Run `npx eslint --version` and `npx prettier --version`. (Tech Stack: Dev Tools)
+
+1.  Configure Husky and lint-staged for pre-commit checks: Create `.husky/pre-commit` and add:
+
+`#!/usr/bin/env sh npx lint-staged `Update `package.json`:
+
+`"lint-staged": { "**/*.{js,jsx,ts,tsx,json,md}": ["npx eslint --fix", "npx prettier --write"] } `**Validation**: Stage a file with lint errors and attempt commit. (Tech Stack: Dev Tools)
+
+## Phase 2: Frontend Development
+
+1.  Create React app in `/frontend` using Create React App v18.2.0:
+
+`cd frontend npx create-react-app@5.0.1 . `**Validation**: Run `npm start` and confirm the default CRA page loads. (Tech Stack: Frontend)
+
+1.  Install React Router v6, Tailwind CSS v3.4.0, and Supabase client:
+
+`npm install react-router-dom@6.11.2 tailwindcss@3.4.0 @supabase/supabase-js@2.35.0 axios `**Validation**: Verify versions with `npm ls react-router-dom tailwindcss @supabase/supabase-js`. (Tech Stack: Frontend)
+
+1.  Configure Tailwind: Create `tailwind.config.js` and add paths:
+
+`module.exports = { content: ['./src/**/*.{js,jsx}'], theme: { extend: {} }, plugins: [] }; `Add `@tailwind base; @tailwind components; @tailwind utilities;` to `src/index.css`. **Validation**: Add a Tailwind class to `App.js` and confirm it applies. (Tech Stack: Frontend)
+
+1.  Create routing structure in `src/App.js` with `<BrowserRouter>` and define routes for:
+
+    *   `/login` → `LoginPage.jsx`
+    *   `/register` → `RegisterPage.jsx`
+    *   `/questionnaire` → `QuestionnairePage.jsx`
+    *   `/drafts` → `DraftsPage.jsx`
+    *   `/poster/:id` → `PosterDetailPage.jsx`
+    *   `/checkout/:orderId` → `CheckoutPage.jsx`
+    *   `/admin` → `AdminDashboard.jsx`\
+        **Validation**: Navigate to each route and confirm a placeholder renders. (App Flow: User Onboarding)
+
+2.  In `src/lib/supabaseClient.js`, initialize Supabase with environment variables `REACT_APP_SUPABASE_URL` and `REACT_APP_SUPABASE_ANON_KEY`. **Validation**: Log in via Supabase client in console. (Tech Stack: Backend)
+
+3.  Create **Authentication Context** in `src/contexts/AuthContext.jsx` to manage JWT and user state. Implement `signup`, `login`, `logout`, `resetPassword`, and social login methods using Supabase Auth. **Validation**: Attempt email/password sign-up and social (Google) sign-in. (Project Description: User Onboarding & Authentication)
+
+4.  Build `LoginPage.jsx` and `RegisterPage.jsx` under `src/pages/` with forms using Tailwind CSS. Implement validation rules (email regex, password ≥ 8 chars). **Validation**: Run UI tests or manually confirm form validation. (Q&A: Form Handling)
+
+5.  Create `QuestionnairePage.jsx` in `src/pages/` that fetches questionnaire options from `/api/questionnaire-options` (see Phase 3). Render selects/radio groups for style, theme, mood, palette, subject. **Validation**: Confirm UI displays options. (Project Description: Questionnaire-Driven Image Generation)
+
+6.  Implement `DraftsPage.jsx` in `src/pages/` to list saved drafts. Each draft links to `PosterDetailPage.jsx`. **Validation**: Create a draft via UI and confirm it appears. (Project Description: Draft Management)
+
+7.  In `src/pages/PosterDetailPage.jsx`, display generated image, metadata, and options to `Edit`, `Order`, or `Delete` draft. **Validation**: Confirm correct routing and actions. (Project Description: Draft Management)
+
+8.  Build `CheckoutPage.jsx` at `src/pages/` with form fields for poster size, material, finish, shipping address, and payment selection (Stripe/PayPal). **Validation**: Submit dummy data and confirm form data structure. (Project Description: Poster Customization & Checkout)
+
+9.  Create `AdminDashboard.jsx` in `src/pages/admin/` with tabs for Orders, Users, and Template Library. Render tables using Tailwind. **Validation**: Confirm UI skeleton. (Project Description: Administrative Dashboard)
+
+## Phase 3: Backend Development
+
+1.  Initialize Express app in `/backend`:
+
+`cd ../backend npm init -y npm install express@4.18.2 @supabase/supabase-js@2.35.0 cors@2.8.5 dotenv@16.0.3 openai@4.11.0 stripe@12.14.0 paypal-rest-sdk@1.8.1 `**Validation**: Run `node -e "console.log('OK')"`. (Tech Stack: Backend)
+
+1.  Create `/backend/src/index.js` to set up Express server with JSON parsing and CORS for `http://localhost:3000`. **Validation**: Start server and confirm `GET /health` returns 200. (App Flow: Health Check)
+2.  In `/backend/src/config.js`, load `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY`, `STRIPE_SECRET_KEY`, `PAYPAL_CLIENT_ID`, and `PAYPAL_CLIENT_SECRET` from `.env`. **Validation**: Attempt to print `process.env.SUPABASE_URL`. (Tech Stack: Security)
+3.  Define database schema in PostgreSQL for Supabase via MCP:
+
+`-- questionnaires CREATE TABLE questionnaire_options ( id serial PRIMARY KEY, type varchar NOT NULL, value varchar NOT NULL ); -- drafts CREATE TABLE drafts ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid REFERENCES auth.users(id), responses jsonb, image_url text, created_at timestamptz DEFAULT now() ); -- orders CREATE TABLE orders ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid REFERENCES auth.users(id), draft_id uuid REFERENCES drafts(id), size varchar NOT NULL, material varchar NOT NULL, finish varchar NOT NULL, price numeric NOT NULL, status varchar NOT NULL, shipping_address jsonb, created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now() ); `**Validation**: Run `npx @modelcontextprotocol/server-postgres` and confirm tables exist in Supabase Studio. (Tech Stack: Database)
+
+1.  Implement `/backend/src/routes/questionnaire.js` to fetch `questionnaire_options` using Supabase client. **Validation**: `GET /api/questionnaire-options` returns JSON array. (Project Description: Questionnaire-Driven Image Generation)
+
+2.  Implement `/backend/src/routes/generateImage.js`:
+
+    *   Validate request body responses.
+    *   Call OpenAI Image API with a prompt built from responses.
+    *   Store returned image in Supabase Storage under `generated-images/`.
+    *   Return public image URL.\
+        **Validation**: `POST /api/generate-image` returns a valid URL. (Project Description: Text-to-Image API Integration)
+
+3.  Implement `/backend/src/routes/drafts.js` with CRUD:
+
+    *   `POST /api/drafts` → insert draft
+    *   `GET /api/drafts` → list user drafts
+    *   `DELETE /api/drafts/:id` → delete draft\
+        **Validation**: Use `curl` to test each endpoint. (Project Description: Draft Management)
+
+4.  Implement `/backend/src/routes/orders.js`:
+
+    *   `POST /api/orders` → create payment intent (Stripe or PayPal), store order with `status = 'pending'`.
+    *   Webhooks: `/webhook/stripe` and `/webhook/paypal` to confirm payment, update `status = 'paid'`, then call printing service API.\
+        **Validation**: Simulate Stripe webhook with `stripe-cli trigger payment_intent.succeeded`. (Project Description: Checkout & Payment)
+
+5.  Implement `/backend/src/routes/admin.js` protected by Supabase JWT middleware: list orders, users, and manage `questionnaire_options`. **Validation**: Access with admin JWT and confirm data. (Project Description: Administrative Dashboard)
+
+6.  In `/backend/src/services/printingService.js`, add functions to send order details to the external printing service API (Poland). Handle errors and retries up to 3 times with 2s delay. **Validation**: Use mock API and confirm a successful call. (Q&A: Payment Failures)
+
+## Phase 4: Integration
+
+1.  In `/frontend/package.json`, add proxy:
+
+`"proxy": "http://localhost:4000" `**Validation**: Frontend Axios calls to `/api/...` reach Express backend. (Tech Stack: Backend)
+
+1.  Update CORS in `/backend/src/index.js` to allow `http://localhost:3000`. **Validation**: Confirm no CORS errors in console. (Tech Stack: Security)
+2.  In React, create `src/services/api.js` using Axios to wrap all backend calls. **Validation**: Import `api.js` in a component and fetch `/api/health`. (Project Description)
+3.  Wire up `QuestionnairePage.jsx` to call `api.generateImage()` and then immediately POST to `/api/drafts`. **Validation**: Create draft and verify in Supabase Studio. (App Flow: Draft Creation)
+4.  Connect `CheckoutPage.jsx` to call `api.createOrder()`. On success, redirect to `/checkout/:orderId`. **Validation**: Place a live test order using Stripe test card. (Project Description: Checkout & Payment)
+5.  Implement global error handling in React (`src/components/ErrorBoundary.jsx`) to catch API failures and display user-friendly messages. **Validation**: Force an API error and confirm UI fallback. (Project Description: Error Handling)
+6.  Add loading spinners (`src/components/Spinner.jsx`) to all pages during API calls. **Validation**: Simulate slow network in DevTools. (Project Description: Performance)
+
+## Phase 5: Deployment
+
+1.  Create Supabase project in `us-central1` region. Copy `SUPABASE_URL` and `SUPABASE_ANON_KEY` into GitHub Secrets. (Tech Stack: Infrastructure)
+2.  Push database schema migrations via Supabase CLI:
+
+`supabase db push `**Validation**: Confirm tables in Supabase Studio. (Tech Stack: Database)
+
+1.  Configure GitHub Actions workflow in `.github/workflows/ci-cd.yml` to: 1) lint + test; 2) build frontend; 3) deploy frontend to Vercel; 4) deploy backend to Heroku (or your preferred host). **Validation**: Merge to `main` and confirm successful pipeline. (Tech Stack: CI/CD)
+2.  Set up environment variables for backend host in GitHub Secrets (e.g., `OPENAI_API_KEY`, `STRIPE_SECRET_KEY`, etc.). **Validation**: Confirm build logs show no missing env vars. (Tech Stack: Security)
+3.  In Vercel, connect the GitHub repo, set `REACT_APP_SUPABASE_URL` and `REACT_APP_SUPABASE_ANON_KEY`, and deploy the `/frontend` directory. **Validation**: Visit the production URL and confirm landing page. (Tech Stack: Deployment)
+4.  Deploy `/backend` to Heroku in `eu-central-1` (closest to Poland). Configure Heroku config vars matching GitHub Secrets. **Validation**: `GET https://your-backend.herokuapp.com/health` returns 200. (Tech Stack: Deployment)
+5.  After deployment, run end-to-end tests with Cypress against the production URL (`https://your-frontend.vercel.app`). **Validation**: All tests pass. (Q&A: Pre-Launch Checklist)
+
+*Total steps: 46*
