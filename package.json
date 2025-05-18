@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "lint": "cd backend && eslint .",
+    "precommit": "lint-staged"
   },
   "keywords": [],
   "author": "",
@@ -17,9 +19,11 @@
     "prettier": "^2.0.0"
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,md}": [
-      "npx eslint --fix",
-      "npx prettier --write"
-    ]
+    "backend/**/*.js": "eslint --config backend/.eslintrc.json --resolve-plugins-relative-to backend"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run precommit"
+    }
   }
 }
