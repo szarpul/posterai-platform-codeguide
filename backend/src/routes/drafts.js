@@ -6,7 +6,7 @@ const { supabase } = require('../lib/supabase');
 // Create a new draft
 router.post('/', requireAuth, async (req, res) => {
   try {
-    const { responses, imageUrl } = req.body;
+    const { responses, imageUrl, prompt, options } = req.body;
     
     // Validate required fields
     if (!responses || !imageUrl) {
@@ -19,8 +19,8 @@ router.post('/', requireAuth, async (req, res) => {
       .insert([{
         user_id: req.user.id,
         image_url: imageUrl,
-        prompt: JSON.stringify(responses), // Store the questionnaire responses as the prompt
-        options: responses
+        prompt: JSON.stringify(prompt || responses), // Use prompt if provided, fallback to responses
+        options: options || responses // Use options if provided, fallback to responses
       }])
       .select()
       .single();

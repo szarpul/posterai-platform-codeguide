@@ -11,35 +11,26 @@ router.post('/generate', requireAuth, async (req, res) => {
     
     // Validate required fields
     if (!style || !theme || !mood || !colorPalette || !subject) {
-      return res.status(400).json({ error: 'Missing required options' });
+      return res.status(400).json({ 
+        error: 'Missing required options',
+        details: 'All questionnaire fields (style, theme, mood, colorPalette, subject) are required'
+      });
     }
 
+    console.log(`Generating image with options: ${JSON.stringify({ style, theme, mood, colorPalette, subject })}`);
+    
     // Generate image
     const { imageUrl, prompt } = await ImageGeneratorService.generateImage({
       style, theme, mood, colorPalette, subject
     });
 
-    // Create draft in database
-    const { data: draft, error: draftError } = await supabase
-      .from('drafts')
-      .insert([{
-        user_id: req.user.id,
-        image_url: imageUrl,
-        prompt,
-        options: { style, theme, mood, colorPalette, subject }
-      }])
-      .select()
-      .single();
-
-    if (draftError) throw draftError;
-
+    // Return just the image URL and prompt
     res.json({ 
       imageUrl,
-      draftId: draft.id,
       prompt 
     });
   } catch (error) {
-    console.error('Image generation route error:', error);
+    console.error('Generate image error:', error);
     res.status(500).json({ error: 'Failed to generate image' });
   }
 });

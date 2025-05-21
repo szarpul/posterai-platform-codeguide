@@ -135,7 +135,9 @@ export default function QuestionnairePage() {
         },
         body: JSON.stringify({
           responses,
-          imageUrl: generatedImage
+          imageUrl: generatedImage,
+          prompt: responses,
+          options: responses
         })
       });
 
@@ -148,6 +150,7 @@ export default function QuestionnairePage() {
       navigate(`/poster/${data.id}`);
     } catch (error) {
       console.error('Save draft error:', error);
+      alert('Failed to save draft. Please try again.');
     }
   };
 
