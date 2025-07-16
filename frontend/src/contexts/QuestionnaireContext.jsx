@@ -51,7 +51,7 @@ export function QuestionnaireProvider({ children }) {
     setError('');
   };
 
-  const generateImage = async () => {
+  const generateImage = async (overrideResponses) => {
     try {
       if (!user || !session?.access_token) {
         setError('Please log in to generate images');
@@ -60,14 +60,14 @@ export function QuestionnaireProvider({ children }) {
 
       setLoading(true);
       setError('');
-      
+      const payload = overrideResponses || responses;
       const response = await fetch(API_ENDPOINTS.GENERATE_IMAGE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify(responses)
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {

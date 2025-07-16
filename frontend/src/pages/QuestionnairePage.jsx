@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuestionnaire } from '../contexts/QuestionnaireContext';
 import { useAuth } from '../contexts/AuthContext';
 import { API_ENDPOINTS } from '../config/api';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const QUESTIONNAIRE_STEPS = [
   {
@@ -62,7 +63,7 @@ const QUESTIONNAIRE_STEPS = [
   }
 ];
 
-function QuestionnaireStep({ step, value, onChange }) {
+function QuestionnaireStep({ step, value, selected, onChange, disabled }) {
   return (
     <div className="space-y-4">
       <div className="text-center">
@@ -75,11 +76,11 @@ function QuestionnaireStep({ step, value, onChange }) {
           <button
             key={option.value}
             onClick={() => onChange(option.value)}
-            className={`${
-              value === option.value
-                ? 'ring-2 ring-indigo-500'
-                : 'hover:border-gray-300'
-            } p-4 border rounded-lg text-left focus:outline-none`}
+            className={`transition-all duration-300 p-4 border rounded-lg text-left focus:outline-none
+              ${value === option.value ? 'ring-2 ring-indigo-500' : 'hover:border-gray-300'}
+              ${selected === option.value ? 'bg-indigo-100 scale-105 shadow-lg' : ''}
+            `}
+            disabled={disabled || (!!selected && selected !== option.value)}
           >
             <h3 className="font-medium text-gray-900">{option.label}</h3>
             <p className="mt-1 text-sm text-gray-500">{option.description}</p>
@@ -107,9 +108,33 @@ export default function QuestionnairePage() {
   const navigate = useNavigate();
   const { user, session } = useAuth();
 
+  const [selected, setSelected] = useState(null); // for highlight
+  const [stepKey, setStepKey] = useState(currentStep); // for AnimatePresence
+
   const currentStepData = QUESTIONNAIRE_STEPS[currentStep];
   const isLastStep = currentStep === QUESTIONNAIRE_STEPS.length - 1;
   const canProceed = responses[currentStepData.field] !== '';
+
+  const handleOptionSelect = async (value) => {
+    setSelected(value);
+    updateResponse(currentStepData.field, value);
+    // Wait 400ms to show highlight, then advance
+    setTimeout(async () => {
+      setSelected(null);
+      if (isLastStep) {
+        if (!user) {
+          sessionStorage.setItem('questionnaire_responses', JSON.stringify({ ...responses, [currentStepData.field]: value }));
+          navigate('/login', { state: { returnTo: '/questionnaire' } });
+          return;
+        }
+        // Pass the up-to-date responses to generateImage
+        await generateImage({ ...responses, [currentStepData.field]: value });
+      } else {
+        nextStep();
+        setStepKey(currentStep + 1); // update key for AnimatePresence
+      }
+    }, 400);
+  };
 
   const handleNext = async () => {
     if (isLastStep) {
@@ -172,12 +197,32 @@ export default function QuestionnairePage() {
               </span>
             </div>
 
-            <div className="mt-4">
-              <QuestionnaireStep
-                step={currentStepData}
-                value={responses[currentStepData.field]}
-                onChange={(value) => updateResponse(currentStepData.field, value)}
-              />
+            <div className="mt-4 min-h-[260px]">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={stepKey}
+                  initial={{ opacity: 0, x: 40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -40 }}
+                  transition={{ duration: 0.35 }}
+                >
+                  {/* If on last step and loading, show spinner instead of options */}
+                  {isLastStep && loading ? (
+                    <div className="flex flex-col items-center justify-center min-h-[200px]">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+                      <div className="text-lg text-gray-700 font-medium">Generating your poster...</div>
+                    </div>
+                  ) : (
+                    <QuestionnaireStep
+                      step={currentStepData}
+                      value={responses[currentStepData.field]}
+                      selected={selected}
+                      onChange={handleOptionSelect}
+                      disabled={isLastStep && loading}
+                    />
+                  )}
+                </motion.div>
+              </AnimatePresence>
             </div>
 
             {error && (
@@ -185,22 +230,6 @@ export default function QuestionnairePage() {
                 {error}
               </div>
             )}
-
-            <div className="mt-8 flex justify-end">
-              <button
-                onClick={handleNext}
-                disabled={!canProceed || loading}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-              >
-                {loading ? (
-                  'Generating...'
-                ) : isLastStep ? (
-                  'Generate Poster'
-                ) : (
-                  'Next'
-                )}
-              </button>
-            </div>
           </div>
         </>
       ) : (

@@ -25,5 +25,8 @@
     "hooks": {
       "pre-commit": "npm run precommit"
     }
+  },
+  "dependencies": {
+    "framer-motion": "^10.16.4"
   }
 }
