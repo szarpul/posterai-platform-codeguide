@@ -2,6 +2,7 @@ class MockPrintingServiceClient {
   async createPrintJob(orderData) {
     console.log('Mock: Creating print job', orderData);
     return {
+      id: 'mock-' + Date.now(),
       jobId: 'mock-' + Date.now(),
       status: 'created',
       estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now

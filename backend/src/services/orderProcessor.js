@@ -108,6 +108,12 @@ class OrderProcessor {
   static async handlePaymentSuccess(paymentIntent) {
     const { orderId } = paymentIntent.metadata;
 
+    // Skip if no orderId in metadata (might be a test webhook)
+    if (!orderId) {
+      console.log('⚠️  Skipping payment success - no orderId in metadata');
+      return { status: 'skipped', reason: 'no_order_id' };
+    }
+
     try {
       // Update order status to paid
       const { error } = await supabase
@@ -121,6 +127,8 @@ class OrderProcessor {
       if (error) {
         throw new Error('Failed to update order status');
       }
+
+      console.log('✅ Order status updated to paid:', orderId);
 
       // Create print job
       const printJob = await PrintingManager.createPrintJob(orderId);
