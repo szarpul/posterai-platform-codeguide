@@ -56,4 +56,4 @@ const initStorage = async () => {
 // Run initialization
 initStorage();
 
-module.exports = { supabase }; 
+module.exports = supabase; 

@@ -2,7 +2,7 @@ const openai = require('../lib/openai');
 const features = require('../config/features');
 const StubImageGeneratorService = require('./stubImageGenerator');
 const axios = require('axios');
-const { supabase } = require('../lib/supabase');
+const supabase = require('../lib/supabase');
 const { v4: uuidv4 } = require('uuid');
 
 class ImageGeneratorService {

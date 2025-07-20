@@ -3,7 +3,7 @@ const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
 const OrderProcessor = require('../services/orderProcessor');
 const stripe = require('../lib/stripe');
-const { supabase } = require('../lib/supabase');
+const supabase = require('../lib/supabase');
 
 // Create a new order
 router.post('/', requireAuth, async (req, res) => {

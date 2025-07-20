@@ -59,7 +59,8 @@ class OrderProcessor {
       .single();
 
     if (orderError) {
-      throw new Error('Failed to create order');
+      console.error('Order creation error details:', orderError);
+      throw new Error(`Failed to create order: ${orderError.message}`);
     }
 
     return order;

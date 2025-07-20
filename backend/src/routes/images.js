@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
 const ImageGeneratorService = require('../services/imageGenerator');
-const { supabase } = require('../lib/supabase');
+const supabase = require('../lib/supabase');
 
 // Generate image from questionnaire options
 router.post('/generate', requireAuth, async (req, res) => {
