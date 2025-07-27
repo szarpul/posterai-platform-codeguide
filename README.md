@@ -93,4 +93,23 @@ The application will be available at:
 3. Stripe:
    - Sign up at https://stripe.com
    - Get test keys from dashboard
-   - Set up webhook for local development using Stripe CLI 
+   - Set up webhook for local development using Stripe CLI
+
+## Testing
+
+### Backend API Testing
+Run the comprehensive backend test to validate all functionality:
+```bash
+cd backend
+node test-complete-order-flow.js
+```
+
+For detailed testing instructions, see `BACKEND_API_TESTING.md`.
+
+### API Documentation
+Complete API documentation is available in `API_DOCUMENTATION.md`, including:
+- All endpoints with request/response examples
+- Authentication requirements
+- Error handling
+- Data models
+- Testing procedures 

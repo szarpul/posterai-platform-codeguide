@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
+import paymentService from '../services/paymentService';
 
 const SIZES = [
   { value: 'A4', label: 'A4 (210 × 297 mm)', price: 2999 },
@@ -25,6 +26,15 @@ const PosterDetailPage = () => {
   const [selectedSize, setSelectedSize] = useState('A4');
   const [selectedFinish, setSelectedFinish] = useState('matte');
   const [orderLoading, setOrderLoading] = useState(false);
+  
+  // Shipping address form
+  const [shippingAddress, setShippingAddress] = useState({
+    name: '',
+    address: '',
+    city: '',
+    postalCode: '',
+    country: 'PL'
+  });
 
   useEffect(() => {
     const fetchDraft = async () => {
@@ -84,49 +94,53 @@ const PosterDetailPage = () => {
     navigate(`/questionnaire`, { state: { draft } });
   };
 
+  const handleShippingAddressChange = (field, value) => {
+    setShippingAddress(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const validateShippingAddress = () => {
+    const { name, address, city, postalCode } = shippingAddress;
+    if (!name.trim() || !address.trim() || !city.trim() || !postalCode.trim()) {
+      setError('Please fill in all shipping address fields');
+      return false;
+    }
+    return true;
+  };
+
   async function handleOrder() {
     try {
       setOrderLoading(true);
       setError('');
 
-      // Create order in the database
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert([
-          {
-            draft_id: draft.id,
-            size: selectedSize,
-            finish: selectedFinish,
-            status: 'pending'
-          }
-        ])
-        .select()
-        .single();
+      console.log('👤 User state:', user);
+      console.log('👤 User ID:', user?.id);
 
-      if (orderError) throw orderError;
-
-      // Create payment intent
-      const response = await fetch('/api/payment/create-intent', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          orderId: order.id
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create payment intent');
+      // Validate shipping address
+      if (!validateShippingAddress()) {
+        setOrderLoading(false);
+        return;
       }
 
-      const { clientSecret } = await response.json();
+      // Create order using payment service
+      const orderData = {
+        draftId: draft.id,
+        size: selectedSize,
+        finish: selectedFinish,
+        shippingAddress: shippingAddress
+      };
 
-      // Navigate to checkout with the client secret
-      navigate(`/checkout/${order.id}?payment_intent=${clientSecret}`);
+      console.log('📦 Order data:', orderData);
+      const order = await paymentService.createOrder(orderData);
+      console.log('✅ Order created:', order);
+
+      // Navigate to checkout
+      navigate(`/checkout/${order.id}`);
     } catch (err) {
       console.error('Error creating order:', err);
-      setError('Failed to create order. Please try again.');
+      setError(err.message || 'Failed to create order. Please try again.');
     } finally {
       setOrderLoading(false);
     }
@@ -193,48 +207,6 @@ const PosterDetailPage = () => {
             </div>
 
             <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Actions</h2>
-              <div className="space-y-3">
-                <button
-                  onClick={handleOrder}
-                  disabled={orderLoading}
-                  className="btn-primary w-full"
-                >
-                  {orderLoading ? 'Processing...' : 'Proceed to Checkout'}
-                </button>
-                <button
-                  onClick={handleEdit}
-                  className="btn-secondary w-full"
-                >
-                  Edit Design
-                </button>
-                <button
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="w-full px-4 py-2 rounded-lg font-medium text-error border-2 border-error hover:bg-error/10 transition-colors duration-200"
-                >
-                  {deleting ? 'Deleting...' : 'Delete Draft'}
-                </button>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Draft Information</h2>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Created:</span>
-                  <span className="text-gray-600">
-                    {new Date(draft.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Draft ID:</span>
-                  <span className="text-gray-600">{draft.id}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-xl font-semibold mb-4">Order Options</h2>
               <div className="space-y-4">
                 {/* Size Selection */}
@@ -279,6 +251,120 @@ const PosterDetailPage = () => {
                     <span className="text-lg font-medium">Total Price:</span>
                     <span className="text-xl font-bold">${(totalPrice / 100).toFixed(2)}</span>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={shippingAddress.name}
+                    onChange={(e) => handleShippingAddressChange('name', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    placeholder="Enter your full name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Street Address
+                  </label>
+                  <input
+                    type="text"
+                    value={shippingAddress.address}
+                    onChange={(e) => handleShippingAddressChange('address', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    placeholder="Enter your street address"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      value={shippingAddress.city}
+                      onChange={(e) => handleShippingAddressChange('city', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      placeholder="City"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Postal Code
+                    </label>
+                    <input
+                      type="text"
+                      value={shippingAddress.postalCode}
+                      onChange={(e) => handleShippingAddressChange('postalCode', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      placeholder="Postal code"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Country
+                  </label>
+                  <select
+                    value={shippingAddress.country}
+                    onChange={(e) => handleShippingAddressChange('country', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="PL">Poland</option>
+                    <option value="US">United States</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="DE">Germany</option>
+                    <option value="FR">France</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Actions</h2>
+              <div className="space-y-3">
+                <button
+                  onClick={handleOrder}
+                  disabled={orderLoading}
+                  className="btn-primary w-full"
+                >
+                  {orderLoading ? 'Processing...' : 'Proceed to Checkout'}
+                </button>
+                <button
+                  onClick={handleEdit}
+                  className="btn-secondary w-full"
+                >
+                  Edit Design
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="w-full px-4 py-2 rounded-lg font-medium text-error border-2 border-error hover:bg-error/10 transition-colors duration-200"
+                >
+                  {deleting ? 'Deleting...' : 'Delete Draft'}
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Draft Information</h2>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Created:</span>
+                  <span className="text-gray-600">
+                    {new Date(draft.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Draft ID:</span>
+                  <span className="text-gray-600">{draft.id}</span>
                 </div>
               </div>
             </div>

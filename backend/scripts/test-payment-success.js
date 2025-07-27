@@ -1,10 +1,21 @@
 const axios = require('axios');
 
 const BASE_URL = 'http://localhost:4000/api';
-const TEST_ORDER_ID = '22de3d9f-aab5-4d9f-b3c8-b5332bf11625';
 
-async function testPaymentSuccess() {
+
+
+async function testPaymentSuccess(orderId) {
   console.log('🧪 Testing Payment Success Flow...\n');
+
+  if (!orderId) {
+    console.log('❌ No order ID provided. Please:');
+    console.log('   1. Start your backend: npm start');
+    console.log('   2. Start your frontend: npm start');
+    console.log('   3. Create an order via the frontend');
+    console.log('   4. Get the order ID from the URL or database');
+    console.log('   5. Run this test with: node test-payment-success.js <ORDER_ID>');
+    return;
+  }
 
   try {
     // Simulate a payment_intent.succeeded webhook
@@ -20,7 +31,7 @@ async function testPaymentSuccess() {
           amount: 2999,
           currency: 'usd',
           metadata: {
-            orderId: TEST_ORDER_ID
+            orderId: orderId
           },
           status: 'succeeded'
         }
@@ -35,7 +46,7 @@ async function testPaymentSuccess() {
     };
 
     console.log('📤 Sending payment success webhook...');
-    console.log('Order ID:', TEST_ORDER_ID);
+    console.log('Order ID:', orderId);
 
     // Send as raw JSON string for express.raw() middleware
     const response = await axios.post(`${BASE_URL}/orders/webhook`, JSON.stringify(webhookPayload), {
@@ -65,5 +76,8 @@ async function testPaymentSuccess() {
   }
 }
 
+// Get order ID from command line argument
+const orderId = process.argv[2];
+
 // Run the test
-testPaymentSuccess(); 
+testPaymentSuccess(orderId); 

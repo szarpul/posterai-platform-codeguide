@@ -42,6 +42,12 @@ export default function Layout({ children }) {
                     >
                       Create Poster
                     </Link>
+                    <Link
+                      to="/orders"
+                      className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900"
+                    >
+                      My Orders
+                    </Link>
                   </>
                 )}
               </div>

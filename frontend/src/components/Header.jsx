@@ -7,6 +7,10 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  console.log('🏷️ Header - User:', user);
+  console.log('🏷️ Header - User email:', user?.email);
+  console.log('🏷️ Header - Current location:', location.pathname);
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -53,6 +57,16 @@ const Header = () => {
                   }`}
                 >
                   My Drafts
+                </Link>
+                <Link
+                  to="/orders"
+                  className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    isActive('/orders')
+                      ? 'text-primary bg-primary/10'
+                      : 'text-gray-600 hover:text-primary hover:bg-primary/5'
+                  }`}
+                >
+                  My Orders
                 </Link>
               </nav>
             )}

@@ -10,6 +10,9 @@ import QuestionnairePage from './pages/QuestionnairePage';
 import DraftsPage from './pages/DraftsPage';
 import PosterDetailPage from './pages/PosterDetailPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import CheckoutPage from './pages/CheckoutPage';
+import OrderSuccessPage from './pages/OrderSuccessPage';
+import OrdersPage from './pages/OrdersPage';
 
 // Protected route wrapper
 function PrivateRoute({ children }) {
@@ -48,10 +51,34 @@ function App() {
                 }
               />
               <Route
+                path="/orders"
+                element={
+                  <PrivateRoute>
+                    <OrdersPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
                 path="/poster/:id"
                 element={
                   <PrivateRoute>
                     <PosterDetailPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/checkout/:orderId"
+                element={
+                  <PrivateRoute>
+                    <CheckoutPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/order-success/:orderId"
+                element={
+                  <PrivateRoute>
+                    <OrderSuccessPage />
                   </PrivateRoute>
                 }
               />

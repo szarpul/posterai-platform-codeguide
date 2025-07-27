@@ -105,4 +105,44 @@ router.get('/:orderId', requireAuth, async (req, res) => {
   }
 });
 
+// Cancel/delete an order (only for pending orders)
+router.delete('/:orderId', requireAuth, async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    // Get the order to check if it belongs to the user and is pending
+    const { data: order, error: fetchError } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .eq('user_id', req.user.id)
+      .single();
+
+    if (fetchError || !order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    // Only allow cancellation of pending orders
+    if (order.status !== 'pending') {
+      return res.status(400).json({ error: 'Only pending orders can be cancelled' });
+    }
+
+    // Delete the order
+    const { error: deleteError } = await supabase
+      .from('orders')
+      .delete()
+      .eq('id', orderId)
+      .eq('user_id', req.user.id);
+
+    if (deleteError) {
+      throw deleteError;
+    }
+
+    res.json({ message: 'Order cancelled successfully' });
+  } catch (error) {
+    console.error('Cancel order error:', error);
+    res.status(500).json({ error: 'Failed to cancel order' });
+  }
+});
+
 module.exports = router;
