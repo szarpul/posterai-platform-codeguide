@@ -119,7 +119,7 @@ const OrderSuccessPage = () => {
               <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
               <div className="space-y-2">
                 <p className="font-medium">{order.shipping_address?.name}</p>
-                <p>{order.shipping_address?.address}</p>
+                <p>{order.shipping_address?.line1}</p>
                 <p>{order.shipping_address?.city}, {order.shipping_address?.postalCode}</p>
                 <p>{order.shipping_address?.country}</p>
               </div>

@@ -26,7 +26,11 @@ stripe listen --forward-to localhost:4000/api/orders/webhook
 ### **2. Environment Variables Check**
 Verify these files exist:
 - ✅ `frontend/.env` - Contains `REACT_APP_API_URL=http://localhost:4000/api`
-- ✅ `backend/.env` - Contains Supabase and Stripe keys
+- ✅ `backend/.env` - Contains Supabase, Stripe, and Prodigi keys
+
+### **3. External Service Access**
+- ✅ **Stripe Dashboard**: `https://dashboard.stripe.com/test/` (for test orders)
+- ✅ **Prodigi Dashboard**: `https://sandbox-beta-dashboard.pwinty.com/dashboard` (for test orders)
 
 ---
 
@@ -91,6 +95,47 @@ Verify these files exist:
 
 ---
 
+## 🔍 **External Service Verification (5 minutes)**
+
+### **✅ Test 7: Stripe Dashboard Verification**
+1. **Open Stripe Dashboard**: `https://dashboard.stripe.com/test/`
+2. **Navigate to**: Payments → Test Mode
+3. **Look for your test payment**:
+   - Should see payment with amount matching your order
+   - Status should be "Succeeded"
+   - Metadata should contain your order ID
+4. **Check Payment Intent**:
+   - Click on the payment to see details
+   - Verify webhook was sent successfully
+   - Check that metadata contains: `orderId`, `draftId`, `userId`
+
+### **✅ Test 8: Prodigi Dashboard Verification**
+1. **Open Prodigi Dashboard**: `https://sandbox-beta-dashboard.pwinty.com/dashboard`
+2. **Log in with your Prodigi credentials**
+3. **Navigate to Orders section**
+4. **Look for your test order**:
+   - Should see order with ID like `ord_xxxxxxxxx`
+   - Status should be "In Progress" or "Created"
+   - Recipient should match your shipping address
+   - SKU should be `GLOBAL-CFPM-A4` (for A4 size)
+5. **Check Order Details**:
+   - Verify shipping address is correct (`line1` format)
+   - Check that image URL is accessible
+   - Confirm order was created after payment
+
+### **✅ Test 9: API Verification**
+```bash
+# Verify Prodigi order via API
+curl -H "X-API-Key: YOUR_PRODIGI_API_KEY" \
+     https://api.sandbox.prodigi.com/v4.0/orders
+
+# Verify Stripe payment via API
+curl -H "Authorization: Bearer YOUR_STRIPE_SECRET_KEY" \
+     https://api.stripe.com/v1/payment_intents
+```
+
+---
+
 ## 🔍 **Expected Console Logs**
 
 ### **During Order Creation:**
@@ -117,6 +162,14 @@ Verify these files exist:
 Mock: Creating print job { orderId: '...', ... }
 ```
 
+### **During Prodigi Integration:**
+```
+📤 Sending order to Prodigi...
+✅ Test order created successfully
+🆔 Prodigi Order ID: ord_xxxxxxxxx
+📊 Order Status: { stage: 'InProgress', ... }
+```
+
 ---
 
 ## 🚨 **Common Issues & Quick Fixes**
@@ -141,6 +194,15 @@ Mock: Creating print job { orderId: '...', ... }
 - **Check**: Backend is running on port 4000
 - **Fix**: Restart backend with `npm start`
 
+### **Issue: Prodigi Order Creation Fails**
+- **Check**: Prodigi API key in `backend/.env`
+- **Fix**: Verify `PRODIGI_API_KEY` and `PRODIGI_BASE_URL`
+- **Check**: Address format uses `line1` instead of `address`
+
+### **Issue: Stripe Webhook Not Received**
+- **Check**: Stripe CLI is running: `stripe listen --forward-to localhost:4000/api/orders/webhook`
+- **Fix**: Restart Stripe CLI and verify webhook endpoint
+
 ---
 
 ## ✅ **Success Criteria**
@@ -154,6 +216,9 @@ All tests pass when:
 - ✅ No console errors or 404s
 - ✅ All animations work (fade-out on order deletion)
 - ✅ Responsive design works on different screen sizes
+- ✅ **Stripe Dashboard**: Payment appears with correct metadata
+- ✅ **Prodigi Dashboard**: Order created with correct shipping address
+- ✅ **Order Status**: Changes from "pending" to "IN PRODUCTION"
 
 ---
 
@@ -165,9 +230,11 @@ All tests pass when:
 | **Poster Creation** | ✅ Working | Questionnaire → AI generation → Save |
 | **Order Creation** | ✅ Working | Creates orders in database |
 | **Payment Processing** | ✅ Working | Stripe integration + webhooks |
+| **Prodigi Integration** | ✅ Working | Print job creation + status updates |
 | **Order Management** | ✅ Working | View, discard, status updates |
 | **UI/UX** | ✅ Working | Animations, responsive design |
 | **Navigation** | ✅ Working | All routes functional |
+| **External Dashboards** | ✅ Working | Stripe + Prodigi verification |
 
 ---
 
@@ -187,7 +254,7 @@ curl http://localhost:4000/health
 stripe listen --forward-to localhost:4000/api/orders/webhook
 ```
 
-**Total Test Time**: ~10 minutes  
+**Total Test Time**: ~15 minutes (including external verification)  
 **Status**: All systems operational ✅
 
 ---
@@ -198,9 +265,24 @@ stripe listen --forward-to localhost:4000/api/orders/webhook
 - `verifications/BACKEND_API_TESTING.md` - Backend API and webhook testing
 - `backend/test-payment-success.js` - Mock webhook testing
 - `backend/test-order-endpoints.js` - Order API testing
+- `backend/scripts/test-prodigi-integration.js` - Prodigi integration testing
 
 ---
 
-**Last Updated**: January 2024  
-**Version**: 1.0  
-**Status**: ✅ Complete Payment Platform Ready 
+## 🔗 **External Service URLs**
+
+### **Stripe Dashboard**
+- **Test Mode**: `https://dashboard.stripe.com/test/`
+- **Payments**: `https://dashboard.stripe.com/test/payments`
+- **Webhooks**: `https://dashboard.stripe.com/test/webhooks`
+
+### **Prodigi Dashboard**
+- **Sandbox**: `https://sandbox-beta-dashboard.pwinty.com/dashboard`
+- **API Base**: `https://api.sandbox.prodigi.com/v4.0`
+- **Orders API**: `https://api.sandbox.prodigi.com/v4.0/orders`
+
+---
+
+**Last Updated**: August 2025  
+**Version**: 2.0  
+**Status**: ✅ Complete Payment + Print Platform Ready 

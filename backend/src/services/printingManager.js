@@ -18,6 +18,14 @@ class PrintingManager {
         throw new Error('Order not found');
       }
 
+      console.log('📋 Order data for Prodigi:', {
+        orderId: order.id,
+        imageUrl: order.drafts?.image_url,
+        size: order.size,
+        finish: order.finish,
+        shippingAddress: order.shipping_address
+      });
+
       // Prepare print job data
       const printJobData = {
         orderId: order.id,
@@ -28,6 +36,8 @@ class PrintingManager {
         },
         shippingAddress: order.shipping_address
       };
+
+      console.log('📤 Sending to Prodigi:', JSON.stringify(printJobData, null, 2));
 
       // Create print job with external service
       const printJob = await printingService.createPrintJob(printJobData);

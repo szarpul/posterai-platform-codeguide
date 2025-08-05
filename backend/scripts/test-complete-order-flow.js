@@ -64,10 +64,10 @@ async function createTestOrder(draftId, userId) {
       status: 'pending',
       shipping_address: {
         name: 'Test User',
-        address: '123 Test Street',
-        city: 'Test City',
-        postal_code: '12345',
-        country: 'PL'
+        line1: '123 Test Street',
+        city: 'Warsaw',
+        postalCode: '00-001',
+        countryCode: 'PL'
       }
     };
 

@@ -191,7 +191,7 @@ const CheckoutPage = () => {
                   <span>Shipping Address:</span>
                   <span className="text-right">
                     {order.shipping_address?.name}<br />
-                    {order.shipping_address?.address}<br />
+                    {order.shipping_address?.line1}<br />
                     {order.shipping_address?.city}, {order.shipping_address?.postalCode}<br />
                     {order.shipping_address?.country}
                   </span>

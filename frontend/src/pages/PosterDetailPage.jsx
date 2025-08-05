@@ -30,7 +30,7 @@ const PosterDetailPage = () => {
   // Shipping address form
   const [shippingAddress, setShippingAddress] = useState({
     name: '',
-    address: '',
+    line1: '',
     city: '',
     postalCode: '',
     country: 'PL'
@@ -102,8 +102,8 @@ const PosterDetailPage = () => {
   };
 
   const validateShippingAddress = () => {
-    const { name, address, city, postalCode } = shippingAddress;
-    if (!name.trim() || !address.trim() || !city.trim() || !postalCode.trim()) {
+    const { name, line1, city, postalCode } = shippingAddress;
+    if (!name.trim() || !line1.trim() || !city.trim() || !postalCode.trim()) {
       setError('Please fill in all shipping address fields');
       return false;
     }
@@ -276,8 +276,8 @@ const PosterDetailPage = () => {
                   </label>
                   <input
                     type="text"
-                    value={shippingAddress.address}
-                    onChange={(e) => handleShippingAddressChange('address', e.target.value)}
+                    value={shippingAddress.line1}
+                    onChange={(e) => handleShippingAddressChange('line1', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     placeholder="Enter your street address"
                   />
