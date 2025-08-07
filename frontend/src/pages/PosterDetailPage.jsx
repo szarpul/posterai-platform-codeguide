@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import paymentService from '../services/paymentService';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const SIZES = [
   { value: 'A4', label: 'A4 (210 × 297 mm)', price: 2999 },
@@ -148,16 +152,16 @@ const PosterDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-light p-6 flex items-center justify-center">
-        <div className="text-lg">Loading poster details...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <LoadingSpinner size="lg" text="Loading poster details..." />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-neutral-light p-6 flex items-center justify-center">
-        <div className="text-error">{error}</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-error-600">{error}</div>
       </div>
     );
   }
@@ -168,46 +172,61 @@ const PosterDetailPage = () => {
   const totalPrice = basePrice + finishSurcharge;
 
   return (
-    <div className="min-h-screen bg-neutral-light p-6">
+    <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Poster Details</h1>
-          <button
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex justify-between items-center mb-8"
+        >
+          <h1 className="text-3xl font-bold text-gray-900">Poster Details</h1>
+          <Button
             onClick={() => navigate('/drafts')}
-            className="btn-secondary"
+            variant="outline"
           >
             Back to Drafts
-          </button>
-        </div>
+          </Button>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Image Preview */}
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-            {draft.image_url && (
-              <img
-                src={draft.image_url}
-                alt="Poster preview"
-                className="w-full h-auto"
-              />
-            )}
-          </div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Card className="overflow-hidden">
+              {draft.image_url && (
+                <img
+                  src={draft.image_url}
+                  alt="Poster preview"
+                  className="w-full h-auto"
+                />
+              )}
+            </Card>
+          </motion.div>
 
           {/* Details and Actions */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Selected Options</h2>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="space-y-6"
+          >
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900">Selected Options</h2>
               <div className="space-y-3">
-                {draft.answers && Object.entries(draft.answers).map(([key, value]) => (
+                {draft.responses && Object.entries(draft.responses).map(([key, value]) => (
                   <div key={key} className="flex justify-between items-center">
-                    <span className="font-medium">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                    <span className="font-medium text-gray-700">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
                     <span className="text-gray-600">{value}</span>
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
 
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Order Options</h2>
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900">Order Options</h2>
               <div className="space-y-4">
                 {/* Size Selection */}
                 <div>
@@ -217,7 +236,7 @@ const PosterDetailPage = () => {
                   <select
                     value={selectedSize}
                     onChange={(e) => setSelectedSize(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   >
                     {SIZES.map((size) => (
                       <option key={size.value} value={size.value}>
@@ -235,7 +254,7 @@ const PosterDetailPage = () => {
                   <select
                     value={selectedFinish}
                     onChange={(e) => setSelectedFinish(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   >
                     {FINISHES.map((finish) => (
                       <option key={finish.value} value={finish.value}>
@@ -248,15 +267,15 @@ const PosterDetailPage = () => {
                 {/* Total Price */}
                 <div className="pt-4 border-t border-gray-200">
                   <div className="flex justify-between items-center">
-                    <span className="text-lg font-medium">Total Price:</span>
-                    <span className="text-xl font-bold">${(totalPrice / 100).toFixed(2)}</span>
+                    <span className="text-lg font-medium text-gray-900">Total Price:</span>
+                    <span className="text-xl font-bold text-primary-600">${(totalPrice / 100).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
-            </div>
+            </Card>
 
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900">Shipping Address</h2>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -266,7 +285,7 @@ const PosterDetailPage = () => {
                     type="text"
                     value={shippingAddress.name}
                     onChange={(e) => handleShippingAddressChange('name', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     placeholder="Enter your full name"
                   />
                 </div>
@@ -278,7 +297,7 @@ const PosterDetailPage = () => {
                     type="text"
                     value={shippingAddress.line1}
                     onChange={(e) => handleShippingAddressChange('line1', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     placeholder="Enter your street address"
                   />
                 </div>
@@ -291,7 +310,7 @@ const PosterDetailPage = () => {
                       type="text"
                       value={shippingAddress.city}
                       onChange={(e) => handleShippingAddressChange('city', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       placeholder="City"
                     />
                   </div>
@@ -303,7 +322,7 @@ const PosterDetailPage = () => {
                       type="text"
                       value={shippingAddress.postalCode}
                       onChange={(e) => handleShippingAddressChange('postalCode', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       placeholder="Postal code"
                     />
                   </div>
@@ -315,7 +334,7 @@ const PosterDetailPage = () => {
                   <select
                     value={shippingAddress.country}
                     onChange={(e) => handleShippingAddressChange('country', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   >
                     <option value="PL">Poland</option>
                     <option value="US">United States</option>
@@ -325,50 +344,55 @@ const PosterDetailPage = () => {
                   </select>
                 </div>
               </div>
-            </div>
+            </Card>
 
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Actions</h2>
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900">Actions</h2>
               <div className="space-y-3">
-                <button
+                <Button
                   onClick={handleOrder}
-                  disabled={orderLoading}
-                  className="btn-primary w-full"
+                  loading={orderLoading}
+                  fullWidth
+                  size="lg"
                 >
                   {orderLoading ? 'Processing...' : 'Proceed to Checkout'}
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleEdit}
-                  className="btn-secondary w-full"
+                  variant="outline"
+                  fullWidth
+                  size="lg"
                 >
                   Edit Design
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleDelete}
-                  disabled={deleting}
-                  className="w-full px-4 py-2 rounded-lg font-medium text-error border-2 border-error hover:bg-error/10 transition-colors duration-200"
+                  loading={deleting}
+                  variant="danger"
+                  fullWidth
+                  size="lg"
                 >
                   {deleting ? 'Deleting...' : 'Delete Draft'}
-                </button>
+                </Button>
               </div>
-            </div>
+            </Card>
 
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Draft Information</h2>
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900">Draft Information</h2>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="font-medium">Created:</span>
+                  <span className="font-medium text-gray-700">Created:</span>
                   <span className="text-gray-600">
                     {new Date(draft.created_at).toLocaleDateString()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="font-medium">Draft ID:</span>
+                  <span className="font-medium text-gray-700">Draft ID:</span>
                   <span className="text-gray-600">{draft.id}</span>
                 </div>
               </div>
-            </div>
-          </div>
+            </Card>
+          </motion.div>
         </div>
       </div>
     </div>

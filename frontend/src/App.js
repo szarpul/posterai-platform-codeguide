@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { QuestionnaireProvider } from './contexts/QuestionnaireContext';
 import Layout from './components/Layout';
+import ErrorBoundary from './components/ErrorBoundary';
+import ToastProvider from './components/ui/Toast';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -22,71 +24,75 @@ function PrivateRoute({ children }) {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <QuestionnaireProvider>
-          <Layout>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              
-              {/* Protected routes */}
-              <Route
-                path="/questionnaire"
-                element={
-                  <PrivateRoute>
-                    <QuestionnairePage />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/drafts"
-                element={
-                  <PrivateRoute>
-                    <DraftsPage />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/orders"
-                element={
-                  <PrivateRoute>
-                    <OrdersPage />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/poster/:id"
-                element={
-                  <PrivateRoute>
-                    <PosterDetailPage />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/checkout/:orderId"
-                element={
-                  <PrivateRoute>
-                    <CheckoutPage />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/order-success/:orderId"
-                element={
-                  <PrivateRoute>
-                    <OrderSuccessPage />
-                  </PrivateRoute>
-                }
-              />
-            </Routes>
-          </Layout>
-        </QuestionnaireProvider>
-      </AuthProvider>
-    </Router>
+    <ErrorBoundary>
+      <ToastProvider>
+        <Router>
+          <AuthProvider>
+            <QuestionnaireProvider>
+              <Layout>
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                  
+                  {/* Protected routes */}
+                  <Route
+                    path="/questionnaire"
+                    element={
+                      <PrivateRoute>
+                        <QuestionnairePage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/drafts"
+                    element={
+                      <PrivateRoute>
+                        <DraftsPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/orders"
+                    element={
+                      <PrivateRoute>
+                        <OrdersPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/poster/:id"
+                    element={
+                      <PrivateRoute>
+                        <PosterDetailPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/checkout/:orderId"
+                    element={
+                      <PrivateRoute>
+                        <CheckoutPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/order-success/:orderId"
+                    element={
+                      <PrivateRoute>
+                        <OrderSuccessPage />
+                      </PrivateRoute>
+                    }
+                  />
+                </Routes>
+              </Layout>
+            </QuestionnaireProvider>
+          </AuthProvider>
+        </Router>
+      </ToastProvider>
+    </ErrorBoundary>
   );
 }
 

@@ -1,11 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabaseClient';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5
+    }
+  }
+};
 
 export default function DraftsPage() {
   const [drafts, setDrafts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     fetchDrafts();
@@ -33,7 +59,10 @@ export default function DraftsPage() {
   }
 
   async function handleDelete(draftId) {
+    if (!window.confirm('Are you sure you want to delete this draft?')) return;
+    
     try {
+      setDeletingId(draftId);
       const { error } = await supabase
         .from('drafts')
         .delete()
@@ -45,88 +74,168 @@ export default function DraftsPage() {
     } catch (err) {
       console.error('Error deleting draft:', err);
       setError('Failed to delete draft. Please try again.');
+    } finally {
+      setDeletingId(null);
     }
   }
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+      <div className="flex justify-center items-center min-h-[400px]">
+        <LoadingSpinner size="lg" text="Loading your drafts..." />
       </div>
     );
   }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="md:flex md:items-center md:justify-between">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="md:flex md:items-center md:justify-between mb-8"
+      >
         <div className="flex-1 min-w-0">
-          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             My Drafts
-          </h2>
+          </h1>
+          <p className="text-gray-600">
+            {drafts.length === 0 
+              ? "Start creating your first poster" 
+              : `${drafts.length} draft${drafts.length !== 1 ? 's' : ''} saved`
+            }
+          </p>
         </div>
         <div className="mt-4 flex md:mt-0 md:ml-4">
-          <Link
+          <Button
             to="/questionnaire"
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            size="lg"
           >
             Create New Poster
-          </Link>
+          </Button>
         </div>
-      </div>
+      </motion.div>
 
       {error && (
-        <div className="mt-4 bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 bg-error-50 border border-error-200 text-error-700 px-4 py-3 rounded-lg"
+        >
           {error}
-        </div>
+        </motion.div>
       )}
 
       {drafts.length === 0 ? (
-        <div className="mt-8 text-center">
-          <p className="text-gray-500">You haven't created any drafts yet.</p>
-          <Link
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center py-12"
+        >
+          <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+            <span className="text-3xl">🎨</span>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            No drafts yet
+          </h3>
+          <p className="text-gray-600 mb-6 max-w-md mx-auto">
+            Create your first poster by answering a few simple questions. Our AI will generate a unique design just for you.
+          </p>
+          <Button
             to="/questionnaire"
-            className="mt-4 inline-flex items-center text-indigo-600 hover:text-indigo-500"
+            size="lg"
           >
-            Start creating your first poster
-            <span aria-hidden="true"> &rarr;</span>
-          </Link>
-        </div>
+            Start Creating
+          </Button>
+        </motion.div>
       ) : (
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {drafts.map((draft) => (
-            <div
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        >
+          {drafts.map((draft, index) => (
+            <motion.div
               key={draft.id}
-              className="relative bg-white rounded-lg shadow overflow-hidden"
+              variants={itemVariants}
+              layout
             >
-              <div className="aspect-w-3 aspect-h-2">
-                <img
-                  src={draft.image_url}
-                  alt="Generated poster"
-                  className="w-full h-full object-center object-cover"
-                />
-              </div>
-              <div className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-500">
-                    {new Date(draft.created_at).toLocaleDateString()}
-                  </div>
-                  <button
-                    onClick={() => handleDelete(draft.id)}
-                    className="text-red-600 hover:text-red-500 text-sm font-medium"
-                  >
-                    Delete
-                  </button>
+              <Card className="group relative overflow-hidden">
+                {/* Image */}
+                <div className="aspect-w-3 aspect-h-2 bg-gray-100">
+                  <img
+                    src={draft.image_url}
+                    alt="Generated poster"
+                    className="w-full h-full object-center object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
-                <Link
-                  to={`/poster/${draft.id}`}
-                  className="mt-4 block w-full text-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-                >
-                  View Details
-                </Link>
-              </div>
-            </div>
+                
+                {/* Overlay on hover */}
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <Button
+                      to={`/poster/${draft.id}`}
+                      variant="accent"
+                      size="sm"
+                    >
+                      View Details
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-sm text-gray-500">
+                      {new Date(draft.created_at).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </div>
+                    <Button
+                      onClick={() => handleDelete(draft.id)}
+                      variant="ghost"
+                      size="sm"
+                      loading={deletingId === draft.id}
+                      className="text-error-600 hover:text-error-700 hover:bg-error-50"
+                    >
+                      {deletingId === draft.id ? 'Deleting...' : 'Delete'}
+                    </Button>
+                  </div>
+                  
+                  {/* Draft info */}
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <span className="w-2 h-2 bg-primary-500 rounded-full"></span>
+                      <span>Draft #{draft.id.slice(0, 8)}</span>
+                    </div>
+                    
+                    {/* Show some of the selected options */}
+                    {draft.responses && (
+                      <div className="flex flex-wrap gap-1">
+                        {Object.entries(draft.responses).slice(0, 3).map(([key, value]) => (
+                          <span
+                            key={key}
+                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
+                          >
+                            {value}
+                          </span>
+                        ))}
+                        {Object.keys(draft.responses || {}).length > 3 && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                            +{Object.keys(draft.responses || {}).length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );

@@ -1,93 +1,119 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useQuestionnaire } from '../contexts/QuestionnaireContext';
 import { useAuth } from '../contexts/AuthContext';
 import { API_ENDPOINTS } from '../config/api';
-import { motion, AnimatePresence } from 'framer-motion';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const QUESTIONNAIRE_STEPS = [
   {
     field: 'style',
     title: 'Choose your style',
     description: 'Select the overall aesthetic for your poster',
+    icon: '🎨',
     options: [
-      { value: 'modern', label: 'Modern', description: 'Clean lines and contemporary design' },
-      { value: 'vintage', label: 'Vintage', description: 'Retro and nostalgic feel' },
-      { value: 'abstract', label: 'Abstract', description: 'Non-representational and artistic' },
-      { value: 'minimalist', label: 'Minimalist', description: 'Simple and uncluttered' }
+      { value: 'modern', label: 'Modern', description: 'Clean lines and contemporary design', icon: '✨' },
+      { value: 'vintage', label: 'Vintage', description: 'Retro and nostalgic feel', icon: '📷' },
+      { value: 'abstract', label: 'Abstract', description: 'Non-representational and artistic', icon: '🎭' },
+      { value: 'minimalist', label: 'Minimalist', description: 'Simple and uncluttered', icon: '⚪' }
     ]
   },
   {
     field: 'theme',
     title: 'Select a theme',
     description: 'What should your poster be about?',
+    icon: '🌍',
     options: [
-      { value: 'nature', label: 'Nature', description: 'Landscapes, flora, and fauna' },
-      { value: 'urban', label: 'Urban', description: 'City life and architecture' },
-      { value: 'fantasy', label: 'Fantasy', description: 'Magical and otherworldly' },
-      { value: 'futuristic', label: 'Futuristic', description: 'Sci-fi and technology' }
+      { value: 'nature', label: 'Nature', description: 'Landscapes, flora, and fauna', icon: '🌿' },
+      { value: 'urban', label: 'Urban', description: 'City life and architecture', icon: '🏙️' },
+      { value: 'fantasy', label: 'Fantasy', description: 'Magical and otherworldly', icon: '🧙‍♂️' },
+      { value: 'futuristic', label: 'Futuristic', description: 'Sci-fi and technology', icon: '🚀' }
     ]
   },
   {
     field: 'mood',
     title: 'Set the mood',
     description: 'How should your poster make people feel?',
+    icon: '💭',
     options: [
-      { value: 'calm', label: 'Calm', description: 'Peaceful and serene' },
-      { value: 'energetic', label: 'Energetic', description: 'Dynamic and vibrant' },
-      { value: 'mysterious', label: 'Mysterious', description: 'Intriguing and enigmatic' },
-      { value: 'joyful', label: 'Joyful', description: 'Happy and uplifting' }
+      { value: 'calm', label: 'Calm', description: 'Peaceful and serene', icon: '😌' },
+      { value: 'energetic', label: 'Energetic', description: 'Dynamic and vibrant', icon: '⚡' },
+      { value: 'mysterious', label: 'Mysterious', description: 'Intriguing and enigmatic', icon: '🔮' },
+      { value: 'joyful', label: 'Joyful', description: 'Happy and uplifting', icon: '😊' }
     ]
   },
   {
     field: 'colorPalette',
     title: 'Pick a color palette',
     description: 'What colors should dominate your design?',
+    icon: '🎨',
     options: [
-      { value: 'warm', label: 'Warm', description: 'Reds, oranges, and yellows' },
-      { value: 'cool', label: 'Cool', description: 'Blues, greens, and purples' },
-      { value: 'monochrome', label: 'Monochrome', description: 'Black, white, and grays' },
-      { value: 'vibrant', label: 'Vibrant', description: 'Bold and colorful mix' }
+      { value: 'warm', label: 'Warm', description: 'Reds, oranges, and yellows', icon: '🔥' },
+      { value: 'cool', label: 'Cool', description: 'Blues, greens, and purples', icon: '❄️' },
+      { value: 'monochrome', label: 'Monochrome', description: 'Black, white, and grays', icon: '⚫' },
+      { value: 'vibrant', label: 'Vibrant', description: 'Bold and colorful mix', icon: '🌈' }
     ]
   },
   {
     field: 'subject',
     title: 'Choose your subject',
     description: 'What should be the main focus?',
+    icon: '🎯',
     options: [
-      { value: 'landscapes', label: 'Landscapes', description: 'Natural or urban scenes' },
-      { value: 'portraits', label: 'Portraits', description: 'People and characters' },
-      { value: 'animals', label: 'Animals', description: 'Wildlife and creatures' },
-      { value: 'architecture', label: 'Architecture', description: 'Buildings and structures' }
+      { value: 'landscapes', label: 'Landscapes', description: 'Natural or urban scenes', icon: '🏔️' },
+      { value: 'portraits', label: 'Portraits', description: 'People and characters', icon: '👤' },
+      { value: 'animals', label: 'Animals', description: 'Wildlife and creatures', icon: '🦁' },
+      { value: 'architecture', label: 'Architecture', description: 'Buildings and structures', icon: '��️' }
     ]
   }
 ];
 
 function QuestionnaireStep({ step, value, selected, onChange, disabled }) {
   return (
-    <div className="space-y-4">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-6"
+    >
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900">{step.title}</h2>
-        <p className="mt-1 text-sm text-gray-500">{step.description}</p>
+        <div className="text-4xl mb-4">{step.icon}</div>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">{step.title}</h2>
+        <p className="text-lg text-gray-600">{step.description}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {step.options.map((option) => (
-          <button
+        {step.options.map((option, index) => (
+          <motion.button
             key={option.value}
             onClick={() => onChange(option.value)}
-            className={`transition-all duration-300 p-4 border rounded-lg text-left focus:outline-none
-              ${value === option.value ? 'ring-2 ring-indigo-500' : 'hover:border-gray-300'}
-              ${selected === option.value ? 'bg-indigo-100 scale-105 shadow-lg' : ''}
-            `}
+            className={`transition-all duration-300 p-6 border-2 rounded-xl text-left focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              value === option.value 
+                ? 'border-primary-500 bg-primary-50 ring-primary-500' 
+                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+            } ${
+              selected === option.value ? 'scale-105 shadow-lg' : ''
+            }`}
             disabled={disabled || (!!selected && selected !== option.value)}
+            whileHover={{ scale: disabled ? 1 : 1.02 }}
+            whileTap={{ scale: disabled ? 1 : 0.98 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
           >
-            <h3 className="font-medium text-gray-900">{option.label}</h3>
-            <p className="mt-1 text-sm text-gray-500">{option.description}</p>
-          </button>
+            <div className="flex items-start space-x-4">
+              <div className="text-2xl">{option.icon}</div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900 text-lg">{option.label}</h3>
+                <p className="mt-1 text-gray-600">{option.description}</p>
+              </div>
+            </div>
+          </motion.button>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -108,8 +134,8 @@ export default function QuestionnairePage() {
   const navigate = useNavigate();
   const { user, session } = useAuth();
 
-  const [selected, setSelected] = useState(null); // for highlight
-  const [stepKey, setStepKey] = useState(currentStep); // for AnimatePresence
+  const [selected, setSelected] = useState(null);
+  const [stepKey, setStepKey] = useState(currentStep);
 
   const currentStepData = QUESTIONNAIRE_STEPS[currentStep];
   const isLastStep = currentStep === QUESTIONNAIRE_STEPS.length - 1;
@@ -118,7 +144,7 @@ export default function QuestionnairePage() {
   const handleOptionSelect = async (value) => {
     setSelected(value);
     updateResponse(currentStepData.field, value);
-    // Wait 400ms to show highlight, then advance
+    
     setTimeout(async () => {
       setSelected(null);
       if (isLastStep) {
@@ -127,27 +153,12 @@ export default function QuestionnairePage() {
           navigate('/login', { state: { returnTo: '/questionnaire' } });
           return;
         }
-        // Pass the up-to-date responses to generateImage
         await generateImage({ ...responses, [currentStepData.field]: value });
       } else {
         nextStep();
-        setStepKey(currentStep + 1); // update key for AnimatePresence
+        setStepKey(currentStep + 1);
       }
     }, 400);
-  };
-
-  const handleNext = async () => {
-    if (isLastStep) {
-      if (!user) {
-        // Save current responses to session storage before redirecting
-        sessionStorage.setItem('questionnaire_responses', JSON.stringify(responses));
-        navigate('/login', { state: { returnTo: '/questionnaire' } });
-        return;
-      }
-      await generateImage();
-    } else {
-      nextStep();
-    }
   };
 
   const handleSaveAsDraft = async () => {
@@ -180,86 +191,112 @@ export default function QuestionnairePage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 py-8">
       {!generatedImage ? (
-        <>
+        <div className="space-y-8">
+          {/* Progress Bar */}
           <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <button
+            <div className="flex items-center justify-between mb-4">
+              <Button
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className="text-sm text-indigo-600 hover:text-indigo-500 disabled:opacity-50"
+                variant="ghost"
+                size="sm"
               >
-                Back
-              </button>
-              <span className="text-sm text-gray-500">
+                ← Back
+              </Button>
+              <span className="text-sm text-gray-500 font-medium">
                 Step {currentStep + 1} of {QUESTIONNAIRE_STEPS.length}
               </span>
             </div>
-
-            <div className="mt-4 min-h-[260px]">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={stepKey}
-                  initial={{ opacity: 0, x: 40 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -40 }}
-                  transition={{ duration: 0.35 }}
-                >
-                  {/* If on last step and loading, show spinner instead of options */}
-                  {isLastStep && loading ? (
-                    <div className="flex flex-col items-center justify-center min-h-[200px]">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
-                      <div className="text-lg text-gray-700 font-medium">Generating your poster...</div>
-                    </div>
-                  ) : (
-                    <QuestionnaireStep
-                      step={currentStepData}
-                      value={responses[currentStepData.field]}
-                      selected={selected}
-                      onChange={handleOptionSelect}
-                      disabled={isLastStep && loading}
-                    />
-                  )}
-                </motion.div>
-              </AnimatePresence>
+            
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <motion.div
+                className="bg-gradient-to-r from-primary-500 to-secondary-500 h-2 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${((currentStep + 1) / QUESTIONNAIRE_STEPS.length) * 100}%` }}
+                transition={{ duration: 0.5 }}
+              />
             </div>
-
-            {error && (
-              <div className="mt-4 bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
-                {error}
-              </div>
-            )}
           </div>
-        </>
+
+          {/* Step Content */}
+          <Card className="p-8">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={stepKey}
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -40 }}
+                transition={{ duration: 0.35 }}
+              >
+                {isLastStep && loading ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <LoadingSpinner size="lg" text="Generating your poster..." />
+                  </div>
+                ) : (
+                  <QuestionnaireStep
+                    step={currentStepData}
+                    value={responses[currentStepData.field]}
+                    selected={selected}
+                    onChange={handleOptionSelect}
+                    disabled={isLastStep && loading}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </Card>
+
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-error-50 border border-error-200 text-error-700 px-4 py-3 rounded-lg"
+            >
+              {error}
+            </motion.div>
+          )}
+        </div>
       ) : (
-        <div className="space-y-8">
-          <div className="aspect-w-1 aspect-h-1 bg-gray-100 rounded-lg overflow-hidden">
-            <img
-              src={generatedImage}
-              alt="Generated poster"
-              className="w-full h-full object-center object-cover"
-            />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="space-y-8"
+        >
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Your Generated Poster</h2>
+            <p className="text-gray-600">Here's your AI-generated poster based on your choices</p>
           </div>
 
-          <div className="flex justify-end space-x-4">
-            <button
+          <Card className="p-6">
+            <div className="aspect-w-1 aspect-h-1 bg-gray-100 rounded-lg overflow-hidden">
+              <img
+                src={generatedImage}
+                alt="Generated poster"
+                className="w-full h-full object-center object-cover"
+              />
+            </div>
+          </Card>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
               onClick={() => {
                 setGeneratedImage(null);
                 resetQuestionnaire();
               }}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              variant="outline"
+              size="lg"
             >
               Start Over
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleSaveAsDraft}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              size="lg"
             >
               Save as Draft
-            </button>
+            </Button>
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );
