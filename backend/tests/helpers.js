@@ -13,6 +13,17 @@ const mockSupabase = {
       },
       error: null,
     }),
+    admin: {
+      getUserById: jest.fn().mockResolvedValue({
+        data: {
+          user: {
+            id: 'test-user-id',
+            email: 'test@example.com',
+          },
+        },
+        error: null,
+      }),
+    },
   },
 };
 
@@ -34,6 +45,41 @@ const mockStripe = {
       client_secret: 'mock-client-secret',
     }),
     confirm: jest.fn(),
+    retrieve: jest.fn().mockResolvedValue({
+      id: 'mock-payment-intent-id',
+      latest_charge: 'mock-charge-id'
+    }),
+    update: jest.fn().mockResolvedValue({
+      id: 'mock-payment-intent-id',
+      receipt_email: 'test@example.com'
+    }),
+    cancel: jest.fn().mockResolvedValue({
+      id: 'mock-payment-intent-id',
+      status: 'canceled'
+    })
+  },
+  charges: {
+    retrieve: jest.fn().mockResolvedValue({
+      id: 'mock-charge-id',
+      receipt_url: 'https://pay.stripe.com/receipts/mock',
+      receipt_number: 'MOCK-123'
+    })
+  },
+  invoices: {
+    create: jest.fn().mockResolvedValue({
+      id: 'mock-invoice-id',
+      number: 'INV-001'
+    }),
+    sendInvoice: jest.fn().mockResolvedValue({
+      id: 'mock-invoice-id',
+      hosted_invoice_url: 'https://invoice.stripe.com/mock',
+      number: '001'
+    })
+  },
+  invoiceItems: {
+    create: jest.fn().mockResolvedValue({
+      id: 'mock-invoice-item-id'
+    })
   },
   webhooks: {
     constructEvent: jest.fn().mockImplementation((payload, signature, _secret) => {

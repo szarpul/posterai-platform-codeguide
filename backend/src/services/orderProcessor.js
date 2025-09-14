@@ -1,6 +1,7 @@
 const stripe = require('../lib/stripe');
 const supabase = require('../lib/supabase');
 const PrintingManager = require('./printingManager');
+const ReceiptService = require('./receiptService');
 
 const POSTER_PRICES = {
   'A4': {
@@ -78,10 +79,17 @@ class OrderProcessor {
       throw new Error('Order not found');
     }
 
-    // Create Stripe PaymentIntent
+    // Get user email for receipt
+    const { data: user, error: userError } = await supabase.auth.admin.getUserById(order.user_id);
+    if (userError || !user.user?.email) {
+      throw new Error('User email not found');
+    }
+
+    // Create Stripe PaymentIntent with receipt_email
     const paymentIntent = await stripe.paymentIntents.create({
       amount: order.amount_cents,
-      currency: 'usd',
+      currency: 'pln', // Use PLN for Polish account
+      receipt_email: user.user.email, // This will automatically send receipt
       metadata: {
         orderId: order.id,
         draftId: order.draft_id,
@@ -115,8 +123,23 @@ class OrderProcessor {
     }
 
     try {
+      console.log('🔄 Processing payment success for order:', orderId);
+
+      // First, get the order details
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .select('*, drafts(*)')
+        .eq('id', orderId)
+        .single();
+
+      if (orderError || !order) {
+        throw new Error(`Order not found: ${orderId}`);
+      }
+
+      console.log('📋 Found order:', { id: order.id, status: order.status, userId: order.user_id });
+
       // Update order status to paid
-      const { error } = await supabase
+      const { error: updateError } = await supabase
         .from('orders')
         .update({ 
           status: 'paid',
@@ -124,11 +147,45 @@ class OrderProcessor {
         })
         .eq('id', orderId);
 
-      if (error) {
+      if (updateError) {
         throw new Error('Failed to update order status');
       }
 
       console.log('✅ Order status updated to paid:', orderId);
+
+      // Get customer email for receipt
+      console.log('🔍 Attempting to get user email for user ID:', order.user_id);
+      
+      let receiptSent = false;
+      let userEmail = null;
+      
+      try {
+        const { data: user, error: userError } = await supabase.auth.admin.getUserById(order.user_id);
+        
+        if (userError) {
+          console.error('❌ Error getting user:', userError);
+          console.warn('⚠️  Customer email not found, skipping receipt');
+        } else if (!user.user?.email) {
+          console.warn('⚠️  User found but no email:', user);
+          console.warn('⚠️  Customer email not found, skipping receipt');
+        } else {
+          console.log('📧 Found customer email:', user.user.email);
+          userEmail = user.user.email;
+          
+          // Send payment receipt
+          try {
+            await ReceiptService.sendPaymentReceipt(orderId, user.user.email, order);
+            console.log('📧 Payment receipt sent successfully');
+            receiptSent = true;
+          } catch (receiptError) {
+            console.error('⚠️  Receipt sending failed, but continuing with order processing:', receiptError.message);
+            // Don't fail the entire order process if receipt fails
+          }
+        }
+      } catch (userLookupError) {
+        console.error('❌ Exception during user lookup:', userLookupError);
+        console.warn('⚠️  Customer email lookup failed, skipping receipt');
+      }
 
       // Create print job
       const printJob = await PrintingManager.createPrintJob(orderId);
@@ -136,7 +193,9 @@ class OrderProcessor {
       return { 
         orderId,
         printJobId: printJob.id,
-        status: 'in_production'
+        status: 'in_production',
+        receiptSent: receiptSent,
+        userEmail: userEmail
       };
     } catch (error) {
       console.error('Payment success handling error:', error);

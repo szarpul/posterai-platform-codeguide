@@ -7,21 +7,21 @@ const supabase = require('../lib/supabase');
 // Generate image from questionnaire options
 router.post('/generate', requireAuth, async (req, res) => {
   try {
-    const { style, theme, mood, colorPalette, subject } = req.body;
+    const { theme, palette, style, mainElement, occasion, emotion, inspirationKeyword } = req.body;
     
-    // Validate required fields
-    if (!style || !theme || !mood || !colorPalette || !subject) {
+    // Validate required fields (inspirationKeyword is optional)
+    if (!theme || !palette || !style || !mainElement || !occasion || !emotion) {
       return res.status(400).json({ 
         error: 'Missing required options',
-        details: 'All questionnaire fields (style, theme, mood, colorPalette, subject) are required'
+        details: 'Required fields: theme, palette, style, mainElement, occasion, emotion. inspirationKeyword is optional.'
       });
     }
 
-    console.log(`Generating image with options: ${JSON.stringify({ style, theme, mood, colorPalette, subject })}`);
+    console.log(`Generating image with options: ${JSON.stringify({ theme, palette, style, mainElement, occasion, emotion, inspirationKeyword })}`);
     
     // Generate image
     const { imageUrl, prompt } = await ImageGeneratorService.generateImage({
-      style, theme, mood, colorPalette, subject
+      theme, palette, style, mainElement, occasion, emotion, inspirationKeyword
     });
 
     // Return just the image URL and prompt

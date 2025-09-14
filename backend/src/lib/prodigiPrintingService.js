@@ -2,9 +2,9 @@ const axios = require('axios');
 
 // Prodigi SKU mapping based on session testing
 const PRODIGI_SKUS = {
-  'A4': 'GLOBAL-CFPM-A4',
-  'A3': 'GLOBAL-CFPM-A3', 
-  'A2': 'GLOBAL-CFPM-A2'
+  'A4': 'GLOBAL-BLP-A4',
+  'A3': 'GLOBAL-BLP-A3',
+  'A2': 'GLOBAL-BLP-A2'
 };
 
 class ProdigiPrintingServiceClient {
@@ -45,9 +45,6 @@ class ProdigiPrintingServiceClient {
           sku: sku,
           copies: 1,
           sizing: 'fillPrintArea',
-          attributes: {
-            color: 'white' // Prodigi requires this attribute
-          },
           assets: [{
             printArea: 'default',
             url: imageUrl
@@ -82,7 +79,7 @@ class ProdigiPrintingServiceClient {
     } catch (error) {
       console.error('Prodigi createPrintJob error:', error.response?.data || error.message);
       console.error('📤 Payload that failed:', JSON.stringify(orderData, null, 2));
-      console.error('🔍 Validation failures:', error.response?.data?.failures);
+      console.error('🔍 Validation failures:', JSON.stringify(error.response?.data?.failures, null, 2));
       throw new Error(`Failed to create Prodigi order: ${error.response?.data?.message || error.message}`);
     }
   }
@@ -101,7 +98,7 @@ class ProdigiPrintingServiceClient {
       );
 
       const orderData = response.data.order; // Access the order object
-      
+
       // Map Prodigi status to our status
       const statusMapping = {
         'Created': 'created',
@@ -157,4 +154,4 @@ class ProdigiPrintingServiceClient {
   }
 }
 
-module.exports = new ProdigiPrintingServiceClient(); 
+module.exports = new ProdigiPrintingServiceClient();

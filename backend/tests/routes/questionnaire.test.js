@@ -15,20 +15,13 @@ describe('Questionnaire Routes', () => {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      // Check response structure
-      expect(response.body).toEqual(
-        expect.objectContaining({
-          style: expect.arrayContaining(['modern', 'vintage', 'abstract', 'minimalist']),
-          theme: expect.arrayContaining(['nature', 'urban', 'fantasy', 'futuristic']),
-          mood: expect.arrayContaining(['calm', 'energetic', 'mysterious', 'joyful']),
-          color: expect.arrayContaining(['warm', 'cool', 'monochrome', 'vibrant']),
-          subject: expect.arrayContaining(['landscapes', 'portraits', 'animals', 'architecture'])
-        })
-      );
-
-      // Check that arrays are not empty
-      Object.values(response.body).forEach(optionArray => {
-        expect(optionArray.length).toBeGreaterThan(0);
+      expect(response.body).toEqual({
+        theme: expect.arrayContaining(['nature', 'urban', 'fantasy', 'futuristic']),
+        palette: expect.arrayContaining(['bright', 'dark', 'pastel', 'neutral']),
+        style: expect.arrayContaining(['realistic', 'cartoon', 'surreal', 'minimalist', 'flat_vector', 'vintage_retro']),
+        main_element: expect.arrayContaining(['photo_realistic', 'illustration_drawing', 'abstract_shapes']),
+        occasion: expect.arrayContaining(['home_decoration', 'office_workspace', 'kids_room', 'gift_special_event']),
+        emotion: expect.arrayContaining(['calm', 'energetic', 'nostalgic', 'inspirational'])
       });
     });
 

@@ -38,12 +38,9 @@ async function testOrderCreation() {
         }
       },
       items: [{
-        sku: 'GLOBAL-CFPM-A4',
+        sku: 'GLOBAL-BLP-11X14',
         copies: 1,
         sizing: 'fillPrintArea',
-        attributes: {
-          color: 'white'
-        },
         assets: [{
           printArea: 'default',
           url: 'https://pwintyimages.blob.core.windows.net/samples/stars/test-sample-grey.png'
@@ -78,7 +75,7 @@ async function testOrderCreation() {
   } catch (error) {
     console.error('❌ Order creation failed:');
     console.error('Status:', error.response?.status);
-    console.error('Data:', error.response?.data);
+    console.error('Data:', JSON.stringify(error.response?.data, null, 2));
     console.error('Message:', error.message);
     return null;
   }

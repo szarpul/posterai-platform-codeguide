@@ -11,11 +11,13 @@ export function useQuestionnaire() {
 export function QuestionnaireProvider({ children }) {
   const { user, session } = useAuth();
   const [responses, setResponses] = useState({
-    style: '',
     theme: '',
-    mood: '',
-    colorPalette: '',
-    subject: ''
+    palette: '',
+    style: '',
+    mainElement: '',
+    occasion: '',
+    emotion: '',
+    inspirationKeyword: ''
   });
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -31,7 +33,7 @@ export function QuestionnaireProvider({ children }) {
   };
 
   const nextStep = () => {
-    setCurrentStep(prev => Math.min(prev + 1, 4));
+    setCurrentStep(prev => Math.min(prev + 1, 6)); // Updated to 7 steps
   };
 
   const prevStep = () => {
@@ -40,11 +42,13 @@ export function QuestionnaireProvider({ children }) {
 
   const resetQuestionnaire = () => {
     setResponses({
-      style: '',
       theme: '',
-      mood: '',
-      colorPalette: '',
-      subject: ''
+      palette: '',
+      style: '',
+      mainElement: '',
+      occasion: '',
+      emotion: '',
+      inspirationKeyword: ''
     });
     setCurrentStep(0);
     setGeneratedImage(null);

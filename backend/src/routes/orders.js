@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
 const OrderProcessor = require('../services/orderProcessor');
+const ReceiptService = require('../services/receiptService');
 const supabase = require('../lib/supabase');
 
 // Create a new order
@@ -40,6 +41,10 @@ router.post('/:orderId/payment', requireAuth, async (req, res) => {
 
 // Webhook for Stripe events
 router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  console.log('🚀 WEBHOOK ENDPOINT CALLED!');
+  console.log('📥 Request body type:', typeof req.body);
+  console.log('📥 Request body length:', req.body ? req.body.length : 'undefined');
+  
   try {
     let event;
     
@@ -48,18 +53,54 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     event = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
     console.log('📥 Received webhook event:', event.type);
+    console.log('📋 Event data:', JSON.stringify(event.data.object, null, 2));
 
     switch (event.type) {
-      case 'payment_intent.succeeded':
-        console.log('💰 Processing payment success for order:', event.data.object.metadata?.orderId);
-        await OrderProcessor.handlePaymentSuccess(event.data.object);
+      case 'payment_intent.succeeded': {
+        const orderId = event.data.object.metadata?.orderId;
+        console.log('💰 Processing payment success for order:', orderId);
+        
+        if (!orderId) {
+          console.warn('⚠️  No orderId found in payment intent metadata');
+          console.warn('📋 Available metadata:', event.data.object.metadata);
+        } else {
+          const result = await OrderProcessor.handlePaymentSuccess(event.data.object);
+          console.log('✅ Payment success processing completed:', result);
+        }
         break;
-      // Add more event handlers as needed
+      }
+      
+      case 'charge.succeeded': {
+        const chargeOrderId = event.data.object.metadata?.orderId;
+        console.log('💰 Processing charge success for order:', chargeOrderId);
+        
+        if (!chargeOrderId) {
+          console.warn('⚠️  No orderId found in charge metadata');
+          console.warn('📋 Available metadata:', event.data.object.metadata);
+        } else {
+          // Create a payment intent object from the charge for consistency
+          const paymentIntentData = {
+            metadata: event.data.object.metadata,
+            id: event.data.object.payment_intent
+          };
+          const result = await OrderProcessor.handlePaymentSuccess(paymentIntentData);
+          console.log('✅ Charge success processing completed:', result);
+        }
+        break;
+      }
+      
+      case 'payment_intent.payment_failed':
+        console.log('❌ Payment failed for order:', event.data.object.metadata?.orderId);
+        break;
+      
+      default:
+        console.log('ℹ️  Unhandled event type:', event.type);
     }
 
     res.json({ received: true });
   } catch (error) {
-    console.error('Webhook error:', error);
+    console.error('❌ Webhook error:', error);
+    console.error('❌ Error stack:', error.stack);
     res.status(400).json({ error: error.message });
   }
 });
@@ -142,6 +183,66 @@ router.delete('/:orderId', requireAuth, async (req, res) => {
   } catch (error) {
     console.error('Cancel order error:', error);
     res.status(500).json({ error: 'Failed to cancel order' });
+  }
+});
+
+// Test receipt service
+router.get('/test-receipt', async (req, res) => {
+  try {
+    console.log('🧪 Testing receipt service...');
+    const testResult = await ReceiptService.testReceiptService();
+    res.json(testResult);
+  } catch (error) {
+    console.error('Receipt service test error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Send receipt for a specific order (for testing)
+router.post('/:orderId/send-receipt', requireAuth, async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { customerEmail } = req.body;
+
+    if (!customerEmail) {
+      return res.status(400).json({ error: 'Customer email is required' });
+    }
+
+    console.log('📧 Manually sending receipt for order:', orderId);
+    const receiptResult = await ReceiptService.sendPaymentReceipt(orderId, customerEmail);
+    
+    res.json({
+      message: 'Receipt sent successfully',
+      receipt: receiptResult
+    });
+  } catch (error) {
+    console.error('Send receipt error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get receipt details for an order
+router.get('/:orderId/receipt', requireAuth, async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const receiptDetails = await ReceiptService.getReceiptDetails(orderId);
+    res.json(receiptDetails);
+  } catch (error) {
+    console.error('Get receipt details error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Test receipt service (for debugging)
+router.post('/test-receipt', requireAuth, async (req, res) => {
+  try {
+    console.log('🧪 Testing receipt service...');
+    const testResult = await ReceiptService.testReceiptService();
+    console.log('🧪 Receipt service test result:', testResult);
+    res.json(testResult);
+  } catch (error) {
+    console.error('Receipt service test error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 

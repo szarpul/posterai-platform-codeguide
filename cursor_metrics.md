@@ -4,15 +4,12 @@
 
 The number of times rules is used as context
 
-<!-- see cursor_project_rules.mdc for usage -->
-
-- app_flow_document.mdc: 0
-- app_flowchart.mdc: 0
-- backend_structure_document.mdc: 0
-- cursor_project_rules.mdc: 0
-- frontend_guidelines_document.mdc: 0
-- implementation_plan.mdc: 1
-- project_requirements_document.mdc: 0
-- security_guideline_document.mdc: 0
-- tech_stack_document.mdc: 0
-- unified_project_document.mdc: 0
+*   cursor_project_rules.mdc: 1
+*   unified_project_documentation.mdc: 1
+*   implementation_plan.mdc: 1
+*   frontend_guidelines.mdc: 1
+*   backend_structure.mdc: 1
+*   app_flow.mdc: 1
+*   project_requirements.mdc: 1
+*   tech_stack.mdc: 1
+*   security_guidelines.mdc: 1

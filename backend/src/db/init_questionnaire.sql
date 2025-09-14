@@ -7,15 +7,7 @@ CREATE TABLE IF NOT EXISTS questionnaire_options (
     UNIQUE(type, value)
 );
 
--- Insert style options
-INSERT INTO questionnaire_options (type, value) VALUES
-    ('style', 'modern'),
-    ('style', 'vintage'),
-    ('style', 'abstract'),
-    ('style', 'minimalist')
-ON CONFLICT (type, value) DO NOTHING;
-
--- Insert theme options
+-- Insert theme options (keep existing)
 INSERT INTO questionnaire_options (type, value) VALUES
     ('theme', 'nature'),
     ('theme', 'urban'),
@@ -23,26 +15,43 @@ INSERT INTO questionnaire_options (type, value) VALUES
     ('theme', 'futuristic')
 ON CONFLICT (type, value) DO NOTHING;
 
--- Insert mood options
+-- Insert palette options (keep existing)
 INSERT INTO questionnaire_options (type, value) VALUES
-    ('mood', 'calm'),
-    ('mood', 'energetic'),
-    ('mood', 'mysterious'),
-    ('mood', 'joyful')
+    ('palette', 'bright'),
+    ('palette', 'dark'),
+    ('palette', 'pastel'),
+    ('palette', 'neutral')
 ON CONFLICT (type, value) DO NOTHING;
 
--- Insert color palette options
+-- Insert style options (updated)
 INSERT INTO questionnaire_options (type, value) VALUES
-    ('color', 'warm'),
-    ('color', 'cool'),
-    ('color', 'monochrome'),
-    ('color', 'vibrant')
+    ('style', 'realistic'),
+    ('style', 'cartoon'),
+    ('style', 'surreal'),
+    ('style', 'minimalist'),
+    ('style', 'flat_vector'),
+    ('style', 'vintage_retro')
 ON CONFLICT (type, value) DO NOTHING;
 
--- Insert subject options
+-- Insert main element options (new)
 INSERT INTO questionnaire_options (type, value) VALUES
-    ('subject', 'landscapes'),
-    ('subject', 'portraits'),
-    ('subject', 'animals'),
-    ('subject', 'architecture')
+    ('main_element', 'photo_realistic'),
+    ('main_element', 'illustration_drawing'),
+    ('main_element', 'abstract_shapes')
+ON CONFLICT (type, value) DO NOTHING;
+
+-- Insert occasion options (new)
+INSERT INTO questionnaire_options (type, value) VALUES
+    ('occasion', 'home_decoration'),
+    ('occasion', 'office_workspace'),
+    ('occasion', 'kids_room'),
+    ('occasion', 'gift_special_event')
+ON CONFLICT (type, value) DO NOTHING;
+
+-- Insert emotion options (updated)
+INSERT INTO questionnaire_options (type, value) VALUES
+    ('emotion', 'calm'),
+    ('emotion', 'energetic'),
+    ('emotion', 'nostalgic'),
+    ('emotion', 'inspirational')
 ON CONFLICT (type, value) DO NOTHING; 

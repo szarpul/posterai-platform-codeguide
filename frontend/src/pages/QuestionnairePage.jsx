@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuestionnaire } from '../contexts/QuestionnaireContext';
@@ -10,20 +10,8 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const QUESTIONNAIRE_STEPS = [
   {
-    field: 'style',
-    title: 'Choose your style',
-    description: 'Select the overall aesthetic for your poster',
-    icon: '🎨',
-    options: [
-      { value: 'modern', label: 'Modern', description: 'Clean lines and contemporary design', icon: '✨' },
-      { value: 'vintage', label: 'Vintage', description: 'Retro and nostalgic feel', icon: '📷' },
-      { value: 'abstract', label: 'Abstract', description: 'Non-representational and artistic', icon: '🎭' },
-      { value: 'minimalist', label: 'Minimalist', description: 'Simple and uncluttered', icon: '⚪' }
-    ]
-  },
-  {
     field: 'theme',
-    title: 'Select a theme',
+    title: 'Choose a theme',
     description: 'What should your poster be about?',
     icon: '🌍',
     options: [
@@ -34,44 +22,122 @@ const QUESTIONNAIRE_STEPS = [
     ]
   },
   {
-    field: 'mood',
-    title: 'Set the mood',
+    field: 'palette',
+    title: 'Pick a color palette',
+    description: 'What colors should dominate your design?',
+    icon: '🎨',
+    options: [
+      { value: 'bright', label: 'Bright', description: 'Ivory, soft yellow, sky blue', icon: '☀️' },
+      { value: 'dark', label: 'Dark', description: 'Charcoal, deep navy, burgundy', icon: '🌙' },
+      { value: 'pastel', label: 'Pastel', description: 'Blush pink, mint, lavender', icon: '🌸' },
+      { value: 'neutral', label: 'Neutral', description: 'Warm grey, sand, off-white', icon: '🪨' }
+    ]
+  },
+  {
+    field: 'style',
+    title: 'Choose your style',
+    description: 'Select the overall aesthetic for your poster',
+    icon: '🎨',
+    options: [
+      { value: 'realistic', label: 'Realistic', description: 'Photorealistic with fine texture', icon: '📷' },
+      { value: 'cartoon', label: 'Cartoon', description: 'Clean cartoon with bold shapes', icon: '✏️' },
+      { value: 'surreal', label: 'Surreal', description: 'Dreamlike and unexpected', icon: '🌙' },
+      { value: 'minimalist', label: 'Minimalist', description: 'Simple and uncluttered', icon: '⚪' },
+      { value: 'flat_vector', label: 'Flat Vector', description: 'Geometric forms and solid fills', icon: '🔷' },
+      { value: 'vintage_retro', label: 'Vintage/Retro', description: 'Retro vibe with film grain', icon: '📺' }
+    ]
+  },
+  {
+    field: 'mainElement',
+    title: 'Main element type',
+    description: 'What should be the primary visual focus?',
+    icon: '🎯',
+    options: [
+      { value: 'photo_realistic', label: 'Photo/Realistic', description: 'Photorealistic image focus', icon: '📸' },
+      { value: 'illustration_drawing', label: 'Illustration/Drawing', description: 'Artistic drawing style', icon: '✏️' },
+      { value: 'abstract_shapes', label: 'Abstract Shapes', description: 'Geometric patterns and forms', icon: '🔶' }
+    ]
+  },
+  {
+    field: 'occasion',
+    title: 'Where will it be used?',
+    description: 'What\'s the purpose of this poster?',
+    icon: '🏠',
+    options: [
+      { value: 'home_decoration', label: 'Home Decoration', description: 'Stylish interior design', icon: '🏡' },
+      { value: 'office_workspace', label: 'Office/Workspace', description: 'Professional environment', icon: '💼' },
+      { value: 'kids_room', label: 'Kids Room', description: 'Playful and child-friendly', icon: '🧸' },
+      { value: 'gift_special_event', label: 'Gift/Special Event', description: 'Thoughtful personal gift', icon: '🎁' }
+    ]
+  },
+  {
+    field: 'emotion',
+    title: 'Set the emotion',
     description: 'How should your poster make people feel?',
     icon: '💭',
     options: [
       { value: 'calm', label: 'Calm', description: 'Peaceful and serene', icon: '😌' },
       { value: 'energetic', label: 'Energetic', description: 'Dynamic and vibrant', icon: '⚡' },
-      { value: 'mysterious', label: 'Mysterious', description: 'Intriguing and enigmatic', icon: '🔮' },
-      { value: 'joyful', label: 'Joyful', description: 'Happy and uplifting', icon: '😊' }
+      { value: 'nostalgic', label: 'Nostalgic', description: 'Warm and sentimental', icon: '🕰️' },
+      { value: 'inspirational', label: 'Inspirational', description: 'Uplifting and awe-inspiring', icon: '✨' }
     ]
   },
   {
-    field: 'colorPalette',
-    title: 'Pick a color palette',
-    description: 'What colors should dominate your design?',
-    icon: '🎨',
-    options: [
-      { value: 'warm', label: 'Warm', description: 'Reds, oranges, and yellows', icon: '🔥' },
-      { value: 'cool', label: 'Cool', description: 'Blues, greens, and purples', icon: '❄️' },
-      { value: 'monochrome', label: 'Monochrome', description: 'Black, white, and grays', icon: '⚫' },
-      { value: 'vibrant', label: 'Vibrant', description: 'Bold and colorful mix', icon: '🌈' }
-    ]
-  },
-  {
-    field: 'subject',
-    title: 'Choose your subject',
-    description: 'What should be the main focus?',
-    icon: '🎯',
-    options: [
-      { value: 'landscapes', label: 'Landscapes', description: 'Natural or urban scenes', icon: '🏔️' },
-      { value: 'portraits', label: 'Portraits', description: 'People and characters', icon: '👤' },
-      { value: 'animals', label: 'Animals', description: 'Wildlife and creatures', icon: '🦁' },
-      { value: 'architecture', label: 'Architecture', description: 'Buildings and structures', icon: '��️' }
-    ]
+    field: 'inspirationKeyword',
+    title: 'Inspiration keyword',
+    description: 'Add a word or phrase that inspires you (optional)',
+    icon: '💡',
+    isTextInput: true,
+    placeholder: 'e.g., freedom, ocean waves, mountain peaks...'
   }
 ];
 
-function QuestionnaireStep({ step, value, selected, onChange, disabled }) {
+function QuestionnaireStep({ step, value, selected, onChange, disabled, isLastStep, onContinue, inputRef }) {
+  if (step.isTextInput) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+      >
+        <div className="text-center">
+          <div className="text-4xl mb-4">{step.icon}</div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">{step.title}</h2>
+          <p className="text-lg text-gray-600">{step.description}</p>
+        </div>
+
+        <div className="max-w-md mx-auto space-y-4">
+          <input
+            ref={inputRef}
+            type="text"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={step.placeholder}
+            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-300"
+            disabled={disabled}
+          />
+          <p className="text-sm text-gray-500 text-center">
+            This is optional - you can leave it blank if you prefer
+          </p>
+          
+          {/* Continue button for the last step */}
+          {isLastStep && (
+            <div className="pt-4">
+              <Button
+                onClick={onContinue}
+                disabled={disabled}
+                size="lg"
+                className="w-full"
+              >
+                Generate Poster
+              </Button>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -136,6 +202,7 @@ export default function QuestionnairePage() {
 
   const [selected, setSelected] = useState(null);
   const [stepKey, setStepKey] = useState(currentStep);
+  const inputRef = useRef(null);
 
   const currentStepData = QUESTIONNAIRE_STEPS[currentStep];
   const isLastStep = currentStep === QUESTIONNAIRE_STEPS.length - 1;
@@ -159,6 +226,37 @@ export default function QuestionnairePage() {
         setStepKey(currentStep + 1);
       }
     }, 400);
+  };
+
+  const handleTextInputChange = async (value) => {
+    updateResponse(currentStepData.field, value);
+    
+    // Don't auto-proceed for text input - let user click continue
+  };
+
+  const handleContinue = async () => {
+    if (isLastStep) {
+      if (!user) {
+        sessionStorage.setItem('questionnaire_responses', JSON.stringify(responses));
+        navigate('/login', { state: { returnTo: '/questionnaire' } });
+        return;
+      }
+      
+      // Get the current input value directly from the DOM to ensure we have the latest
+      let currentInputValue = '';
+      if (currentStepData.isTextInput && inputRef.current) {
+        currentInputValue = inputRef.current.value;
+      }
+      
+      // Ensure we have the most up-to-date responses before generating
+      const currentResponses = {
+        ...responses,
+        [currentStepData.field]: currentInputValue
+      };
+      
+      console.log('Generating image with responses:', currentResponses);
+      await generateImage(currentResponses);
+    }
   };
 
   const handleSaveAsDraft = async () => {
@@ -239,8 +337,11 @@ export default function QuestionnairePage() {
                     step={currentStepData}
                     value={responses[currentStepData.field]}
                     selected={selected}
-                    onChange={handleOptionSelect}
+                    onChange={currentStepData.isTextInput ? handleTextInputChange : handleOptionSelect}
                     disabled={isLastStep && loading}
+                    isLastStep={isLastStep}
+                    onContinue={handleContinue}
+                    inputRef={inputRef}
                   />
                 )}
               </motion.div>

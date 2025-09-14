@@ -7,21 +7,93 @@ const { v4: uuidv4 } = require('uuid');
 
 class ImageGeneratorService {
   static buildPrompt(options) {
-    const { style, theme, mood, colorPalette, subject } = options;
+    const { palette, style, mainElement, occasion, emotion, inspirationKeyword } = options;
     
-    // Build a more detailed prompt for better image quality
-    return `Create a high-quality, professional poster design with the following characteristics:
-    
-    Style: ${style} design language with clean compositions and balanced elements.
-    Theme: ${theme} incorporating relevant visual elements and symbolism.
-    Mood: A ${mood} atmosphere that evokes corresponding emotional responses.
-    Colors: Use a ${colorPalette} color palette that works harmoniously together.
-    Subject: ${subject} as the main focal point of the composition.
-    
-    The poster should have a clean look suitable for high-quality printing at large sizes.
-    Avoid any text or words in the image. Focus on creating a striking visual composition.
-    Make the image clearly readable from a distance with good contrast.
-    Ensure the design has enough margin space around the edges for printing.`;
+    // Style mappings
+    const styleMappings = {
+      'realistic': 'photorealistic illustration, fine texture, lifelike lighting',
+      'cartoon': 'clean cartoon, bold shapes, flat shading, thick outlines',
+      'surreal': 'surreal, dreamlike, unexpected juxtaposition, ethereal',
+      'minimalist': 'minimalist poster, large shapes, limited palette, strong negative space',
+      'flat_vector': 'flat vector style, geometric forms, solid fills, high contrast',
+      'vintage_retro': 'vintage poster, subtle film grain, retro vibe'
+    };
+
+    // Emotion mappings with lighting
+    const emotionMappings = {
+      'calm': {
+        mood: 'calm, serene mood',
+        lighting: 'soft diffuse light, pastel ambiance'
+      },
+      'energetic': {
+        mood: 'energetic, dynamic mood',
+        lighting: 'high contrast light, directional highlights'
+      },
+      'nostalgic': {
+        mood: 'nostalgic, warm mood',
+        lighting: 'golden hour glow, slight film grain'
+      },
+      'inspirational': {
+        mood: 'uplifting, awe-inspiring mood',
+        lighting: 'dramatic rim light, airy atmosphere'
+      }
+    };
+
+    // Palette mappings
+    const paletteMappings = {
+      'bright': 'bright palette — ivory, soft yellow, sky blue',
+      'dark': 'dark palette — charcoal, deep navy, burgundy',
+      'pastel': 'pastel palette — blush pink, mint, lavender',
+      'neutral': 'neutral palette — warm grey, sand, off-white'
+    };
+
+    // Main element mappings
+    const mainElementMappings = {
+      'photo_realistic': 'photo-centric composition, clear subject in foreground',
+      'illustration_drawing': 'illustration-centric, iconic silhouette',
+      'abstract_shapes': 'abstract geometric centerpiece, bold forms'
+    };
+
+    // Occasion mappings
+    const occasionMappings = {
+      'home_decoration': 'designed for a stylish home interior, modern decor',
+      'office_workspace': 'professional, motivational poster for office walls',
+      'kids_room': 'playful, child-friendly atmosphere, warm and inviting',
+      'gift_special_event': 'designed as a thoughtful, personal gift poster'
+    };
+
+    // Build prompt fragments
+    const styleFragment = styleMappings[style] || style;
+    const emotionData = emotionMappings[emotion] || { mood: emotion, lighting: 'natural lighting' };
+    const emotionFragment = emotionData.mood;
+    const lightingFragment = emotionData.lighting;
+    const paletteFragment = paletteMappings[palette] || palette;
+    const mainElementFragment = mainElementMappings[mainElement] || mainElement;
+    const occasionFragment = occasionMappings[occasion] || occasion;
+    const subjectFragment = inspirationKeyword
+      ? `inspired by "${inspirationKeyword}"`
+      : 'creative composition';
+
+    // Build final prompt using the template
+    const prompt = `
+          High-quality poster artwork, print-ready, full-bleed design.
+          
+          Occasion: ${occasionFragment}
+          Subject: ${subjectFragment} — artwork only, not a photo
+          Primary style: ${styleFragment}
+          Emotion/mood: ${emotionFragment}
+          Color palette: ${paletteFragment}
+          Composition: ${mainElementFragment}, edge-to-edge (full-bleed), strong focal point, balanced negative space
+          Lighting: ${lightingFragment}
+          Detail level: crisp details, smooth gradients, no noise, no blur
+          Quality intents: ultra sharp, print-grade, vector-like edges, consistent style
+          
+          Constraints: no frame, no border, no mat, no wall, no mockup, no interior scene, no perspective view, 
+          no hands holding it, no watermark, no UI, no text, no captions, no extra logos
+          Camera/Render: straight-on orthographic view, tightly cropped to artwork edges
+          `.trim();
+
+    return prompt;
   }
 
   static async generateWithRetry(options, maxRetries = 3) {
