@@ -1,32 +1,26 @@
 {
-  "name": "posterai-platform-codeguide",
+  "name": "posterai-platform",
   "version": "1.0.0",
-  "description": "AI-powered poster creation platform",
-  "main": "index.js",
+  "description": "AI Poster Platform - Full Stack",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky install",
-    "lint": "cd backend && eslint .",
+    "start": "cd backend && npm start",
+    "install:backend": "cd backend && npm install",
+    "build": "cd backend && npm install",
     "precommit": "lint-staged"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "eslint": "^8.0.0",
-    "husky": "^8.0.0",
-    "lint-staged": "^13.0.0",
-    "prettier": "^2.0.0"
+  "engines": {
+    "node": ">=16.0.0"
   },
   "lint-staged": {
-    "backend/**/*.js": "eslint --config backend/.eslintrc.json --resolve-plugins-relative-to backend"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run precommit"
-    }
-  },
-  "dependencies": {
-    "framer-motion": "^10.16.4"
+    "backend/**/*.js": [
+      "eslint --config backend/.eslintrc.json --resolve-plugins-relative-to backend --fix"
+    ],
+    "frontend/src/**/*.{js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   }
 }
