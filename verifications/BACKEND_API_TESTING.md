@@ -1,9 +1,11 @@
 # 🧪 Backend API Testing Guide
 
 ## Overview
+
 This guide provides step-by-step instructions to verify that all backend API endpoints, webhooks, and database operations are working correctly using automated test scripts.
 
 ## Prerequisites
+
 - Backend server running (`npm start` in `backend/` directory)
 - Supabase environment variables configured in `backend/.env`
 - All dependencies installed (`npm install` in `backend/`)
@@ -13,34 +15,43 @@ This guide provides step-by-step instructions to verify that all backend API end
 ### **Base URL**: `http://localhost:4000/api`
 
 ### **Health Check**
+
 ```http
 GET /health
 ```
+
 **Response**: `{"status":"ok"}`
 
 ### **Questionnaire Options**
+
 ```http
 GET /questionnaire/options
 ```
+
 **Response**: Available questionnaire choices (styles, themes, moods, etc.)
 
 ### **Image Generation**
+
 ```http
 POST /images/generate
 ```
+
 **Auth**: Required  
 **Body**: `{"responses": {"style": "modern", "theme": "nature", ...}}`
 
 ### **Drafts Management**
+
 ```http
 GET /drafts                    # Get user drafts
 POST /drafts                   # Create draft
 PUT /drafts/:id               # Update draft
 DELETE /drafts/:id            # Delete draft
 ```
+
 **Auth**: Required for all endpoints
 
 ### **Orders Management**
+
 ```http
 GET /orders                   # Get user orders
 POST /orders                  # Create order
@@ -48,12 +59,15 @@ GET /orders/:id              # Get single order
 DELETE /orders/:id           # Cancel order
 POST /orders/:id/payment     # Create payment intent
 ```
+
 **Auth**: Required for all endpoints
 
 ### **Webhooks**
+
 ```http
 POST /orders/webhook         # Stripe webhook handler
 ```
+
 **Auth**: None (uses Stripe signature validation)
 
 ## 🚀 Quick Start Commands
@@ -67,6 +81,7 @@ npm start
 ```
 
 **Expected Output**:
+
 ```
 Server running on port 4000
 Connected to Supabase
@@ -81,6 +96,7 @@ node scripts/test-complete-order-flow.js
 ```
 
 **Expected Output**:
+
 ```
 🔍 Checking backend health...
 ✅ Backend is running
@@ -143,12 +159,13 @@ node scripts/list-orders.js
 cd backend
 node scripts/test-complete-order-flow.js <USER_ID>
 
-# Test payment webhook only (requires existing order ID)
+# Test email service
 cd backend
-node scripts/test-payment-success.js <ORDER_ID>
+node scripts/test-email-service.js
 ```
 
-**Note**: 
+**Note**:
+
 - `test-complete-order-flow.js` works without any parameters - it creates a test user, draft, and order automatically
 - `test-payment-success.js` requires an existing order ID. Use `list-orders.js` first to get an order ID
 
@@ -164,6 +181,7 @@ The backend is working correctly when:
 - ✅ **Print Job Creation**: External service integration working
 
 **🎯 Single Command Validation:**
+
 ```bash
 cd backend && node scripts/test-complete-order-flow.js
 ```
@@ -174,4 +192,4 @@ cd backend && node scripts/test-complete-order-flow.js
 
 **Last Updated**: January 2024  
 **Version**: 2.0  
-**Status**: ✅ Backend API Testing Guide 
+**Status**: ✅ Backend API Testing Guide

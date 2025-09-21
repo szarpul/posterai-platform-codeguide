@@ -1,5 +1,6 @@
 const printingService = require('../lib/printingService');
 const supabase = require('../lib/supabase');
+const OrderProcessor = require('./orderProcessor');
 
 class PrintingManager {
   static async createPrintJob(orderId) {
@@ -104,9 +105,17 @@ class PrintingManager {
         throw new Error('Failed to update order status');
       }
 
+      const newStatus = statusMapping[status.status] || status.status;
+
+      // Send status update email to customer
+      await OrderProcessor.sendOrderStatusUpdateEmail(orderId, newStatus, {
+        trackingNumber: status.tracking_number,
+        estimatedDelivery: status.estimated_delivery_date
+      });
+
       return {
         orderId,
-        status: statusMapping[status.status],
+        status: newStatus,
         trackingNumber: status.tracking_number,
         estimatedDeliveryDate: status.estimated_delivery_date
       };

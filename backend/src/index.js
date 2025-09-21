@@ -13,6 +13,7 @@ const imageRoutes = require('./routes/images');
 const orderRoutes = require('./routes/orders');
 const draftsRoutes = require('./routes/drafts');
 const webhookRoutes = require('./routes/webhooks');
+const emailRoutes = require('./routes/email');
 
 // Middleware
 app.use(
@@ -29,6 +30,7 @@ app.use('/api/images', imageRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/drafts', draftsRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/email', emailRoutes);
 
 // Special handling for Stripe webhook
 app.use('/api/orders/webhook', express.raw({ type: 'application/json' }));

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const prodigiService = require('../lib/prodigiPrintingService');
 const supabase = require('../lib/supabase');
+const OrderProcessor = require('../services/orderProcessor');
 
 // Prodigi webhook handler
 router.post('/prodigi', async (req, res) => {
@@ -102,6 +103,12 @@ async function handleOrderStatusUpdate(webhookData) {
       newStatus: newStatus,
       prodigiStage: stage
     });
+
+    // Send status update email to customer
+    await OrderProcessor.sendOrderStatusUpdateEmail(order.id, newStatus, {
+      trackingNumber: webhookData.trackingNumber,
+      estimatedDelivery: webhookData.estimatedDelivery
+    });
   } catch (error) {
     console.error('❌ Error handling order status update:', error);
   }
@@ -142,6 +149,12 @@ async function handleOrderShipped(webhookData) {
       prodigiOrderId: orderId,
       ourOrderId: order.id
     });
+
+    // Send shipped notification email to customer
+    await OrderProcessor.sendOrderStatusUpdateEmail(order.id, 'shipped', {
+      trackingNumber: webhookData.trackingNumber,
+      estimatedDelivery: webhookData.estimatedDelivery
+    });
   } catch (error) {
     console.error('❌ Error handling order shipped:', error);
   }
@@ -181,6 +194,11 @@ async function handleOrderDelivered(webhookData) {
     console.log('📦 Order delivered from Prodigi webhook:', {
       prodigiOrderId: orderId,
       ourOrderId: order.id
+    });
+
+    // Send delivered notification email to customer
+    await OrderProcessor.sendOrderStatusUpdateEmail(order.id, 'delivered', {
+      trackingNumber: webhookData.trackingNumber
     });
   } catch (error) {
     console.error('❌ Error handling order delivered:', error);

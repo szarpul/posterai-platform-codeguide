@@ -2,6 +2,7 @@ const stripe = require('../lib/stripe');
 const supabase = require('../lib/supabase');
 const PrintingManager = require('./printingManager');
 const ReceiptService = require('./receiptService');
+const EmailService = require('./emailService');
 
 const POSTER_PRICES = {
   'A4': {
@@ -64,7 +65,84 @@ class OrderProcessor {
       throw new Error(`Failed to create order: ${orderError.message}`);
     }
 
+    // Send order confirmation email
+    await this.sendOrderConfirmationEmail(order, draft, userId);
+
     return order;
+  }
+
+  /**
+   * Send order confirmation email
+   * @param {Object} order - Order object
+   * @param {Object} draft - Draft object
+   * @param {string} userId - User ID
+   * @returns {Promise<void>}
+   */
+  static async sendOrderConfirmationEmail(order, draft, userId) {
+    try {
+      console.log('📧 Sending order confirmation email for order:', order.id);
+      
+      // Get user email
+      const { data: user, error: userError } = await supabase.auth.admin.getUserById(userId);
+      
+      if (userError || !user.user?.email) {
+        console.warn('⚠️  User email not found, skipping order confirmation email');
+        return;
+      }
+
+      // Prepare order data with draft information
+      const orderWithDraft = {
+        ...order,
+        drafts: draft
+      };
+      
+      await EmailService.sendOrderConfirmation(order.id, user.user.email, orderWithDraft);
+      console.log('✅ Order confirmation email sent successfully');
+      
+    } catch (emailError) {
+      console.error('⚠️  Order confirmation email failed, but continuing with order creation:', emailError.message);
+      // Don't fail the entire order creation if email fails
+    }
+  }
+
+  /**
+   * Send order status update email
+   * @param {string} orderId - Order ID
+   * @param {string} status - New status
+   * @param {Object} additionalData - Additional data (tracking number, etc.)
+   * @returns {Promise<void>}
+   */
+  static async sendOrderStatusUpdateEmail(orderId, status, additionalData = {}) {
+    try {
+      console.log('📧 Sending order status update email for order:', orderId);
+      
+      // Get order details
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .select('*, drafts(*)')
+        .eq('id', orderId)
+        .single();
+
+      if (orderError || !order) {
+        console.warn('⚠️  Order not found, skipping status update email');
+        return;
+      }
+
+      // Get user email
+      const { data: user, error: userError } = await supabase.auth.admin.getUserById(order.user_id);
+      
+      if (userError || !user.user?.email) {
+        console.warn('⚠️  User email not found, skipping status update email');
+        return;
+      }
+
+      await EmailService.sendOrderStatusUpdate(orderId, user.user.email, status, additionalData);
+      console.log('✅ Order status update email sent successfully');
+      
+    } catch (emailError) {
+      console.error('⚠️  Order status update email failed:', emailError.message);
+      // Don't fail the entire process if email fails
+    }
   }
 
   static async createPaymentIntent(orderId) {
