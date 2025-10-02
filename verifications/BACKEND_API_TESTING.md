@@ -159,9 +159,12 @@ node scripts/list-orders.js
 cd backend
 node scripts/test-complete-order-flow.js <USER_ID>
 
-# Test email service
+# Test email service (dynamic based on EMAIL_VENDOR)
 cd backend
 node scripts/test-email-service.js
+
+# Test Resend email service specifically
+node scripts/test-resend-service.js
 ```
 
 **Note**:
