@@ -9,7 +9,7 @@ A web platform for creating and ordering AI-generated posters.
 - Supabase account
 - OpenAI API key
 - Stripe account (for payments)
-- SendGrid account (for emails)
+- Resend account (for emails)
 
 ## Setup Instructions
 
@@ -50,8 +50,18 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 OPENAI_API_KEY=your_openai_api_key
 STRIPE_SECRET_KEY=your_stripe_secret_key
 STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
-SENDGRID_API_KEY=your_sendgrid_api_key
-SENDGRID_FROM_EMAIL=your_verified_email@domain.com
+
+# Email Service Configuration (Resend - Default)
+EMAIL_VENDOR=resend
+RESEND_API_KEY=your_resend_api_key
+RESEND_FROM_EMAIL=your-verified-email@domain.com
+
+# Alternative: Gmail Configuration
+# EMAIL_VENDOR=gmail
+# GMAIL_USER=your-email@gmail.com
+# GMAIL_FROM_EMAIL=your-email@gmail.com
+# GMAIL_APP_PASSWORD=your-16-character-app-password
+
 USE_STUB_IMAGE_GENERATION=true  # Set to 'true' to use stubbed image generation instead of OpenAI
 ```
 
@@ -76,6 +86,56 @@ The application will be available at:
 - Frontend: http://localhost:3000
 - Backend: http://localhost:4000
 
+## Email Service Setup
+
+### Resend Setup (Recommended)
+
+1. **Create Resend Account**:
+
+   - Go to [resend.com](https://resend.com) and sign up
+   - Verify your email address
+
+2. **Add Your Domain** (Optional but recommended):
+
+   - Go to Resend Dashboard → Domains
+   - Click "Add Domain" and enter your domain (e.g., `yourdomain.com`)
+   - Add the required DNS records to verify domain ownership
+   - Wait for verification (5-30 minutes)
+
+3. **Generate API Key**:
+
+   - Go to Resend Dashboard → API Keys
+   - Click "Create API Key"
+   - Copy the API key (starts with `re_`)
+
+4. **Add to .env**:
+
+   ```
+   EMAIL_VENDOR=resend
+   RESEND_API_KEY=re_your_api_key_here
+   RESEND_FROM_EMAIL=your-verified-email@domain.com
+   ```
+
+5. **Test Email Service**:
+   ```bash
+   cd backend
+   node scripts/test-resend-service.js
+   ```
+
+### Alternative Email Services
+
+#### Gmail SMTP Setup
+
+1. Enable 2-Factor Authentication on Gmail
+2. Generate App Password (16-character code)
+3. Add to .env:
+   ```
+   EMAIL_VENDOR=gmail
+   GMAIL_USER=your-email@gmail.com
+   GMAIL_FROM_EMAIL=your-email@gmail.com
+   GMAIL_APP_PASSWORD=your-16-character-app-password
+   ```
+
 ## Environment Variables
 
 ### Frontend
@@ -91,8 +151,8 @@ The application will be available at:
 - `OPENAI_API_KEY`: Your OpenAI API key
 - `STRIPE_SECRET_KEY`: Your Stripe secret key
 - `STRIPE_WEBHOOK_SECRET`: Your Stripe webhook secret
-- `SENDGRID_API_KEY`: Your SendGrid API key
-- `SENDGRID_FROM_EMAIL`: Your verified sender email address
+- `RESEND_API_KEY`: Your Resend API key
+- `RESEND_FROM_EMAIL`: Your verified sender email address
 - `USE_STUB_IMAGE_GENERATION`: Set to 'true' to use stubbed image generation instead of OpenAI
 
 ## Getting the Required Keys
@@ -113,10 +173,11 @@ The application will be available at:
    - Get test keys from dashboard
    - Set up webhook for local development using Stripe CLI
 
-4. SendGrid:
-   - Sign up at https://sendgrid.com
-   - Get API key from settings
-   - Verify sender email address
+4. Resend:
+   - Sign up at https://resend.com
+   - Generate API key from dashboard
+   - Optionally add and verify custom domain
+   - Test setup: `node scripts/test-resend-service.js`
 
 ## Testing
 

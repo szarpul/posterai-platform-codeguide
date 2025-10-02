@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const EmailService = require('../services/emailService');
 
+// Create email service instance
+const emailService = new EmailService();
+
 // Test order confirmation email endpoint
 router.post('/test-order-confirmation', async (req, res) => {
   try {
@@ -15,7 +18,7 @@ router.post('/test-order-confirmation', async (req, res) => {
 
     console.log('📧 Testing order confirmation email...');
     
-    const result = await EmailService.sendOrderConfirmation(orderId, customerEmail);
+    const result = await emailService.sendOrderConfirmation(orderId, customerEmail);
     
     if (result.success) {
       res.json({

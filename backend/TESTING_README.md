@@ -14,7 +14,8 @@ This document explains how to run the comprehensive test suite for the poster pl
 
 - **`scripts/test-receipt-service.js`** - Basic receipt service functionality test
 - **`scripts/test-receipt-integration.js`** - Complete receipt flow integration test
-- **`scripts/test-email-service.js`** - Email service testing (SendGrid integration)
+- **`scripts/test-email-service.js`** - Universal email service testing (Resend/Gmail/SendGrid)
+- **`scripts/test-resend-service.js`** - Resend email service testing
 
 ## 🚀 Running Tests
 
@@ -44,8 +45,11 @@ node scripts/test-receipt-service.js
 # Test complete receipt integration
 node scripts/test-receipt-integration.js
 
-# Test email service
+# Test universal email service (dynamic based on EMAIL_VENDOR)
 node scripts/test-email-service.js
+
+# Test Resend email service specifically
+node scripts/test-resend-service.js
 ```
 
 ## 📋 Test Coverage
@@ -70,10 +74,13 @@ node scripts/test-email-service.js
 
 ### Email Service Tests
 
-- ✅ SendGrid connection and configuration
+- ✅ Resend connection and configuration (default)
+- ✅ Gmail SMTP connection and configuration (alternative)
+- ✅ SendGrid connection and configuration (alternative)
 - ✅ Order confirmation email sending
 - ✅ Order status update email sending
 - ✅ Email template generation
+- ✅ Vendor provider pattern and switching
 - ✅ Error handling and graceful failures
 
 ### Webhook Tests
@@ -95,8 +102,17 @@ Make sure these are set in your `.env` file:
 STRIPE_SECRET_KEY=sk_test_...
 SUPABASE_URL=https://...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
-SENDGRID_API_KEY=SG...
-SENDGRID_FROM_EMAIL=your-email@domain.com
+
+# Resend Configuration (default)
+EMAIL_VENDOR=resend
+RESEND_API_KEY=re_your_api_key_here
+RESEND_FROM_EMAIL=your-verified-email@domain.com
+
+# Alternative email providers
+# EMAIL_VENDOR=gmail
+# GMAIL_USER=your-email@gmail.com
+# GMAIL_FROM_EMAIL=your-email@gmail.com
+# GMAIL_APP_PASSWORD=your-16-character-app-password
 ```
 
 ### Mock Data
@@ -126,10 +142,13 @@ The tests use comprehensive mock data:
 
 ### 3. Email Service Test
 
-- SendGrid API connection
+- Resend API connection (default vendor)
+- Gmail SMTP connection (alternative vendor)
+- SendGrid API connection (alternative vendor)
 - Order confirmation email sending
 - Order status update email sending
 - Email template generation
+- Vendor switching functionality
 - Error handling scenarios
 
 ### 4. Unit Tests

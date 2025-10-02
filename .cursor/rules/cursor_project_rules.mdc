@@ -142,6 +142,7 @@ Update this rule if user requested changes to the project requirement, etc.
 *   Separate frontend (`src/`) and backend (`backend/`) directories clearly.
 *   Enforce version-specific conventions (e.g., React 18 Hooks, Node.js ES modules).
 *   Never mix routing paradigms (e.g., no Next.js pages in a React Router project).
+*   When running command in terminal, always execute one command at once
 
 ## Rules Metrics
 

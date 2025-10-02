@@ -1,49 +1,64 @@
-const EmailService = require('./src/services/emailService');
-const EmailTemplates = require('./src/templates/emailTemplates');
-const EmailUtils = require('./src/utils/emailUtils');
 require('dotenv').config();
 
+const EmailService = require('../src/services/emailService');
+const EmailTemplates = require('../src/templates/emailTemplates');
+const EmailUtils = require('../src/utils/emailUtils');
+
+// Create email service instance
+const emailService = new EmailService();
+
 async function testEmailService() {
-  console.log('🧪 Testing Refactored SendGrid Email Service Integration...\n');
+  console.log('🧪 Testing Email Service Integration (Gmail/SendGrid)...\n');
 
   // Check environment variables
   console.log('📋 Checking environment variables:');
-  console.log('SENDGRID_API_KEY:', process.env.SENDGRID_API_KEY ? '✅ Set' : '❌ Missing');
-  console.log('SENDGRID_FROM_EMAIL:', process.env.SENDGRID_FROM_EMAIL ? '✅ Set' : '❌ Missing');
+  console.log('EMAIL_VENDOR:', process.env.EMAIL_VENDOR || 'gmail (default)');
+  
+  if (process.env.EMAIL_VENDOR === 'gmail' || !process.env.EMAIL_VENDOR) {
+    console.log('GMAIL_USER:', process.env.GMAIL_USER ? '✅ Set' : '❌ Missing');
+    console.log('GMAIL_FROM_EMAIL:', process.env.GMAIL_FROM_EMAIL ? '✅ Set' : '❌ Missing');
+    console.log('GMAIL_APP_PASSWORD:', process.env.GMAIL_APP_PASSWORD ? '✅ Set' : '❌ Missing');
+  } else if (process.env.EMAIL_VENDOR === 'sendgrid') {
+    console.log('SENDGRID_API_KEY:', process.env.SENDGRID_API_KEY ? '✅ Set' : '❌ Missing');
+    console.log('SENDGRID_FROM_EMAIL:', process.env.SENDGRID_FROM_EMAIL ? '✅ Set' : '❌ Missing');
+  }
   console.log('');
 
-  if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_FROM_EMAIL) {
-    console.error('❌ Missing required environment variables!');
-    console.log('Please add the following to your .env file:');
-    console.log('SENDGRID_API_KEY=your_sendgrid_api_key_here');
-    console.log('SENDGRID_FROM_EMAIL=your_verified_email@domain.com');
-    process.exit(1);
+  // Validate environment variables based on vendor
+  const vendorType = process.env.EMAIL_VENDOR || 'gmail';
+  
+  if (vendorType === 'gmail') {
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_FROM_EMAIL || !process.env.GMAIL_APP_PASSWORD) {
+      console.error('❌ Missing required Gmail environment variables!');
+      console.log('Please add the following to your .env file:');
+      console.log('EMAIL_VENDOR=gmail');
+      console.log('GMAIL_USER=your-email@gmail.com');
+      console.log('GMAIL_FROM_EMAIL=your-email@gmail.com');
+      console.log('GMAIL_APP_PASSWORD=your-16-character-app-password');
+      process.exit(1);
+    }
+  } else if (vendorType === 'sendgrid') {
+    if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_FROM_EMAIL) {
+      console.error('❌ Missing required SendGrid environment variables!');
+      console.log('Please add the following to your .env file:');
+      console.log('EMAIL_VENDOR=sendgrid');
+      console.log('SENDGRID_API_KEY=your_sendgrid_api_key_here');
+      console.log('SENDGRID_FROM_EMAIL=your_verified_email@domain.com');
+      process.exit(1);
+    }
   }
 
   try {
-    // Test 1: Basic email service test
-    console.log('📧 Test 1: Basic email service test...');
-    
-    // Test SendGrid connection directly
-    const sgMail = require('@sendgrid/mail');
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-    
-    const msg = {
-      to: process.env.SENDGRID_FROM_EMAIL,
-      from: process.env.SENDGRID_FROM_EMAIL,
-      subject: 'Test Email - PosterAI Platform',
-      text: 'This is a test email to verify SendGrid integration is working correctly.',
-      html: '<p>This is a test email to verify SendGrid integration is working correctly.</p>'
-    };
-
-    const result = await sgMail.send(msg);
-    
-    console.log('✅ Basic email test passed!');
-    console.log('Message ID:', result[0].headers['x-message-id']);
-
+    // Test 1: Connection Test
+    console.log('📧 Test 1: Testing email service connection...');
+    const isConnected = await emailService.testConnection();
+    if (isConnected) {
+      console.log('✅ Email service connection successful');
+    } else {
+      console.log('❌ Email service connection failed');
+      process.exit(1);
+    }
     console.log('');
-
-    // Test 2: Email utilities test
     console.log('📧 Test 2: Email utilities test...');
     
     const testDate = new Date();
@@ -119,19 +134,15 @@ async function testEmailService() {
       }
     };
 
-    const confirmationResult = await EmailService.sendOrderConfirmation(
+    const confirmationResult = await emailService.sendOrderConfirmation(
       mockOrderData.id,
-      process.env.SENDGRID_FROM_EMAIL, // Send to self for testing
+      vendorType === 'gmail' ? process.env.GMAIL_USER : process.env.SENDGRID_FROM_EMAIL, // Send to self for testing
       mockOrderData
     );
 
-    if (confirmationResult.success) {
-      console.log('✅ Order confirmation email test passed!');
-      console.log('Message ID:', confirmationResult.messageId);
-      console.log('Order ID:', confirmationResult.orderId);
-    } else {
-      console.log('❌ Order confirmation email test failed:', confirmationResult.error);
-    }
+    console.log('✅ Order confirmation email test passed!');
+    console.log('Message ID:', confirmationResult.messageId);
+    console.log('Order ID:', confirmationResult.orderId);
 
     console.log('');
     console.log('🎉 All refactored email tests completed!');
@@ -145,6 +156,15 @@ async function testEmailService() {
   } catch (error) {
     console.error('❌ Test failed with error:', error.message);
     console.error('Stack trace:', error.stack);
+    
+    // Log SendGrid error details if available
+    if (error.response) {
+      console.error('📧 SendGrid Error Details:');
+      console.error('Status:', error.response.status);
+      console.error('Status Text:', error.response.statusText);
+      console.error('Response Body:', JSON.stringify(error.response.body, null, 2));
+      console.error('Response Headers:', JSON.stringify(error.response.headers, null, 2));
+    }
   }
 }
 

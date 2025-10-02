@@ -216,6 +216,33 @@ PosterAI Platform
   }
 
   /**
+   * Create text version of order status update email
+   * @param {Object} data - Email data
+   * @returns {string} Text version
+   */
+  static createOrderStatusUpdateText(data) {
+    return `
+Aktualizacja statusu zamówienia #${data.orderId}
+
+Cześć ${data.customerName}!
+
+Mamy aktualizację dotyczącą Twojego zamówienia #${data.orderId}:
+
+Status zamówienia: ${this.getStatusText(data.status)}
+Data aktualizacji: ${data.updateDate}
+
+${data.trackingNumber ? `Numer śledzenia: ${data.trackingNumber}` : ''}
+
+${data.estimatedDelivery ? `Szacowana dostawa: ${data.estimatedDelivery}` : ''}
+
+Możesz śledzić status swojego zamówienia w swoim koncie lub skontaktować się z nami: support@posterai.pl
+
+Dziękujemy za wybór naszej platformy!
+PosterAI Platform
+`;
+  }
+
+  /**
    * Get status text in Polish
    * @param {string} status - Status code
    * @returns {string} Status text

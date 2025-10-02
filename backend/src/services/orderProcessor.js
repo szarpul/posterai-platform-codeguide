@@ -4,6 +4,9 @@ const PrintingManager = require('./printingManager');
 const ReceiptService = require('./receiptService');
 const EmailService = require('./emailService');
 
+// Create email service instance
+const emailService = new EmailService();
+
 const POSTER_PRICES = {
   'A4': {
     'matte': 2999, // $29.99
@@ -96,7 +99,7 @@ class OrderProcessor {
         drafts: draft
       };
       
-      await EmailService.sendOrderConfirmation(order.id, user.user.email, orderWithDraft);
+      await emailService.sendOrderConfirmation(order.id, user.user.email, orderWithDraft);
       console.log('✅ Order confirmation email sent successfully');
       
     } catch (emailError) {
@@ -136,7 +139,7 @@ class OrderProcessor {
         return;
       }
 
-      await EmailService.sendOrderStatusUpdate(orderId, user.user.email, status, additionalData);
+      await emailService.sendOrderStatusUpdate(orderId, user.user.email, status, additionalData);
       console.log('✅ Order status update email sent successfully');
       
     } catch (emailError) {
