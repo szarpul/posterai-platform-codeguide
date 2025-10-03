@@ -42,8 +42,34 @@ class GmailVendor extends EmailVendor {
     try {
       EmailUtils.logEmailAttempt('order_confirmation', customerEmail, 'Gmail');
       
-      const html = EmailTemplates.createOrderConfirmationHTML(orderData);
-      const text = EmailTemplates.createOrderConfirmationText(orderData);
+      // Process order data for email template
+      let processedData = orderData;
+      if (orderData && orderData.user_id) {
+        try {
+          // Get user data and prepare email data
+          const user = await EmailUtils.getUserById(orderData.user_id);
+          processedData = EmailUtils.prepareOrderEmailData(orderData, user);
+        } catch (userError) {
+          console.warn('⚠️  Could not fetch user data, using fallback data:', userError.message);
+          // Use fallback data if user fetch fails
+          processedData = {
+            orderId: orderData.id,
+            customerName: orderData.shipping_address?.name || 'Customer',
+            customerEmail: customerEmail,
+            posterSize: orderData.size,
+            posterFinish: orderData.finish,
+            posterImage: orderData.drafts?.image_url,
+            amount: EmailUtils.formatCurrency(orderData.amount_cents),
+            currency: 'PLN',
+            orderDate: EmailUtils.formatDate(orderData.created_at),
+            shippingAddress: orderData.shipping_address,
+            estimatedDelivery: EmailUtils.calculateEstimatedDelivery(orderData.created_at)
+          };
+        }
+      }
+      
+      const html = EmailTemplates.createOrderConfirmationHTML(processedData);
+      const text = EmailTemplates.createOrderConfirmationText(processedData);
       
       const mailOptions = {
         from: this.fromEmail,
