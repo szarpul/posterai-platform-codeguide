@@ -2,6 +2,24 @@
 
 A web platform for creating and ordering AI-generated posters.
 
+## ⚠️ PowerShell Command Syntax
+
+**Important**: This project runs on Windows PowerShell. Use semicolons (`;`) to separate commands, not `&&`:
+
+```powershell
+# ✅ CORRECT PowerShell syntax
+cd backend; npm install; npm start
+
+# ❌ WRONG - this is bash syntax
+cd backend && npm install && npm start
+
+# ✅ CORRECT - with environment variables
+cd backend; $env:NODE_ENV="development"; npm start
+
+# ✅ CORRECT - multiple commands
+cd frontend; npm install; npm start
+```
+
 ## Prerequisites
 
 - Node.js (v16 or higher)
@@ -15,14 +33,14 @@ A web platform for creating and ordering AI-generated posters.
 
 1. Clone the repository:
 
-```bash
+```powershell
 git clone <repository-url>
 cd posterai-platform
 ```
 
 2. Frontend Setup:
 
-```bash
+```powershell
 cd frontend
 npm install
 ```
@@ -36,7 +54,7 @@ REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 3. Backend Setup:
 
-```bash
+```powershell
 cd ../backend
 npm install
 ```
@@ -69,14 +87,14 @@ USE_STUB_IMAGE_GENERATION=true  # Set to 'true' to use stubbed image generation 
 
 In one terminal (frontend):
 
-```bash
+```powershell
 cd frontend
 npm start
 ```
 
 In another terminal (backend):
 
-```bash
+```powershell
 cd backend
 npm run dev
 ```
@@ -117,7 +135,7 @@ The application will be available at:
    ```
 
 5. **Test Email Service**:
-   ```bash
+   ```powershell
    cd backend
    node scripts/test-resend-service.js
    ```
@@ -185,7 +203,7 @@ The application will be available at:
 
 Run the comprehensive backend test to validate all functionality:
 
-```bash
+```powershell
 cd backend
 node test-complete-order-flow.js
 ```

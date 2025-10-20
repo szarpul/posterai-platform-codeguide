@@ -1,5 +1,6 @@
 const features = {
-  useStubImageGeneration: process.env.USE_STUB_IMAGE_GENERATION === 'true'
+  imageGenerationProvider: process.env.IMAGE_GENERATION_PROVIDER || 'openai',
+  leonardoModel: process.env.LEONARDO_MODEL || 'leonardo-phoenix-1.0'
 };
 
 module.exports = features; 

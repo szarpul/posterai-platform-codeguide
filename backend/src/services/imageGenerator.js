@@ -1,6 +1,4 @@
-const openai = require('../lib/openai');
-const features = require('../config/features');
-const StubImageGeneratorService = require('./stubImageGenerator');
+const ImageGeneratorFactory = require('./imageGeneration/ImageGeneratorFactory');
 const axios = require('axios');
 const supabase = require('../lib/supabase');
 const { v4: uuidv4 } = require('uuid');
@@ -76,6 +74,8 @@ class ImageGeneratorService {
 
     // Build final prompt using the template
     const prompt = `
+          IMPORTANT: Create ONLY the poster artwork itself, not a mockup or room scene.
+          
           High-quality poster artwork, print-ready, full-bleed design.
           
           Occasion: ${occasionFragment}
@@ -88,9 +88,15 @@ class ImageGeneratorService {
           Detail level: crisp details, smooth gradients, no noise, no blur
           Quality intents: ultra sharp, print-grade, vector-like edges, consistent style
           
-          Constraints: no frame, no border, no mat, no wall, no mockup, no interior scene, no perspective view, 
-          no hands holding it, no watermark, no UI, no text, no captions, no extra logos
-          Camera/Render: straight-on orthographic view, tightly cropped to artwork edges
+          STRICT CONSTRAINTS: 
+          - Create the poster artwork ONLY, not displayed on a wall or in a room
+          - No frame, no border, no mat, no wall background
+          - No mockup, no interior scene, no perspective view, no room setting
+          - No hands holding it, no furniture, no environment
+          - No watermark, no UI, no text, no captions, no extra logos
+          - Flat, direct view of the artwork itself as if viewing the print file
+          
+          Camera/Render: straight-on orthographic view, tightly cropped to artwork edges only
           `.trim();
 
     return prompt;
@@ -98,36 +104,26 @@ class ImageGeneratorService {
 
   static async generateWithRetry(options, maxRetries = 3) {
     let lastError = null;
+    let provider = null;
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const prompt = this.buildPrompt(options); // Restore dynamic prompt
+        const prompt = this.buildPrompt(options);
+        provider = ImageGeneratorFactory.getDefaultProvider();
         
-        console.log(`Attempt ${attempt}: Generating image with OpenAI`);
+        console.log(`Attempt ${attempt}: Generating image with ${provider.getProviderName()}`);
         console.log('Using prompt:', prompt);
         
-        const response = await openai.images.generate({
-          model: "dall-e-3",
-          prompt: prompt,
-          n: 1,
-          size: "1024x1024",
-          quality: "standard",    // Restore quality
-          style: "natural",       // Restore style
-          response_format: "url"  // Restore response_format
-        });
-        
-        if (!response.data?.[0]?.url) {
-          console.error('OpenAI response data:', JSON.stringify(response.data, null, 2));
-          throw new Error('No image URL in response');
-        }
+        const imageUrl = await provider.generateRawImage(prompt);
         
         return { 
-          imageUrl: response.data[0].url,
+          imageUrl,
           prompt 
         };
       } catch (error) {
         lastError = error;
-        console.error('OpenAI API error:', error);
+        const providerName = provider ? provider.getProviderName() : 'Unknown Provider';
+        console.error(`${providerName} API error:`, error);
         
         const isRateLimitError = error.message?.includes('rate limit') || error.status === 429;
         const isServerError = error.status >= 500 && error.status < 600;
@@ -148,17 +144,11 @@ class ImageGeneratorService {
 
   static async generateImage(options) {
     try {
-      // Use stubbed implementation if feature flag is enabled
-      if (features.useStubImageGeneration) {
-        console.log('Using stubbed image generation');
-        return StubImageGeneratorService.generateImage(options);
-      }
-
-      // Use real OpenAI implementation with retries
+      // Use real implementation with retries
       const { imageUrl, prompt } = await this.generateWithRetry(options);
       
       try {
-        // Download image from OpenAI (temporary URL)
+        // Download image from provider (temporary URL)
         const imageResponse = await axios.get(imageUrl, { 
           responseType: 'arraybuffer',
           timeout: 10000 // 10s timeout
@@ -193,9 +183,9 @@ class ImageGeneratorService {
         };
       } catch (storageError) {
         console.error('Storage error:', storageError);
-        // If storage fails, return the original OpenAI URL
+        // If storage fails, return the original provider URL
         // The URL is temporary but at least the user can see something
-        console.warn('Falling back to original OpenAI URL (temporary)');
+        console.warn('Falling back to original provider URL (temporary)');
         return { imageUrl, prompt };
       }
     } catch (error) {

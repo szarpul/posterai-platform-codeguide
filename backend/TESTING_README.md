@@ -1,6 +1,6 @@
 # Backend Testing Guide
 
-This document explains how to run the comprehensive test suite for the poster platform backend, including the newly implemented receipt functionality.
+This document explains how to run the comprehensive test suite for the poster platform backend, including the newly implemented receipt functionality and image generation provider switching.
 
 ## 🧪 Test Structure
 
@@ -8,6 +8,8 @@ This document explains how to run the comprehensive test suite for the poster pl
 
 - **`tests/routes/orders.test.js`** - Tests for order routes including receipt endpoints
 - **`tests/services/receiptService.test.js`** - Tests for the ReceiptService class
+- **`tests/services/imageGeneration/leonardoProvider.test.js`** - Tests for Leonardo.ai provider
+- **`tests/services/imageGeneration/imageGeneratorFactory.test.js`** - Tests for provider factory
 - **`tests/helpers.js`** - Mock implementations for testing
 
 ### Integration Tests
@@ -21,35 +23,37 @@ This document explains how to run the comprehensive test suite for the poster pl
 
 ### 1. Unit Tests (Jest)
 
-```bash
+```powershell
 # Run all tests
-npm test
+cd backend; npm test
 
 # Run specific test files
-npm test tests/routes/orders.test.js
-npm test tests/services/receiptService.test.js
+cd backend; npm test tests/routes/orders.test.js
+cd backend; npm test tests/services/receiptService.test.js
+cd backend; npm test tests/services/imageGeneration/leonardoProvider.test.js
+cd backend; npm test tests/services/imageGeneration/imageGeneratorFactory.test.js
 
 # Run tests with coverage
-npm test -- --coverage
+cd backend; npm test -- --coverage
 
 # Run tests in watch mode
-npm test -- --watch
+cd backend; npm test -- --watch
 ```
 
 ### 2. Integration Tests
 
-```bash
+```powershell
 # Test basic receipt service
-node scripts/test-receipt-service.js
+cd backend; node scripts/test-receipt-service.js
 
 # Test complete receipt integration
-node scripts/test-receipt-integration.js
+cd backend; node scripts/test-receipt-integration.js
 
 # Test universal email service (dynamic based on EMAIL_VENDOR)
-node scripts/test-email-service.js
+cd backend; node scripts/test-email-service.js
 
 # Test Resend email service specifically
-node scripts/test-resend-service.js
+cd backend; node scripts/test-resend-service.js
 ```
 
 ## 📋 Test Coverage
@@ -83,6 +87,16 @@ node scripts/test-resend-service.js
 - ✅ Vendor provider pattern and switching
 - ✅ Error handling and graceful failures
 
+### Image Generation Provider Tests
+
+- ✅ OpenAI provider functionality
+- ✅ Leonardo.ai provider functionality (with SDK)
+- ✅ Stub provider functionality
+- ✅ Provider factory pattern and switching
+- ✅ Environment-based provider selection
+- ✅ Error handling for each provider
+- ✅ Provider name and identification
+
 ### Webhook Tests
 
 - ✅ `payment_intent.succeeded` events
@@ -102,6 +116,16 @@ Make sure these are set in your `.env` file:
 STRIPE_SECRET_KEY=sk_test_...
 SUPABASE_URL=https://...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
+
+# Image Generation Provider (openai, leonardo, stub)
+IMAGE_GENERATION_PROVIDER=openai
+
+# OpenAI Configuration (when using openai provider)
+OPENAI_API_KEY=sk-your_openai_api_key_here
+
+# Leonardo.ai Configuration (when using leonardo provider)
+LEONARDO_API_KEY=your_leonardo_api_key_here
+LEONARDO_MODEL=leonardo-phoenix-1.0  # or lucid-realism-1.0
 
 # Resend Configuration (default)
 EMAIL_VENDOR=resend
@@ -159,7 +183,66 @@ The tests use comprehensive mock data:
 - Edge cases
 - Mock interactions
 
+## 🎨 Image Generation Provider Switching
+
+### Switching Between Providers
+
+You can easily switch between image generation providers using environment variables:
+
+```bash
+# Use OpenAI (default)
+IMAGE_GENERATION_PROVIDER=openai
+OPENAI_API_KEY=sk-your_openai_api_key_here
+
+# Use Leonardo.ai
+IMAGE_GENERATION_PROVIDER=leonardo
+LEONARDO_API_KEY=your_leonardo_api_key_here
+LEONARDO_MODEL=leonardo-phoenix-1.0  # or lucid-realism-1.0
+
+# Use Stub (for testing)
+IMAGE_GENERATION_PROVIDER=stub
+```
+
+### Testing Different Providers
+
+```powershell
+# Test with OpenAI
+cd backend; $env:IMAGE_GENERATION_PROVIDER="openai"; npm test tests/services/imageGeneration/
+
+# Test with Leonardo.ai
+cd backend; $env:IMAGE_GENERATION_PROVIDER="leonardo"; npm test tests/services/imageGeneration/
+
+# Test with Stub
+cd backend; $env:IMAGE_GENERATION_PROVIDER="stub"; npm test tests/services/imageGeneration/
+```
+
+### Leonardo.ai Setup
+
+1. **Get API Key**: Visit [Leonardo.ai API Access](https://app.leonardo.ai/api-access)
+2. **Subscribe to Plan**: Choose a plan that suits your needs
+3. **Create API Key**: Generate a new API key
+4. **Set Environment**: Add `LEONARDO_API_KEY` to your `.env` file
+5. **Choose Model**: Set `LEONARDO_MODEL` to `leonardo-phoenix-1.0` or `lucid-realism-1.0`
+
 ## 🚨 Common Test Issues
+
+### Image Generation Provider Errors
+
+```bash
+# If you see Leonardo.ai errors:
+❌ Leonardo.ai generation failed: API Error
+
+# Check your LEONARDO_API_KEY in .env
+# Ensure you have sufficient credits in your Leonardo.ai account
+```
+
+```bash
+# If you see OpenAI errors:
+❌ OpenAI API error: rate limit
+
+# Check your OPENAI_API_KEY in .env
+# Ensure you have sufficient credits in your OpenAI account
+```
 
 ### Stripe API Errors
 
