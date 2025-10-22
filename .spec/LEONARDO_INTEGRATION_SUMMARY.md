@@ -273,24 +273,29 @@ IMAGE_GENERATION_PROVIDER=leonardo
 LEONARDO_API_KEY=your_leonardo_api_key_here
 
 # Optional (defaults shown)
-LEONARDO_MODEL_ID=291be633-cb24-434f-898f-e662799936ad
+LEONARDO_MODEL_ID=05ce0082-2d80-4a2d-8653-4d1c85e2418e  # Kino 2.0
+LEONARDO_SCHEDULER=LEONARDO  # Leonardo's default scheduler
 ```
 
 ### Model Selection
 
-| Model                      | ID                                     |                        Best For |
-| -------------------------- | -------------------------------------- | ------------------------------: |
-| Leonardo Kino XL (DEFAULT) | `291be633-cb24-434f-898f-e662799936ad` | Cinematic, poster-style artwork |
-| Leonardo Phoenix           | `b24e16ff-06e3-43eb-8d33-4416c2d75876` |   Fast generation, good quality |
-| Leonardo Diffusion XL      | `1e60896f-3c26-4296-8ecc-53e2afecc132` |           High detail, artistic |
-| Leonardo Vision XL         | `6b645e3a-d64f-4341-a6d8-7a3690fbf042` |           Photorealistic images |
-| AlbedoBase XL              | `aa77f04e-3eec-4034-9c07-d0f619684628` |      Versatile, general purpose |
+| Model                       | ID                                     |                            Best For |
+| --------------------------- | -------------------------------------- | ----------------------------------: |
+| Leonardo Kino 2.0 (DEFAULT) | `05ce0082-2d80-4a2d-8653-4d1c85e2418e` | Latest, best poster artwork quality |
+| Leonardo Kino XL            | `291be633-cb24-434f-898f-e662799936ad` |     Cinematic, poster-style artwork |
+| Leonardo Phoenix            | `b24e16ff-06e3-43eb-8d33-4416c2d75876` |       Fast generation, good quality |
+| Leonardo Diffusion XL       | `1e60896f-3c26-4296-8ecc-53e2afecc132` |               High detail, artistic |
+| Leonardo Vision XL          | `6b645e3a-d64f-4341-a6d8-7a3690fbf042` |               Photorealistic images |
+| AlbedoBase XL               | `aa77f04e-3eec-4034-9c07-d0f619684628` |          Versatile, general purpose |
 
-**Why Leonardo Kino XL?**
+**Why Leonardo Kino 2.0?**
 
-- Respects `num_images: 1` parameter (Phoenix returns 4 images)
-- Better for poster-style artwork
-- Cinematic quality suitable for wall art
+- Latest model from Leonardo (October 2024)
+- Improved prompt adherence and consistency
+- Better quality specifically for poster-style artwork
+- Respects `num_images: 1` parameter
+- Enhanced detail and clarity
+- Requires `alchemy: false` and valid scheduler
 
 ---
 
