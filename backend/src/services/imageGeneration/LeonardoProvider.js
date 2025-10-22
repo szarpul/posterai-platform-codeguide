@@ -10,11 +10,25 @@ class LeonardoProvider {
     // - b24e16ff-06e3-43eb-8d33-4416c2d75876 : Leonardo Phoenix (fast, good quality)
     // - 1e60896f-3c26-4296-8ecc-53e2afecc132 : Leonardo Diffusion XL (high detail)
     // - 291be633-cb24-434f-898f-e662799936ad : Leonardo Kino XL (cinematic)
+    // - 05ce0082-2d80-4a2d-8653-4d1c85e2418e : Leonardo Kino 2.0 (latest, requires alchemy: false)
     // - 6b645e3a-d64f-4341-a6d8-7a3690fbf042 : Leonardo Vision XL (photorealistic)
     // - aa77f04e-3eec-4034-9c07-d0f619684628 : AlbedoBase XL (versatile)
     
-    // Default to Leonardo Kino XL for better poster-style artwork
-    this.model = process.env.LEONARDO_MODEL_ID || '291be633-cb24-434f-898f-e662799936ad';
+    // Default to Leonardo Kino 2.0 for best poster-style artwork
+    // NOTE: Kino 2.0 requires:
+    //   - alchemy: false
+    //   - scheduler: valid scheduler (see options below)
+    this.model = process.env.LEONARDO_MODEL_ID || '05ce0082-2d80-4a2d-8653-4d1c85e2418e';
+    
+    // Valid scheduler options:
+    // - LEONARDO (recommended - Leonardo's default, balanced)
+    // - EULER_DISCRETE (fast, good quality)
+    // - EULER_ANCESTRAL_DISCRETE (more creative/varied)
+    // - DPM_SOLVER (high quality, slower)
+    // - KLMS (Karras, high detail)
+    // - DDIM (deterministic, consistent)
+    // - PNDM (pseudo numerical methods)
+    this.scheduler = process.env.LEONARDO_SCHEDULER || 'LEONARDO';
     
     if (!leonardo) {
       throw new Error('Leonardo.ai SDK not initialized. Please set LEONARDO_API_KEY environment variable.');
@@ -31,6 +45,7 @@ class LeonardoProvider {
       console.log('🎨 Leonardo SDK instance:', !!leonardo);
       console.log('🎨 Leonardo API configured:', !!leonardo?.image);
       console.log('🎨 Using model:', this.model);
+      console.log('🎨 Using scheduler:', this.scheduler);
       
       const requestParams = {
         prompt: prompt,
@@ -40,7 +55,9 @@ class LeonardoProvider {
         numImages: 1,  // Try camelCase as well
         num_images: 1,  // Keep snake_case for compatibility
         guidance_scale: 7,
-        num_inference_steps: 20
+        num_inference_steps: 20,
+        alchemy: false,  // Disable Alchemy for Kino 2.0 compatibility
+        scheduler: this.scheduler  // Configurable scheduler (default: FLUX)
       };
       
       console.log('🎨 Request parameters:', JSON.stringify(requestParams, null, 2));
@@ -80,17 +97,46 @@ class LeonardoProvider {
       try {
         console.log(`\n🔄 Poll attempt ${attempt}/${maxAttempts} for generation ID: ${generationId}`);
         console.log('   Fetching generation status...');
-        const generation = await leonardo.image.getGenerationById(generationId);
         
-        // Debug: ALWAYS log the response structure to see what we're getting
-        console.log('🔍 Full response:', JSON.stringify(generation, null, 2));
+        let generation;
+        try {
+          generation = await leonardo.image.getGenerationById(generationId);
+        } catch (sdkError) {
+          // SDK may throw validation errors for newer models like KINO_2_0
+          // If it's a response validation error, try to extract data anyway
+          if (sdkError.message?.includes('Response validation failed') || 
+              sdkError.message?.includes('invalid_enum_value')) {
+            console.warn(`⚠️ SDK validation error (expected for KINO_2_0), attempting to use raw response...`);
+            
+            // The SDK error should contain the raw response data
+            // Try to make a direct API call instead
+            const axios = require('axios');
+            const response = await axios.get(
+              `https://cloud.leonardo.ai/api/rest/v1/generations/${generationId}`,
+              {
+                headers: {
+                  'Authorization': `Bearer ${process.env.LEONARDO_API_KEY}`,
+                  'Accept': 'application/json'
+                }
+              }
+            );
+            generation = { object: response.data };
+            console.log('✓ Retrieved data via direct API call');
+          } else {
+            throw sdkError;
+          }
+        }
+        
+        // Debug: log the response structure
+        console.log('🔍 Response status available');
         
         // The SDK wraps the response in an 'object' property
         // Try both camelCase and snake_case since Leonardo API returns camelCase
         const generationData = generation?.object?.generationsByPk || 
                                generation?.object?.generations_by_pk || 
                                generation?.generationsByPk ||
-                               generation?.generations_by_pk;
+                               generation?.generations_by_pk ||
+                               generation?.object; // Direct API response
         
         if (!generationData) {
           console.error('❌ No generation data found in response!');
@@ -100,7 +146,6 @@ class LeonardoProvider {
           }
         } else {
           console.log('✓ Generation data found');
-          console.log('  Keys in generationData:', Object.keys(generationData));
         }
         
         const status = generationData?.status || 'UNKNOWN';
@@ -112,7 +157,9 @@ class LeonardoProvider {
         
         if (generationData?.status === 'COMPLETE') {
           // Try both camelCase and snake_case for images
-          const images = generationData.generatedImages || generationData.generated_images;
+          const images = generationData.generatedImages || 
+                        generationData.generated_images ||
+                        generationData.generated_image_variation_generics;
           console.log(`   ✅ Generation complete! Found ${images?.length || 0} images`);
           if (images && images.length > 0 && images[0].url) {
             console.log(`   📸 Image URL: ${images[0].url}`);

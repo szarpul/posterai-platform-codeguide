@@ -86,11 +86,13 @@ constructor() {
   // Available Leonardo Models:
   // - b24e16ff-06e3-43eb-8d33-4416c2d75876 : Leonardo Phoenix (fast, good quality)
   // - 1e60896f-3c26-4296-8ecc-53e2afecc132 : Leonardo Diffusion XL (high detail)
-  // - 291be633-cb24-434f-898f-e662799936ad : Leonardo Kino XL (cinematic) ✅ DEFAULT
+  // - 291be633-cb24-434f-898f-e662799936ad : Leonardo Kino XL (cinematic)
+  // - 05ce0082-2d80-4a2d-8653-4d1c85e2418e : Leonardo Kino 2.0 (latest) ✅ DEFAULT
   // - 6b645e3a-d64f-4341-a6d8-7a3690fbf042 : Leonardo Vision XL (photorealistic)
   // - aa77f04e-3eec-4034-9c07-d0f619684628 : AlbedoBase XL (versatile)
 
-  this.model = process.env.LEONARDO_MODEL_ID || '291be633-cb24-434f-898f-e662799936ad';
+  this.model = process.env.LEONARDO_MODEL_ID || '05ce0082-2d80-4a2d-8653-4d1c85e2418e';
+  this.scheduler = process.env.LEONARDO_SCHEDULER || 'LEONARDO';
 }
 ```
 
@@ -571,6 +573,138 @@ LeonardoProvider returns imageUrl
 
 ---
 
+## Leonardo Kino 2.0 Update (October 2024)
+
+### New Issues Encountered
+
+After upgrading to **Leonardo Kino 2.0** model (`05ce0082-2d80-4a2d-8653-4d1c85e2418e`), three new issues appeared:
+
+#### 1. Alchemy Incompatibility
+
+**Error:** `"Alchemy is not enabled with Kino 2.0"`
+
+**Solution:** Added `alchemy: false` parameter to generation request
+
+```javascript
+const requestParams = {
+  // ... other params
+  alchemy: false, // Required for Kino 2.0
+};
+```
+
+#### 2. Invalid Scheduler Values
+
+**Error:** `Invalid enum value. Expected 'KLMS' | 'EULER_ANCESTRAL_DISCRETE' | ...`
+
+**Issue:** Initially used incorrect scheduler values (`FLUX`, `PHOENIX`, etc.) which were actually `sdVersion` values, not scheduler options.
+
+**Solution:** Updated to use correct scheduler enum values:
+
+```javascript
+// Valid schedulers:
+this.scheduler = process.env.LEONARDO_SCHEDULER || 'LEONARDO';
+
+// Options: LEONARDO, EULER_DISCRETE, EULER_ANCESTRAL_DISCRETE,
+//          DPM_SOLVER, KLMS, DDIM, PNDM
+```
+
+#### 3. SDK Response Validation Error
+
+**Error:** `Response validation failed: received 'KINO_2_0', expected 'v1_5' | 'v2' | 'v3' | ...`
+
+**Issue:** The Leonardo SDK's TypeScript definitions don't include `KINO_2_0` as a valid `sdVersion` enum value yet. The API returns this value, but the SDK rejects it during response validation.
+
+**Solution:** Implemented fallback to direct API calls when SDK validation fails:
+
+```javascript
+try {
+  generation = await leonardo.image.getGenerationById(generationId);
+} catch (sdkError) {
+  if (sdkError.message?.includes('Response validation failed')) {
+    // Bypass SDK validation with direct HTTP call
+    const response = await axios.get(
+      `https://cloud.leonardo.ai/api/rest/v1/generations/${generationId}`,
+      { headers: { Authorization: `Bearer ${process.env.LEONARDO_API_KEY}` } }
+    );
+    generation = { object: response.data };
+  }
+}
+```
+
+### Updated Configuration
+
+#### Model Selection
+
+```javascript
+// Default: Leonardo Kino 2.0
+this.model = process.env.LEONARDO_MODEL_ID || '05ce0082-2d80-4a2d-8653-4d1c85e2418e';
+```
+
+#### Scheduler Selection (New)
+
+```javascript
+// Default: LEONARDO (Leonardo's proprietary scheduler)
+this.scheduler = process.env.LEONARDO_SCHEDULER || 'LEONARDO';
+```
+
+#### Valid Scheduler Options
+
+| Scheduler                    | Description                      | Best For                 |
+| ---------------------------- | -------------------------------- | ------------------------ |
+| **LEONARDO**                 | Leonardo's default (recommended) | General use, balanced    |
+| **EULER_DISCRETE**           | Fast convergence                 | Quick generations        |
+| **EULER_ANCESTRAL_DISCRETE** | More creative/varied             | Abstract art, variety    |
+| **DPM_SOLVER**               | High quality, slower             | Production renders       |
+| **KLMS**                     | Karras method                    | High detail, sharp edges |
+| **DDIM**                     | Deterministic                    | Reproducible results     |
+| **PNDM**                     | Legacy algorithm                 | Compatibility            |
+
+### Environment Variables
+
+```bash
+# Model (default: Kino 2.0)
+LEONARDO_MODEL_ID=05ce0082-2d80-4a2d-8653-4d1c85e2418e
+
+# Scheduler (default: LEONARDO)
+LEONARDO_SCHEDULER=LEONARDO
+
+# API Key
+LEONARDO_API_KEY=your_key_here
+IMAGE_GENERATION_PROVIDER=leonardo
+```
+
+### Key Changes to Files
+
+**`LeonardoProvider.js`:**
+
+- ✅ Added `alchemy: false` parameter
+- ✅ Added configurable `scheduler` property
+- ✅ Implemented SDK validation error bypass with direct API calls
+- ✅ Updated logging to show scheduler selection
+- ✅ Enhanced error handling for KINO_2_0 edge cases
+
+**`env.example`:**
+
+- ✅ Updated default model to Kino 2.0
+- ✅ Added `LEONARDO_SCHEDULER` documentation
+- ✅ Listed all valid scheduler options with descriptions
+
+### Kino 2.0 Benefits
+
+- ✅ Latest Leonardo model (October 2024)
+- ✅ Improved prompt adherence
+- ✅ Better quality for poster-style artwork
+- ✅ More consistent results
+- ✅ Enhanced detail and clarity
+
+### Known Limitations
+
+⚠️ **SDK Validation:** The `@leonardo-ai/sdk` package doesn't yet support `KINO_2_0` in its TypeScript types. Our code works around this by catching validation errors and making direct API calls.
+
+**Future:** Once Leonardo updates their SDK to include `KINO_2_0`, the workaround will gracefully fall back to using the SDK directly.
+
+---
+
 ## Session Completion Status
 
 ✅ **COMPLETE** - Leonardo.ai integration is fully functional and stable
@@ -584,7 +718,10 @@ LeonardoProvider returns imageUrl
 - ✅ Single image returned as expected
 - ✅ Images uploaded to Supabase Storage
 - ✅ Prompt constraints prevent mockup/wall scenes
-- ✅ Leonardo Kino XL model selected for optimal results
+- ✅ **Leonardo Kino 2.0 model** working with proper configuration
+- ✅ **Alchemy disabled** for Kino 2.0 compatibility
+- ✅ **Scheduler parameter** configurable via environment variable
+- ✅ **SDK validation bypass** working for KINO_2_0 response type
 
 ### Ready for Production
 
@@ -604,6 +741,8 @@ The Leonardo integration is now production-ready with:
 # 1. Ensure environment variables are set
 LEONARDO_API_KEY=your_key_here
 IMAGE_GENERATION_PROVIDER=leonardo
+# Optional: LEONARDO_MODEL_ID=05ce0082-2d80-4a2d-8653-4d1c85e2418e (default)
+# Optional: LEONARDO_SCHEDULER=LEONARDO (default)
 
 # 2. Start backend
 cd backend
@@ -613,9 +752,11 @@ npm start
 # Use frontend or Postman to POST /api/images/generate
 
 # 4. Monitor logs for:
+# - Model and scheduler being used
 # - Generation ID
+# - SDK validation bypass (if needed for Kino 2.0)
 # - Polling status
 # - Image URL
 ```
 
-**Default behavior:** Generates 1 image using Leonardo Kino XL model, polls every 3 seconds for up to 180 seconds, returns clean poster artwork without walls or frames.
+**Default behavior:** Generates 1 image using Leonardo Kino 2.0 model with LEONARDO scheduler, disables Alchemy automatically, bypasses SDK validation errors, polls every 3 seconds for up to 180 seconds, returns clean poster artwork without walls or frames.
