@@ -5,99 +5,75 @@ const { v4: uuidv4 } = require('uuid');
 
 class ImageGeneratorService {
   static buildPrompt(options) {
-    const { palette, style, mainElement, occasion, emotion, inspirationKeyword } = options;
+    const { theme, palette, style, emotion, inspirationKeyword } = options;
     
-    // Style mappings
+    // Style mappings (expanded to replace mainElement)
     const styleMappings = {
-      'realistic': 'photorealistic illustration, fine texture, lifelike lighting',
-      'cartoon': 'clean cartoon, bold shapes, flat shading, thick outlines',
-      'surreal': 'surreal, dreamlike, unexpected juxtaposition, ethereal',
-      'minimalist': 'minimalist poster, large shapes, limited palette, strong negative space',
-      'flat_vector': 'flat vector style, geometric forms, solid fills, high contrast',
-      'vintage_retro': 'vintage poster, subtle film grain, retro vibe'
+      'realistic': 'photorealistic, fine texture and detail, lifelike lighting',
+      'cartoon': 'cartoon illustration, bold shapes, clean lines, vibrant colors',
+      'surreal': 'surreal and dreamlike, unexpected elements, ethereal atmosphere',
+      'minimalist': 'minimalist composition, large simple shapes, strong use of negative space',
+      'flat_vector': 'flat vector art, geometric forms, solid colors, high contrast',
+      'vintage_retro': 'vintage aesthetic, retro style, subtle texture and grain'
     };
 
     // Emotion mappings with lighting
     const emotionMappings = {
       'calm': {
-        mood: 'calm, serene mood',
-        lighting: 'soft diffuse light, pastel ambiance'
+        mood: 'calm and serene',
+        lighting: 'soft diffused light, gentle ambiance'
       },
       'energetic': {
-        mood: 'energetic, dynamic mood',
-        lighting: 'high contrast light, directional highlights'
+        mood: 'energetic and dynamic',
+        lighting: 'vibrant lighting, strong contrast'
       },
       'nostalgic': {
-        mood: 'nostalgic, warm mood',
-        lighting: 'golden hour glow, slight film grain'
+        mood: 'warm and nostalgic',
+        lighting: 'golden warm glow, soft vintage feel'
       },
       'inspirational': {
-        mood: 'uplifting, awe-inspiring mood',
-        lighting: 'dramatic rim light, airy atmosphere'
+        mood: 'uplifting and awe-inspiring',
+        lighting: 'dramatic lighting, expansive atmosphere'
       }
     };
 
     // Palette mappings
     const paletteMappings = {
-      'bright': 'bright palette — ivory, soft yellow, sky blue',
-      'dark': 'dark palette — charcoal, deep navy, burgundy',
-      'pastel': 'pastel palette — blush pink, mint, lavender',
-      'neutral': 'neutral palette — warm grey, sand, off-white'
+      'bright': 'bright colors — ivory, soft yellow, sky blue',
+      'dark': 'dark tones — charcoal, deep navy, burgundy',
+      'pastel': 'pastel hues — blush pink, mint green, lavender',
+      'neutral': 'neutral palette — warm grey, sand, cream'
     };
 
-    // Main element mappings
-    const mainElementMappings = {
-      'photo_realistic': 'photo-centric composition, clear subject in foreground',
-      'illustration_drawing': 'illustration-centric, iconic silhouette',
-      'abstract_shapes': 'abstract geometric centerpiece, bold forms'
-    };
-
-    // Occasion mappings
-    const occasionMappings = {
-      'home_decoration': 'designed for a stylish home interior, modern decor',
-      'office_workspace': 'professional, motivational poster for office walls',
-      'kids_room': 'playful, child-friendly atmosphere, warm and inviting',
-      'gift_special_event': 'designed as a thoughtful, personal gift poster'
+    // Theme as subject
+    const themeSubjects = {
+      'nature': 'natural landscape or organic elements',
+      'urban': 'urban architecture or city scene',
+      'fantasy': 'fantastical or magical imagery',
+      'futuristic': 'futuristic or sci-fi themed visual'
     };
 
     // Build prompt fragments
     const styleFragment = styleMappings[style] || style;
     const emotionData = emotionMappings[emotion] || { mood: emotion, lighting: 'natural lighting' };
-    const emotionFragment = emotionData.mood;
-    const lightingFragment = emotionData.lighting;
     const paletteFragment = paletteMappings[palette] || palette;
-    const mainElementFragment = mainElementMappings[mainElement] || mainElement;
-    const occasionFragment = occasionMappings[occasion] || occasion;
-    const subjectFragment = inspirationKeyword
-      ? `inspired by "${inspirationKeyword}"`
-      : 'creative composition';
+    const subjectFragment = themeSubjects[theme] || theme;
+    
+    const inspirationFragment = inspirationKeyword 
+      ? `, inspired by the concept of "${inspirationKeyword}"`
+      : '';
 
-    // Build final prompt using the template
+    // Simplified prompt - describe what TO create
     const prompt = `
-          IMPORTANT: Create ONLY the poster artwork itself, not a mockup or room scene.
-          
-          High-quality poster artwork, print-ready, full-bleed design.
-          
-          Occasion: ${occasionFragment}
-          Subject: ${subjectFragment} — artwork only, not a photo
-          Primary style: ${styleFragment}
-          Emotion/mood: ${emotionFragment}
-          Color palette: ${paletteFragment}
-          Composition: ${mainElementFragment}, edge-to-edge (full-bleed), strong focal point, balanced negative space
-          Lighting: ${lightingFragment}
-          Detail level: crisp details, smooth gradients, no noise, no blur
-          Quality intents: ultra sharp, print-grade, vector-like edges, consistent style
-          
-          STRICT CONSTRAINTS: 
-          - Create the poster artwork ONLY, not displayed on a wall or in a room
-          - No frame, no border, no mat, no wall background
-          - No mockup, no interior scene, no perspective view, no room setting
-          - No hands holding it, no furniture, no environment
-          - No watermark, no UI, no text, no captions, no extra logos
-          - Flat, direct view of the artwork itself as if viewing the print file
-          
-          Camera/Render: straight-on orthographic view, tightly cropped to artwork edges only
-          `.trim();
+Create ${subjectFragment}${inspirationFragment}.
+
+Style: ${styleFragment}
+Mood: ${emotionData.mood}
+Colors: ${paletteFragment}
+Lighting: ${emotionData.lighting}
+
+Technical requirements: high quality, sharp details, well-balanced composition, full-frame artwork, clean edges.
+`.trim();
 
     return prompt;
   }

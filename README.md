@@ -219,3 +219,40 @@ Complete API documentation is available in `API_DOCUMENTATION.md`, including:
 - Error handling
 - Data models
 - Testing procedures
+
+## Project Documentation
+
+This project maintains several types of documentation:
+
+### Specification Changes (`.spec/`)
+
+The `.spec/` directory contains detailed specifications for major features and system changes:
+
+- **[INDEX.md](.spec/INDEX.md)** - Master index of all specifications
+- **[README.md](.spec/README.md)** - Guide to creating and using specifications
+- Individual spec files for major changes (e.g., `questionnaire-simplification.md`)
+
+Use specifications to understand:
+
+- Why changes were made
+- How to implement/migrate changes
+- How to test and verify
+- How to rollback if needed
+
+### Deployment Guides
+
+- `DEPLOYMENT_CHECKLIST.md` - Pre-deployment validation checklist
+- `FRONTEND_DEPLOYMENT_CHECKLIST.md` - Frontend-specific deployment steps
+- `RAILWAY_DEPLOYMENT_GUIDE.md` - Deploying backend to Railway
+- `VERCEL_DEPLOYMENT_GUIDE.md` - Deploying frontend to Vercel
+
+### Testing Documentation
+
+- `E2E_TESTING_GUIDE.md` - End-to-end testing procedures
+- `verifications/BACKEND_API_TESTING.md` - Backend API verification
+- `backend/TESTING_README.md` - Backend unit and integration tests
+
+### Integration Guides
+
+- `documentation/leonardo-integration-plan.md` - Leonardo AI integration
+- `frontend/PAYMENT_INTEGRATION_README.md` - Payment gateway setup

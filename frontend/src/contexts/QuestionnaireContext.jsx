@@ -14,10 +14,8 @@ export function QuestionnaireProvider({ children }) {
     theme: '',
     palette: '',
     style: '',
-    mainElement: '',
-    occasion: '',
     emotion: '',
-    inspirationKeyword: ''
+    inspirationKeyword: '',
   });
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -26,18 +24,18 @@ export function QuestionnaireProvider({ children }) {
   const [error, setError] = useState('');
 
   const updateResponse = (field, value) => {
-    setResponses(prev => ({
+    setResponses((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const nextStep = () => {
-    setCurrentStep(prev => Math.min(prev + 1, 6)); // Updated to 7 steps
+    setCurrentStep((prev) => Math.min(prev + 1, 4)); // 5 steps total (0-4)
   };
 
   const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 0));
+    setCurrentStep((prev) => Math.max(prev - 1, 0));
   };
 
   const resetQuestionnaire = () => {
@@ -45,10 +43,8 @@ export function QuestionnaireProvider({ children }) {
       theme: '',
       palette: '',
       style: '',
-      mainElement: '',
-      occasion: '',
       emotion: '',
-      inspirationKeyword: ''
+      inspirationKeyword: '',
     });
     setCurrentStep(0);
     setGeneratedImage(null);
@@ -69,9 +65,9 @@ export function QuestionnaireProvider({ children }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
+          Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -100,12 +96,8 @@ export function QuestionnaireProvider({ children }) {
     prevStep,
     resetQuestionnaire,
     generateImage,
-    setGeneratedImage
+    setGeneratedImage,
   };
 
-  return (
-    <QuestionnaireContext.Provider value={value}>
-      {children}
-    </QuestionnaireContext.Provider>
-  );
-} 
+  return <QuestionnaireContext.Provider value={value}>{children}</QuestionnaireContext.Provider>;
+}

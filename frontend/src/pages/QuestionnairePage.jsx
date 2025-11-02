@@ -12,87 +12,108 @@ const QUESTIONNAIRE_STEPS = [
   {
     field: 'theme',
     title: 'Choose a theme',
-    description: 'What should your poster be about?',
+    description: 'What should your artwork be about?',
     icon: '🌍',
     options: [
       { value: 'nature', label: 'Nature', description: 'Landscapes, flora, and fauna', icon: '🌿' },
       { value: 'urban', label: 'Urban', description: 'City life and architecture', icon: '🏙️' },
       { value: 'fantasy', label: 'Fantasy', description: 'Magical and otherworldly', icon: '🧙‍♂️' },
-      { value: 'futuristic', label: 'Futuristic', description: 'Sci-fi and technology', icon: '🚀' }
-    ]
+      {
+        value: 'futuristic',
+        label: 'Futuristic',
+        description: 'Sci-fi and technology',
+        icon: '🚀',
+      },
+    ],
   },
   {
     field: 'palette',
     title: 'Pick a color palette',
-    description: 'What colors should dominate your design?',
+    description: 'What colors should dominate?',
     icon: '🎨',
     options: [
       { value: 'bright', label: 'Bright', description: 'Ivory, soft yellow, sky blue', icon: '☀️' },
       { value: 'dark', label: 'Dark', description: 'Charcoal, deep navy, burgundy', icon: '🌙' },
       { value: 'pastel', label: 'Pastel', description: 'Blush pink, mint, lavender', icon: '🌸' },
-      { value: 'neutral', label: 'Neutral', description: 'Warm grey, sand, off-white', icon: '🪨' }
-    ]
+      { value: 'neutral', label: 'Neutral', description: 'Warm grey, sand, cream', icon: '🪨' },
+    ],
   },
   {
     field: 'style',
     title: 'Choose your style',
-    description: 'Select the overall aesthetic for your poster',
-    icon: '🎨',
+    description: 'Select the visual aesthetic',
+    icon: '✨',
     options: [
-      { value: 'realistic', label: 'Realistic', description: 'Photorealistic with fine texture', icon: '📷' },
-      { value: 'cartoon', label: 'Cartoon', description: 'Clean cartoon with bold shapes', icon: '✏️' },
+      {
+        value: 'realistic',
+        label: 'Realistic',
+        description: 'Photorealistic with fine details',
+        icon: '📷',
+      },
+      {
+        value: 'cartoon',
+        label: 'Cartoon',
+        description: 'Bold illustrations with clean lines',
+        icon: '✏️',
+      },
       { value: 'surreal', label: 'Surreal', description: 'Dreamlike and unexpected', icon: '🌙' },
-      { value: 'minimalist', label: 'Minimalist', description: 'Simple and uncluttered', icon: '⚪' },
-      { value: 'flat_vector', label: 'Flat Vector', description: 'Geometric forms and solid fills', icon: '🔷' },
-      { value: 'vintage_retro', label: 'Vintage/Retro', description: 'Retro vibe with film grain', icon: '📺' }
-    ]
-  },
-  {
-    field: 'mainElement',
-    title: 'Main element type',
-    description: 'What should be the primary visual focus?',
-    icon: '🎯',
-    options: [
-      { value: 'photo_realistic', label: 'Photo/Realistic', description: 'Photorealistic image focus', icon: '📸' },
-      { value: 'illustration_drawing', label: 'Illustration/Drawing', description: 'Artistic drawing style', icon: '✏️' },
-      { value: 'abstract_shapes', label: 'Abstract Shapes', description: 'Geometric patterns and forms', icon: '🔶' }
-    ]
-  },
-  {
-    field: 'occasion',
-    title: 'Where will it be used?',
-    description: 'What\'s the purpose of this poster?',
-    icon: '🏠',
-    options: [
-      { value: 'home_decoration', label: 'Home Decoration', description: 'Stylish interior design', icon: '🏡' },
-      { value: 'office_workspace', label: 'Office/Workspace', description: 'Professional environment', icon: '💼' },
-      { value: 'kids_room', label: 'Kids Room', description: 'Playful and child-friendly', icon: '🧸' },
-      { value: 'gift_special_event', label: 'Gift/Special Event', description: 'Thoughtful personal gift', icon: '🎁' }
-    ]
+      {
+        value: 'minimalist',
+        label: 'Minimalist',
+        description: 'Simple and uncluttered',
+        icon: '⚪',
+      },
+      {
+        value: 'flat_vector',
+        label: 'Flat Vector',
+        description: 'Geometric forms and solid colors',
+        icon: '🔷',
+      },
+      {
+        value: 'vintage_retro',
+        label: 'Vintage/Retro',
+        description: 'Retro vibe with texture',
+        icon: '📺',
+      },
+    ],
   },
   {
     field: 'emotion',
     title: 'Set the emotion',
-    description: 'How should your poster make people feel?',
+    description: 'How should your artwork feel?',
     icon: '💭',
     options: [
       { value: 'calm', label: 'Calm', description: 'Peaceful and serene', icon: '😌' },
       { value: 'energetic', label: 'Energetic', description: 'Dynamic and vibrant', icon: '⚡' },
       { value: 'nostalgic', label: 'Nostalgic', description: 'Warm and sentimental', icon: '🕰️' },
-      { value: 'inspirational', label: 'Inspirational', description: 'Uplifting and awe-inspiring', icon: '✨' }
-    ]
+      {
+        value: 'inspirational',
+        label: 'Inspirational',
+        description: 'Uplifting and awe-inspiring',
+        icon: '✨',
+      },
+    ],
   },
   {
     field: 'inspirationKeyword',
     title: 'Inspiration keyword',
-    description: 'Add a word or phrase that inspires you (optional)',
+    description: 'Add a word or phrase for inspiration (optional)',
     icon: '💡',
     isTextInput: true,
-    placeholder: 'e.g., freedom, ocean waves, mountain peaks...'
-  }
+    placeholder: 'e.g., freedom, ocean waves, mountain peaks...',
+  },
 ];
 
-function QuestionnaireStep({ step, value, selected, onChange, disabled, isLastStep, onContinue, inputRef }) {
+function QuestionnaireStep({
+  step,
+  value,
+  selected,
+  onChange,
+  disabled,
+  isLastStep,
+  onContinue,
+  inputRef,
+}) {
   if (step.isTextInput) {
     return (
       <motion.div
@@ -119,17 +140,12 @@ function QuestionnaireStep({ step, value, selected, onChange, disabled, isLastSt
           <p className="text-sm text-gray-500 text-center">
             This is optional - you can leave it blank if you prefer
           </p>
-          
+
           {/* Continue button for the last step */}
           {isLastStep && (
             <div className="pt-4">
-              <Button
-                onClick={onContinue}
-                disabled={disabled}
-                size="lg"
-                className="w-full"
-              >
-                Generate Poster
+              <Button onClick={onContinue} disabled={disabled} size="lg" className="w-full">
+                Generate Artwork
               </Button>
             </div>
           )}
@@ -156,12 +172,10 @@ function QuestionnaireStep({ step, value, selected, onChange, disabled, isLastSt
             key={option.value}
             onClick={() => onChange(option.value)}
             className={`transition-all duration-300 p-6 border-2 rounded-xl text-left focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-              value === option.value 
-                ? 'border-primary-500 bg-primary-50 ring-primary-500' 
+              value === option.value
+                ? 'border-primary-500 bg-primary-50 ring-primary-500'
                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-            } ${
-              selected === option.value ? 'scale-105 shadow-lg' : ''
-            }`}
+            } ${selected === option.value ? 'scale-105 shadow-lg' : ''}`}
             disabled={disabled || (!!selected && selected !== option.value)}
             whileHover={{ scale: disabled ? 1 : 1.02 }}
             whileTap={{ scale: disabled ? 1 : 0.98 }}
@@ -195,7 +209,7 @@ export default function QuestionnairePage() {
     prevStep,
     generateImage,
     setGeneratedImage,
-    resetQuestionnaire
+    resetQuestionnaire,
   } = useQuestionnaire();
   const navigate = useNavigate();
   const { user, session } = useAuth();
@@ -211,12 +225,15 @@ export default function QuestionnairePage() {
   const handleOptionSelect = async (value) => {
     setSelected(value);
     updateResponse(currentStepData.field, value);
-    
+
     setTimeout(async () => {
       setSelected(null);
       if (isLastStep) {
         if (!user) {
-          sessionStorage.setItem('questionnaire_responses', JSON.stringify({ ...responses, [currentStepData.field]: value }));
+          sessionStorage.setItem(
+            'questionnaire_responses',
+            JSON.stringify({ ...responses, [currentStepData.field]: value })
+          );
           navigate('/login', { state: { returnTo: '/questionnaire' } });
           return;
         }
@@ -230,7 +247,7 @@ export default function QuestionnairePage() {
 
   const handleTextInputChange = async (value) => {
     updateResponse(currentStepData.field, value);
-    
+
     // Don't auto-proceed for text input - let user click continue
   };
 
@@ -241,19 +258,19 @@ export default function QuestionnairePage() {
         navigate('/login', { state: { returnTo: '/questionnaire' } });
         return;
       }
-      
+
       // Get the current input value directly from the DOM to ensure we have the latest
       let currentInputValue = '';
       if (currentStepData.isTextInput && inputRef.current) {
         currentInputValue = inputRef.current.value;
       }
-      
+
       // Ensure we have the most up-to-date responses before generating
       const currentResponses = {
         ...responses,
-        [currentStepData.field]: currentInputValue
+        [currentStepData.field]: currentInputValue,
       };
-      
+
       console.log('Generating image with responses:', currentResponses);
       await generateImage(currentResponses);
     }
@@ -265,14 +282,14 @@ export default function QuestionnairePage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           responses,
           imageUrl: generatedImage,
           prompt: responses,
-          options: responses
-        })
+          options: responses,
+        }),
       });
 
       if (!response.ok) {
@@ -295,19 +312,14 @@ export default function QuestionnairePage() {
           {/* Progress Bar */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <Button
-                onClick={prevStep}
-                disabled={currentStep === 0}
-                variant="ghost"
-                size="sm"
-              >
+              <Button onClick={prevStep} disabled={currentStep === 0} variant="ghost" size="sm">
                 ← Back
               </Button>
               <span className="text-sm text-gray-500 font-medium">
                 Step {currentStep + 1} of {QUESTIONNAIRE_STEPS.length}
               </span>
             </div>
-            
+
             <div className="w-full bg-gray-200 rounded-full h-2">
               <motion.div
                 className="bg-gradient-to-r from-primary-500 to-secondary-500 h-2 rounded-full"
@@ -330,14 +342,16 @@ export default function QuestionnairePage() {
               >
                 {isLastStep && loading ? (
                   <div className="flex flex-col items-center justify-center py-12">
-                    <LoadingSpinner size="lg" text="Generating your poster..." />
+                    <LoadingSpinner size="lg" text="Generating your artwork..." />
                   </div>
                 ) : (
                   <QuestionnaireStep
                     step={currentStepData}
                     value={responses[currentStepData.field]}
                     selected={selected}
-                    onChange={currentStepData.isTextInput ? handleTextInputChange : handleOptionSelect}
+                    onChange={
+                      currentStepData.isTextInput ? handleTextInputChange : handleOptionSelect
+                    }
                     disabled={isLastStep && loading}
                     isLastStep={isLastStep}
                     onContinue={handleContinue}
@@ -365,15 +379,15 @@ export default function QuestionnairePage() {
           className="space-y-8"
         >
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Your Generated Poster</h2>
-            <p className="text-gray-600">Here's your AI-generated poster based on your choices</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Your Generated Artwork</h2>
+            <p className="text-gray-600">Here's your AI-generated artwork based on your choices</p>
           </div>
 
           <Card className="p-6">
             <div className="aspect-w-1 aspect-h-1 bg-gray-100 rounded-lg overflow-hidden">
               <img
                 src={generatedImage}
-                alt="Generated poster"
+                alt="Generated artwork"
                 className="w-full h-full object-center object-cover"
               />
             </div>
@@ -390,10 +404,7 @@ export default function QuestionnairePage() {
             >
               Start Over
             </Button>
-            <Button
-              onClick={handleSaveAsDraft}
-              size="lg"
-            >
+            <Button onClick={handleSaveAsDraft} size="lg">
               Save as Draft
             </Button>
           </div>
@@ -401,4 +412,4 @@ export default function QuestionnairePage() {
       )}
     </div>
   );
-} 
+}
