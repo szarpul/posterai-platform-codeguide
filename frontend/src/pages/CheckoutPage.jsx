@@ -1,24 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useAuth } from '../contexts/AuthContext';
 import paymentService from '../services/paymentService';
 import stripePromise from '../lib/stripe';
-
-const CARD_ELEMENT_OPTIONS = {
-  style: {
-    base: {
-      fontSize: '16px',
-      color: '#424770',
-      '::placeholder': {
-        color: '#aab7c4',
-      },
-    },
-    invalid: {
-      color: '#9e2146',
-    },
-  },
-};
 
 const CheckoutForm = ({ order, clientSecret }) => {
   const stripe = useStripe();
@@ -31,22 +16,27 @@ const CheckoutForm = ({ order, clientSecret }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setProcessing(true);
+    setError(null);
 
     if (!stripe || !elements) {
+      setProcessing(false);
       return;
     }
 
-    const { error: paymentError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: elements.getElement(CardElement),
+    // PaymentElement automatically collects billing address including postal code
+    const { error: paymentError, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/order-success/${order.id}`,
       },
+      redirect: 'if_required', // Only redirect for 3D Secure, otherwise handle in place
     });
 
     if (paymentError) {
       setError(paymentError.message);
       setProcessing(false);
     } else {
-      if (paymentIntent.status === 'succeeded') {
+      if (paymentIntent && paymentIntent.status === 'succeeded') {
         setSucceeded(true);
         setError(null);
         setProcessing(false);
@@ -54,6 +44,10 @@ const CheckoutForm = ({ order, clientSecret }) => {
         setTimeout(() => {
           navigate(`/order-success/${order.id}`);
         }, 2000);
+      } else if (paymentIntent && paymentIntent.status === 'requires_action') {
+        // 3D Secure authentication will be handled automatically by PaymentElement
+        // The redirect will happen via confirmParams.return_url
+        setProcessing(false);
       }
     }
   };
@@ -64,24 +58,16 @@ const CheckoutForm = ({ order, clientSecret }) => {
         <h2 className="text-xl font-semibold mb-4">Payment Information</h2>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Card Details
-            </label>
-            <div className="border border-gray-300 rounded-md p-3">
-              <CardElement options={CARD_ELEMENT_OPTIONS} />
-            </div>
+            {/* PaymentElement automatically collects card details and billing address (including postal code) */}
+            <PaymentElement />
           </div>
-          
-          {error && (
-            <div className="text-red-600 text-sm">
-              {error}
-            </div>
-          )}
-          
+
+          {error && <div className="text-red-600 text-sm mt-4">{error}</div>}
+
           <button
             type="submit"
             disabled={!stripe || processing || succeeded}
-            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed mt-6"
           >
             {processing ? 'Processing...' : succeeded ? 'Payment Successful!' : 'Pay Now'}
           </button>
@@ -141,10 +127,7 @@ const CheckoutPage = () => {
         <div className="text-error text-center">
           <h2 className="text-xl font-semibold mb-2">Checkout Error</h2>
           <p>{error}</p>
-          <button
-            onClick={() => navigate('/drafts')}
-            className="btn-secondary mt-4"
-          >
+          <button onClick={() => navigate('/drafts')} className="btn-secondary mt-4">
             Back to Drafts
           </button>
         </div>
@@ -165,10 +148,7 @@ const CheckoutPage = () => {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Checkout</h1>
-          <button
-            onClick={() => navigate('/drafts')}
-            className="btn-secondary"
-          >
+          <button onClick={() => navigate('/drafts')} className="btn-secondary">
             Back to Drafts
           </button>
         </div>
@@ -190,9 +170,12 @@ const CheckoutPage = () => {
                 <div className="flex justify-between">
                   <span>Shipping Address:</span>
                   <span className="text-right">
-                    {order.shipping_address?.name}<br />
-                    {order.shipping_address?.line1}<br />
-                    {order.shipping_address?.city}, {order.shipping_address?.postalCode}<br />
+                    {order.shipping_address?.name}
+                    <br />
+                    {order.shipping_address?.line1}
+                    <br />
+                    {order.shipping_address?.city}, {order.shipping_address?.postalCode}
+                    <br />
                     {order.shipping_address?.country}
                   </span>
                 </div>
@@ -219,7 +202,7 @@ const CheckoutPage = () => {
 
           {/* Payment Form */}
           <div>
-            <Elements stripe={stripePromise}>
+            <Elements stripe={stripePromise} options={{ clientSecret }}>
               <CheckoutForm order={order} clientSecret={clientSecret} />
             </Elements>
           </div>
@@ -229,4 +212,4 @@ const CheckoutPage = () => {
   );
 };
 
-export default CheckoutPage; 
+export default CheckoutPage;

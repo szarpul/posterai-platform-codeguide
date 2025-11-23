@@ -68,8 +68,8 @@ class OrderProcessor {
       throw new Error(`Failed to create order: ${orderError.message}`);
     }
 
-    // Send order confirmation email
-    await this.sendOrderConfirmationEmail(order, draft, userId);
+    // Don't send order confirmation email here - order is still pending payment
+    // Email will be sent after payment succeeds in handlePaymentSuccess()
 
     return order;
   }
@@ -167,10 +167,14 @@ class OrderProcessor {
     }
 
     // Create Stripe PaymentIntent with receipt_email
+    // PaymentElement works with explicit payment_method_types
+    // Restricting to cards only (no BLIK or other payment methods)
     const paymentIntent = await stripe.paymentIntents.create({
       amount: order.amount_cents,
       currency: 'pln', // Use PLN for Polish account
       receipt_email: user.user.email, // This will automatically send receipt
+      payment_method_types: ['card'], // Only credit/debit cards, no BLIK or other methods
+      // PaymentElement will automatically collect billing address
       metadata: {
         orderId: order.id,
         draftId: order.draft_id,
@@ -219,6 +223,16 @@ class OrderProcessor {
 
       console.log('📋 Found order:', { id: order.id, status: order.status, userId: order.user_id });
 
+      // Idempotency check: Skip if order is already paid
+      if (order.status === 'paid') {
+        console.log('⚠️  Order already processed (status: paid), skipping duplicate processing');
+        return {
+          orderId,
+          status: 'already_processed',
+          message: 'Order was already marked as paid'
+        };
+      }
+
       // Update order status to paid
       const { error: updateError } = await supabase
         .from('orders')
@@ -234,10 +248,11 @@ class OrderProcessor {
 
       console.log('✅ Order status updated to paid:', orderId);
 
-      // Get customer email for receipt
+      // Get customer email for receipt and order confirmation
       console.log('🔍 Attempting to get user email for user ID:', order.user_id);
       
       let receiptSent = false;
+      let confirmationSent = false;
       let userEmail = null;
       
       try {
@@ -245,13 +260,25 @@ class OrderProcessor {
         
         if (userError) {
           console.error('❌ Error getting user:', userError);
-          console.warn('⚠️  Customer email not found, skipping receipt');
+          console.warn('⚠️  Customer email not found, skipping emails');
         } else if (!user.user?.email) {
           console.warn('⚠️  User found but no email:', user);
-          console.warn('⚠️  Customer email not found, skipping receipt');
+          console.warn('⚠️  Customer email not found, skipping emails');
         } else {
           console.log('📧 Found customer email:', user.user.email);
           userEmail = user.user.email;
+          
+          // Send order confirmation email (now that payment is successful)
+          // order.drafts contains the draft data from the select query above
+          try {
+            const draft = order.drafts || null;
+            await this.sendOrderConfirmationEmail(order, draft, order.user_id);
+            console.log('📧 Order confirmation email sent successfully');
+            confirmationSent = true;
+          } catch (confirmationError) {
+            console.error('⚠️  Order confirmation email failed, but continuing:', confirmationError.message);
+            // Don't fail the entire order process if confirmation email fails
+          }
           
           // Send payment receipt
           try {
@@ -265,7 +292,7 @@ class OrderProcessor {
         }
       } catch (userLookupError) {
         console.error('❌ Exception during user lookup:', userLookupError);
-        console.warn('⚠️  Customer email lookup failed, skipping receipt');
+        console.warn('⚠️  Customer email lookup failed, skipping emails');
       }
 
       // Create print job
@@ -276,6 +303,7 @@ class OrderProcessor {
         printJobId: printJob.id,
         status: 'in_production',
         receiptSent: receiptSent,
+        confirmationSent: confirmationSent,
         userEmail: userEmail
       };
     } catch (error) {

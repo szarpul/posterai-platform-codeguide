@@ -71,21 +71,10 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       }
       
       case 'charge.succeeded': {
-        const chargeOrderId = event.data.object.metadata?.orderId;
-        console.log('💰 Processing charge success for order:', chargeOrderId);
-        
-        if (!chargeOrderId) {
-          console.warn('⚠️  No orderId found in charge metadata');
-          console.warn('📋 Available metadata:', event.data.object.metadata);
-        } else {
-          // Create a payment intent object from the charge for consistency
-          const paymentIntentData = {
-            metadata: event.data.object.metadata,
-            id: event.data.object.payment_intent
-          };
-          const result = await OrderProcessor.handlePaymentSuccess(paymentIntentData);
-          console.log('✅ Charge success processing completed:', result);
-        }
+        // Skip charge.succeeded - payment_intent.succeeded already handles everything
+        // Stripe sends both events for the same payment, so we only process payment_intent.succeeded
+        // to avoid duplicate emails and order processing
+        console.log('ℹ️  Skipping charge.succeeded event (already handled by payment_intent.succeeded)');
         break;
       }
       
