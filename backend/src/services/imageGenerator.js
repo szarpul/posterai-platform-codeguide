@@ -5,9 +5,131 @@ const { v4: uuidv4 } = require('uuid');
 
 class ImageGeneratorService {
   static buildPrompt(options) {
-    const { theme, palette, style, emotion, inspirationKeyword } = options;
-    
-    // Style mappings (expanded to replace mainElement)
+    // Support both old format (theme, palette, style, emotion) and new format (artStyle, colorPalette, subject)
+    const { 
+      // New 3-step format
+      artStyle, 
+      colorPalette, 
+      subject,
+      // Old format (for backward compatibility)
+      theme, 
+      palette, 
+      style, 
+      emotion, 
+      inspirationKeyword 
+    } = options;
+
+    // Use new format if provided, otherwise fall back to old format
+    if (artStyle && colorPalette && subject) {
+      return this.buildPromptNewFormat({ artStyle, colorPalette, subject });
+    } else if (theme && palette && style && emotion) {
+      return this.buildPromptOldFormat({ theme, palette, style, emotion, inspirationKeyword });
+    } else {
+      throw new Error('Invalid options: must provide either (artStyle, colorPalette, subject) or (theme, palette, style, emotion)');
+    }
+  }
+
+  static buildPromptNewFormat({ artStyle, colorPalette, subject }) {
+    // Art Style mappings for new 3-step visual questionnaire
+    const artStyleMappings = {
+      'abstract_geometric': 'abstract geometric composition, clean lines, geometric patterns, modern design',
+      'minimalist': 'minimalist design, simple forms, strong use of negative space, clean aesthetic',
+      'botanical': 'botanical art, organic forms, plant-based imagery, natural elements',
+      'landscape': 'landscape art, scenic views, natural environments, atmospheric perspective',
+      'surreal': 'surreal art, dreamlike imagery, unexpected combinations, ethereal atmosphere',
+      'retro_vintage': 'retro vintage style, mid-century modern aesthetic, nostalgic design, classic poster art',
+      'cosmic_space': 'cosmic space art, celestial imagery, nebulas, galaxies, astronomical themes'
+    };
+
+    // Color Palette mappings
+    const colorPaletteMappings = {
+      'monochrome': 'monochrome palette — black, white, shades of grey',
+      'earth_tones': 'earth tones — warm browns, terracotta, ochre, sage green',
+      'ocean_blues': 'ocean blues — deep blue, turquoise, aqua, seafoam',
+      'warm_sunset': 'warm sunset colors — coral, peach, golden yellow, warm orange',
+      'forest_greens': 'forest greens — deep green, emerald, moss, olive',
+      'vibrant_bold': 'vibrant bold colors — bright red, electric blue, vivid purple, high saturation',
+      'pastels': 'pastel colors — soft pink, lavender, mint, peach, light blue'
+    };
+
+    // Subject mappings (dynamic based on art style)
+    const subjectMappings = {
+      'abstract_geometric': {
+        'organic_shapes': 'organic shapes, flowing forms, natural curves',
+        'geometric_patterns': 'geometric patterns, repeating shapes, structured design',
+        'fluid_forms': 'fluid forms, dynamic movement, abstract composition'
+      },
+      'minimalist': {
+        'lines': 'simple lines, linear elements, geometric lines',
+        'shapes': 'basic shapes, geometric forms, simple compositions',
+        'negative_space': 'strong negative space, balanced composition, clean design',
+        'simple_forms': 'simple forms, reduced elements, essential shapes'
+      },
+      'botanical': {
+        'flowers': 'flowers, floral elements, botanical illustrations',
+        'leaves': 'leaves, foliage, plant details, natural textures',
+        'trees': 'trees, branches, natural growth patterns',
+        'abstract_plants': 'abstract plant forms, stylized botanical elements'
+      },
+      'landscape': {
+        'mountains': 'mountain landscapes, peaks, scenic vistas',
+        'ocean': 'ocean scenes, seascapes, coastal views',
+        'forest': 'forest scenes, woodland, natural environments',
+        'desert': 'desert landscapes, arid scenes, vast horizons'
+      },
+      'surreal': {
+        'dreamscapes': 'dreamlike landscapes, surreal environments, fantastical scenes',
+        'abstract_forms': 'abstract forms, non-representational elements, conceptual imagery',
+        'unexpected_combinations': 'unexpected combinations, juxtaposed elements, surreal compositions'
+      },
+      'retro_vintage': {
+        'travel_poster': 'travel poster style, vintage tourism, classic destinations',
+        'mid_century_modern': 'mid-century modern design, retro aesthetic, 1950s-60s style',
+        'psychedelic': 'psychedelic art, vibrant patterns, 1960s-70s aesthetic'
+      },
+      'cosmic_space': {
+        'planets': 'planets, celestial bodies, astronomical objects',
+        'nebulas': 'nebulas, cosmic clouds, stellar formations',
+        'stars': 'stars, starfields, celestial patterns',
+        'galaxies': 'galaxies, spiral formations, cosmic structures'
+      }
+    };
+
+    // Get mappings
+    const artStyleDescription = artStyleMappings[artStyle] || artStyle;
+    const colorPaletteDescription = colorPaletteMappings[colorPalette] || colorPalette;
+    const subjectDescription = subjectMappings[artStyle]?.[subject] || subject;
+
+    // Build prompt for art poster for home decor
+    const prompt = `
+IMPORTANT: Create ONLY the poster artwork itself, not a mockup or room scene.
+
+High-quality poster artwork, print-ready, full-bleed design for home decor.
+
+Subject: ${subjectDescription}
+Art Style: ${artStyleDescription}
+Color Palette: ${colorPaletteDescription}
+
+Composition: edge-to-edge (full-bleed), strong focal point, balanced negative space
+Detail level: crisp details, smooth gradients, no noise, no blur
+Quality intents: ultra sharp, print-grade, vector-like edges, consistent style
+
+STRICT CONSTRAINTS: 
+- Create the poster artwork ONLY, not displayed on a wall or in a room
+- No frame, no border, no mat, no wall background
+- No mockup, no interior scene, no perspective view, no room setting
+- No hands holding it, no furniture, no environment
+- No watermark, no UI, no text, no captions, no extra logos
+- Flat, direct view of the artwork itself as if viewing the print file
+
+Camera/Render: straight-on orthographic view, tightly cropped to artwork edges only
+`.trim();
+
+    return prompt;
+  }
+
+  static buildPromptOldFormat({ theme, palette, style, emotion, inspirationKeyword }) {
+    // Old format mappings (for backward compatibility)
     const styleMappings = {
       'realistic': 'photorealistic, fine texture and detail, lifelike lighting',
       'cartoon': 'cartoon illustration, bold shapes, clean lines, vibrant colors',
@@ -17,7 +139,6 @@ class ImageGeneratorService {
       'vintage_retro': 'vintage aesthetic, retro style, subtle texture and grain'
     };
 
-    // Emotion mappings with lighting
     const emotionMappings = {
       'calm': {
         mood: 'calm and serene',
@@ -37,7 +158,6 @@ class ImageGeneratorService {
       }
     };
 
-    // Palette mappings
     const paletteMappings = {
       'bright': 'bright colors — ivory, soft yellow, sky blue',
       'dark': 'dark tones — charcoal, deep navy, burgundy',
@@ -45,7 +165,6 @@ class ImageGeneratorService {
       'neutral': 'neutral palette — warm grey, sand, cream'
     };
 
-    // Theme as subject
     const themeSubjects = {
       'nature': 'natural landscape or organic elements',
       'urban': 'urban architecture or city scene',
@@ -53,7 +172,6 @@ class ImageGeneratorService {
       'futuristic': 'futuristic or sci-fi themed visual'
     };
 
-    // Build prompt fragments
     const styleFragment = styleMappings[style] || style;
     const emotionData = emotionMappings[emotion] || { mood: emotion, lighting: 'natural lighting' };
     const paletteFragment = paletteMappings[palette] || palette;
@@ -63,16 +181,30 @@ class ImageGeneratorService {
       ? `, inspired by the concept of "${inspirationKeyword}"`
       : '';
 
-    // Simplified prompt - describe what TO create
     const prompt = `
-Create ${subjectFragment}${inspirationFragment}.
+IMPORTANT: Create ONLY the poster artwork itself, not a mockup or room scene.
 
+High-quality poster artwork, print-ready, full-bleed design.
+
+Subject: ${subjectFragment}${inspirationFragment}
 Style: ${styleFragment}
 Mood: ${emotionData.mood}
 Colors: ${paletteFragment}
 Lighting: ${emotionData.lighting}
 
-Technical requirements: high quality, sharp details, well-balanced composition, full-frame artwork, clean edges.
+Composition: edge-to-edge (full-bleed), strong focal point, balanced negative space
+Detail level: crisp details, smooth gradients, no noise, no blur
+Quality intents: ultra sharp, print-grade, vector-like edges, consistent style
+
+STRICT CONSTRAINTS: 
+- Create the poster artwork ONLY, not displayed on a wall or in a room
+- No frame, no border, no mat, no wall background
+- No mockup, no interior scene, no perspective view, no room setting
+- No hands holding it, no furniture, no environment
+- No watermark, no UI, no text, no captions, no extra logos
+- Flat, direct view of the artwork itself as if viewing the print file
+
+Camera/Render: straight-on orthographic view, tightly cropped to artwork edges only
 `.trim();
 
     return prompt;
