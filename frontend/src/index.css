@@ -1,36 +1,218 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+/* Distinctive Typography */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Warm Creative Studio Palette */
+  --color-cream: #FAF8F5;
+  --color-cream-dark: #F5F0E8;
+  --color-warm-white: #FFFDFB;
+
+  --color-terracotta: #E07A5F;
+  --color-terracotta-light: #F4A990;
+  --color-terracotta-dark: #C45D43;
+
+  --color-sage: #3D5A45;
+  --color-sage-light: #5A7D64;
+  --color-sage-muted: #8BA894;
+
+  --color-gold: #D4A276;
+  --color-gold-light: #E8C9A8;
+
+  --color-charcoal: #2D2A26;
+  --color-charcoal-light: #4A4640;
+  --color-warm-gray: #8A857D;
+
+  /* Shadows with warm tint */
+  --shadow-sm: 0 1px 2px rgba(45, 42, 38, 0.05);
+  --shadow-md: 0 4px 12px rgba(45, 42, 38, 0.08);
+  --shadow-lg: 0 12px 32px rgba(45, 42, 38, 0.12);
+  --shadow-xl: 0 24px 48px rgba(45, 42, 38, 0.16);
+}
+
 @layer base {
   html {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Outfit', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  
+
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply text-charcoal;
+    background-color: var(--color-cream);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-optical-sizing: auto;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Better focus styles */
+  :focus-visible {
+    outline: 2px solid var(--color-terracotta);
+    outline-offset: 2px;
   }
 }
 
 @layer components {
+  /* Base button styles */
   .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+    @apply px-5 py-2.5 rounded-full font-medium transition-all duration-300;
+    font-family: 'Outfit', sans-serif;
   }
-  
+
   .btn-primary {
-    @apply px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 
-           disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+    background: var(--color-terracotta);
+    color: white;
+    box-shadow: var(--shadow-md), 0 0 0 0 rgba(224, 122, 95, 0);
   }
-  
+
+  .btn-primary:hover {
+    background: var(--color-terracotta-dark);
+    box-shadow: var(--shadow-lg), 0 0 0 4px rgba(224, 122, 95, 0.15);
+    transform: translateY(-1px);
+  }
+
   .btn-secondary {
-    @apply btn bg-secondary-600 text-white hover:bg-secondary-700;
+    background: var(--color-sage);
+    color: white;
   }
-  
+
+  .btn-secondary:hover {
+    background: var(--color-sage-light);
+  }
+
   .input {
-    @apply px-3 py-2 border border-gray-300 rounded-lg focus:outline-none 
-           focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500
-           disabled:bg-gray-100 disabled:cursor-not-allowed;
+    @apply px-4 py-3 rounded-xl transition-all duration-200;
+    background: var(--color-warm-white);
+    border: 1px solid rgba(45, 42, 38, 0.1);
   }
-} 
+
+  .input:focus {
+    border-color: var(--color-terracotta);
+    box-shadow: 0 0 0 3px rgba(224, 122, 95, 0.15);
+    outline: none;
+  }
+
+  /* Card with warm shadows */
+  .card {
+    background: var(--color-warm-white);
+    border-radius: 1.25rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(45, 42, 38, 0.04);
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--color-terracotta) 0%, var(--color-terracotta-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Decorative blob shapes */
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .blob-terracotta {
+    background: var(--color-terracotta-light);
+  }
+
+  .blob-sage {
+    background: var(--color-sage-muted);
+  }
+
+  .blob-gold {
+    background: var(--color-gold-light);
+  }
+
+  /* Subtle grain texture overlay */
+  .grain::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.03;
+    z-index: 1000;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  }
+
+  /* Animated underline for links */
+  .link-underline {
+    position: relative;
+    text-decoration: none;
+  }
+
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--color-terracotta);
+    transition: width 0.3s ease;
+  }
+
+  .link-underline:hover::after {
+    width: 100%;
+  }
+
+  /* Pill badge */
+  .pill {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+    background: rgba(224, 122, 95, 0.1);
+    color: var(--color-terracotta-dark);
+  }
+
+  /* Section divider */
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(45, 42, 38, 0.1), transparent);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-cream-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-warm-gray);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-charcoal-light);
+}
+
+/* Selection color */
+::selection {
+  background: rgba(224, 122, 95, 0.2);
+  color: var(--color-charcoal);
+}
