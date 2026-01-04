@@ -212,16 +212,13 @@ class LeonardoProvider {
         }
       );
 
-      console.log('🎨 V2 Response received');
+      console.log('🎨 V2 Response received:', JSON.stringify(response.data, null, 2));
 
       // Extract generation ID from response
-      // Try multiple possible response structures
-      const jobData = response.data?.sdGenerationJob ||
-                     response.data?.object?.sdGenerationJob ||
-                     response.data;
-
-      const generationId = jobData?.generationId ||
-                          jobData?.id ||
+      // V2 API returns: { generate: { apiCreditCost, generationId } }
+      const generationId = response.data?.generate?.generationId ||
+                          response.data?.sdGenerationJob?.generationId ||
+                          response.data?.object?.sdGenerationJob?.generationId ||
                           response.data?.generationId ||
                           response.data?.id;
 

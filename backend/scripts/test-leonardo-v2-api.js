@@ -41,9 +41,9 @@ async function testLeonardoV2API() {
     console.log('\n✅ Success! V2 Generation response:');
     console.log(JSON.stringify(response.data, null, 2));
 
-    // Try to extract generation ID from various possible locations
-    const generationId = response.data?.sdGenerationJob?.generationId ||
-                        response.data?.object?.sdGenerationJob?.generationId ||
+    // V2 API returns: { generate: { apiCreditCost, generationId } }
+    const generationId = response.data?.generate?.generationId ||
+                        response.data?.sdGenerationJob?.generationId ||
                         response.data?.generationId ||
                         response.data?.id;
 
