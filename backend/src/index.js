@@ -16,10 +16,42 @@ const webhookRoutes = require('./routes/webhooks');
 const emailRoutes = require('./routes/email');
 
 // Middleware
+// FRONTEND_URL is always used when provided; fallback to localhost for local dev
+const allowedOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
+  : ['http://localhost:3000'];
+
+// Patterns for dynamic origins (only in non-production for staging/preview environments)
+const allowedOriginPatterns = process.env.NODE_ENV === 'production'
+  ? []
+  : [
+      // Vercel preview deployments: posterai-git-{branch}-{hash}-piotrs-projects-d087cc3c.vercel.app
+      /^https:\/\/posterai-git-[a-z0-9-]+-piotrs-projects-d087cc3c\.vercel\.app$/,
+      // Local development on any port
+      /^http:\/\/localhost:\d+$/
+    ];
+
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : 'http://localhost:3000',
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      // Check exact matches first
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      
+      // Check pattern matches (for Vercel previews, etc.)
+      const matchesPattern = allowedOriginPatterns.some(pattern => pattern.test(origin));
+      if (matchesPattern) {
+        return callback(null, true);
+      }
+      
+      console.warn(`CORS blocked origin: ${origin}. Allowed: ${allowedOrigins.join(', ')} + Vercel previews`);
+      callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
   })
 );
 app.use(express.json());
