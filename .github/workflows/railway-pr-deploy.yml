@@ -18,7 +18,7 @@ jobs:
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
-          railway up --service=${{ secrets.RAILWAY_SERVICE_ID }} --environment=pr-${{ github.event.pull_request.number }}
+          railway up --service=${{ secrets.RAILWAY_SERVICE_ID }} --environment=testing
 
       - name: Comment deployment URL
         uses: actions/github-script@v6
