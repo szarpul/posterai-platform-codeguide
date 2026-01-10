@@ -679,6 +679,28 @@ export default function QuestionnairePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {!generatedImage ? (
           <>
+            {/* New Experience Banner */}
+            <motion.div
+              className="mb-8 text-center"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-primary-50 to-secondary-50 border border-primary-200 rounded-2xl px-6 py-3 shadow-soft">
+                <span className="text-2xl">✨</span>
+                <div className="text-left">
+                  <div className="text-sm font-semibold text-charcoal">
+                    Try our new interactive experience!
+                  </div>
+                  <button
+                    onClick={() => navigate('/vibe-explorer')}
+                    className="text-xs text-primary-600 hover:text-primary-700 font-medium underline"
+                  >
+                    Switch to Vibe Explorer →
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+
             {/* Progress */}
             <ProgressSteps currentStep={currentStep} />
 
