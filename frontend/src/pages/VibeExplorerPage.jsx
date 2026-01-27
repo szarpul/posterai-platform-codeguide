@@ -97,7 +97,7 @@ export default function VibeExplorerPage() {
     responses,
   } = useQuestionnaire();
   const navigate = useNavigate();
-  const { user, session } = useAuth();
+  const { session } = useAuth();
 
   const handleGenerate = async (selection) => {
     // InteractivePosterBuilder sends data in correct format (artStyle, colorPalette, subject)

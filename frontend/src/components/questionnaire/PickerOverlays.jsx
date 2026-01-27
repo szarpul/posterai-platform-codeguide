@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Art styles
@@ -147,10 +147,7 @@ function PickerOverlay({ isOpen, onClose, title, children }) {
 
 // Style Picker
 export function StylePickerOverlay({ isOpen, onClose, currentStyle, onSelect, onPreview }) {
-  const [hoveredStyle, setHoveredStyle] = useState(null);
-
   const handleHover = (style) => {
-    setHoveredStyle(style);
     if (onPreview) {
       onPreview(style);
     }
@@ -227,10 +224,7 @@ export function StylePickerOverlay({ isOpen, onClose, currentStyle, onSelect, on
 
 // Palette Picker
 export function PalettePickerOverlay({ isOpen, onClose, currentPalette, onSelect, onPreview }) {
-  const [hoveredPalette, setHoveredPalette] = useState(null);
-
   const handleHover = (palette) => {
-    setHoveredPalette(palette);
     if (onPreview) {
       onPreview(palette);
     }

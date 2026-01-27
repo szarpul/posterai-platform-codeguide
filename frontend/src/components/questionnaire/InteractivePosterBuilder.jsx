@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import InteractivePosterCanvas from './InteractivePosterCanvas';
 import { StylePickerOverlay, PalettePickerOverlay, SubjectPickerOverlay } from './PickerOverlays';
@@ -77,9 +77,6 @@ export default function InteractivePosterBuilder({ onGenerate, loading }) {
   // Hovered zone on poster
   const [hoveredZone, setHoveredZone] = useState(null);
 
-  // Has user interacted
-  const [hasInteracted, setHasInteracted] = useState(false);
-
   // Available subjects based on current style
   const [availableSubjects, setAvailableSubjects] = useState(DEFAULT_SUBJECTS);
 
@@ -95,22 +92,20 @@ export default function InteractivePosterBuilder({ onGenerate, loading }) {
         subject: subjects[0].value,
       }));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSelection.style]);
 
   // Open pickers
   const openStylePicker = () => {
     setActivePicker('style');
-    setHasInteracted(true);
   };
 
   const openPalettePicker = () => {
     setActivePicker('palette');
-    setHasInteracted(true);
   };
 
   const openSubjectPicker = () => {
     setActivePicker('subject');
-    setHasInteracted(true);
   };
 
   // Close pickers
