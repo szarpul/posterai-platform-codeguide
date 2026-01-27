@@ -166,7 +166,6 @@ export function StylePickerOverlay({ isOpen, onClose, currentStyle, onSelect, on
             key={style.value}
             onClick={() => handleSelect(style.value)}
             onMouseEnter={() => handleHover(style.value)}
-            onMouseLeave={() => setHoveredStyle(null)}
             className="relative group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-2xl"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -243,7 +242,6 @@ export function PalettePickerOverlay({ isOpen, onClose, currentPalette, onSelect
             key={palette.value}
             onClick={() => handleSelect(palette.value)}
             onMouseEnter={() => handleHover(palette.value)}
-            onMouseLeave={() => setHoveredPalette(null)}
             className="relative group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-2xl text-left"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
