@@ -9,6 +9,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import QuestionnairePage from './pages/QuestionnairePage';
+import VibeExplorerPage from './pages/VibeExplorerPage';
 import DraftsPage from './pages/DraftsPage';
 import PosterDetailPage from './pages/PosterDetailPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
@@ -43,6 +44,14 @@ function App() {
                     element={
                       <PrivateRoute>
                         <QuestionnairePage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/vibe-explorer"
+                    element={
+                      <PrivateRoute>
+                        <VibeExplorerPage />
                       </PrivateRoute>
                     }
                   />
