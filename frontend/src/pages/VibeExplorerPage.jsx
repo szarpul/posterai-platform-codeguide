@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import VibeExplorer from '../components/questionnaire/VibeExplorer';
+import InteractivePosterBuilder from '../components/questionnaire/InteractivePosterBuilder';
 import { useQuestionnaire } from '../contexts/QuestionnaireContext';
 import { useAuth } from '../contexts/AuthContext';
 import { API_ENDPOINTS } from '../config/api';
@@ -100,14 +100,8 @@ export default function VibeExplorerPage() {
   const { user, session } = useAuth();
 
   const handleGenerate = async (selection) => {
-    // Convert snake_case to match API expectations
-    const formattedSelection = {
-      artStyle: selection.style,
-      colorPalette: selection.palette,
-      subject: selection.subject,
-    };
-
-    await generateImage(formattedSelection);
+    // InteractivePosterBuilder sends data in correct format (artStyle, colorPalette, subject)
+    await generateImage(selection);
   };
 
   const handleSaveAsDraft = async () => {
@@ -152,7 +146,7 @@ export default function VibeExplorerPage() {
     <div className="min-h-screen bg-cream">
       <AnimatePresence mode="wait">
         {!generatedImage ? (
-          <VibeExplorer key="explorer" onGenerate={handleGenerate} loading={loading} />
+          <InteractivePosterBuilder key="builder" onGenerate={handleGenerate} loading={loading} />
         ) : (
           <div key="result" className="py-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
