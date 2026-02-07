@@ -9,4 +9,5 @@ export const API_ENDPOINTS = {
   ORDERS: `${API_BASE_URL}/orders`,
   QUESTIONNAIRE_OPTIONS: `${API_BASE_URL}/questionnaire/options`,
   QUESTIONNAIRE_BASE: `${API_BASE_URL}/questionnaire`,
+  EMAIL_INSTRUCTIONS: `${API_BASE_URL}/email/instructions`,
 };

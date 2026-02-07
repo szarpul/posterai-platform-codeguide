@@ -34,6 +34,16 @@ class EmailVendor {
   }
 
   /**
+   * Send print instructions email
+   * @param {string} customerEmail - Customer email address
+   * @param {Object} instructionData - Instruction data (image URL, selections)
+   * @returns {Promise<Object>} Email sending result
+   */
+  async sendPrintInstructions(_customerEmail, _instructionData) {
+    throw new Error('Must implement sendPrintInstructions');
+  }
+
+  /**
    * Test the email provider connection
    * @returns {Promise<boolean>} True if connection is successful
    */

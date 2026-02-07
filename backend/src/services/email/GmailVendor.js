@@ -121,6 +121,36 @@ class GmailVendor extends EmailVendor {
   }
 
   /**
+   * Send print instructions email via Gmail
+   * @param {string} customerEmail - Customer email address
+   * @param {Object} instructionData - Instruction data
+   * @returns {Promise<Object>} Email sending result
+   */
+  async sendPrintInstructions(customerEmail, instructionData = {}) {
+    try {
+      EmailUtils.logEmailAttempt('print_instructions', customerEmail, 'Gmail');
+
+      const html = EmailTemplates.createPrintInstructionsHTML(instructionData);
+      const text = EmailTemplates.createPrintInstructionsText(instructionData);
+
+      const mailOptions = {
+        from: this.fromEmail,
+        to: customerEmail,
+        subject: 'Instrukcje wydruku plakatu',
+        html,
+        text,
+      };
+
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('✅ Gmail print instructions sent:', result.messageId);
+      return result;
+    } catch (error) {
+      console.error('❌ Gmail print instructions failed:', error.message);
+      throw error;
+    }
+  }
+
+  /**
    * Test Gmail connection
    * @returns {Promise<boolean>} True if connection is successful
    */

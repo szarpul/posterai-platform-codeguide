@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuestionnaire } from '../contexts/QuestionnaireContext';
 import { useAuth } from '../contexts/AuthContext';
 import { API_ENDPOINTS } from '../config/api';
+import FEATURES from '../config/features';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import Input from '../components/ui/Input';
 
 // Art Style definitions with visual metadata
 const ART_STYLES = [
@@ -513,6 +515,12 @@ function GeneratedResult({
   onSave,
   onCheckout,
   loading,
+  enableStripeCheckout,
+  instructionEmail,
+  onInstructionEmailChange,
+  onRequestInstructions,
+  instructionStatus,
+  instructionSubmitting,
 }) {
   return (
     <motion.div
@@ -574,18 +582,68 @@ function GeneratedResult({
         <Button onClick={onSave} variant="secondary" size="lg">
           Save as Draft
         </Button>
-        <Button onClick={onCheckout} size="lg">
-          Proceed to Checkout
-          <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 8l4 4m0 0l-4 4m4-4H3"
-            />
-          </svg>
-        </Button>
+        {enableStripeCheckout && (
+          <Button onClick={onCheckout} size="lg">
+            Proceed to Checkout
+            <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 8l4 4m0 0l-4 4m4-4H3"
+              />
+            </svg>
+          </Button>
+        )}
       </motion.div>
+
+      {!enableStripeCheckout && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="mt-10"
+        >
+          <Card className="p-6 md:p-8">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-display font-semibold text-charcoal mb-2">
+                Request Print Instructions
+              </h3>
+              <p className="text-charcoal-light">
+                Enter your email and we will send you the next steps to get this poster printed.
+              </p>
+            </div>
+            <form onSubmit={onRequestInstructions} className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <Input
+                  type="email"
+                  name="instructionEmail"
+                  label="Email address"
+                  value={instructionEmail}
+                  onChange={(event) => onInstructionEmailChange(event.target.value)}
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  required
+                />
+              </div>
+              <div className="md:pt-7">
+                <Button type="submit" size="lg" loading={instructionSubmitting}>
+                  Send Instructions
+                </Button>
+              </div>
+            </form>
+            {instructionStatus && (
+              <div
+                className={`mt-4 text-sm ${
+                  instructionStatus.type === 'success' ? 'text-success-600' : 'text-error-600'
+                }`}
+              >
+                {instructionStatus.message}
+              </div>
+            )}
+          </Card>
+        </motion.div>
+      )}
     </motion.div>
   );
 }
@@ -609,6 +667,16 @@ export default function QuestionnairePage() {
   } = useQuestionnaire();
   const navigate = useNavigate();
   const { user, session } = useAuth();
+  const [instructionEmail, setInstructionEmail] = useState('');
+  const [instructionStatus, setInstructionStatus] = useState(null);
+  const [instructionSubmitting, setInstructionSubmitting] = useState(false);
+  const enableStripeCheckout = FEATURES.enableStripeCheckout;
+
+  useEffect(() => {
+    if (user?.email && !instructionEmail) {
+      setInstructionEmail(user.email);
+    }
+  }, [user, instructionEmail]);
 
   const handleStyleSelect = (value) => {
     updateResponse('artStyle', value);
@@ -672,6 +740,50 @@ export default function QuestionnairePage() {
   const handleStartOver = () => {
     setGeneratedImage(null);
     resetQuestionnaire();
+  };
+
+  const handleRequestInstructions = async (event) => {
+    event.preventDefault();
+    setInstructionStatus(null);
+
+    const email = instructionEmail.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      setInstructionStatus({ type: 'error', message: 'Please enter a valid email address.' });
+      return;
+    }
+
+    setInstructionSubmitting(true);
+    try {
+      const response = await fetch(API_ENDPOINTS.EMAIL_INSTRUCTIONS, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          imageUrl: generatedImage,
+          responses,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send instructions.');
+      }
+
+      setInstructionStatus({
+        type: 'success',
+        message: 'Instructions sent! Check your inbox for next steps.',
+      });
+    } catch (err) {
+      console.error('Instruction request error:', err);
+      setInstructionStatus({
+        type: 'error',
+        message: err.message || 'Failed to send instructions. Please try again.',
+      });
+    } finally {
+      setInstructionSubmitting(false);
+    }
   };
 
   return (
@@ -762,6 +874,12 @@ export default function QuestionnairePage() {
             onSave={handleSaveAsDraft}
             onCheckout={() => navigate('/customize')}
             loading={loading}
+            enableStripeCheckout={enableStripeCheckout}
+            instructionEmail={instructionEmail}
+            onInstructionEmailChange={setInstructionEmail}
+            onRequestInstructions={handleRequestInstructions}
+            instructionStatus={instructionStatus}
+            instructionSubmitting={instructionSubmitting}
           />
         )}
       </div>
