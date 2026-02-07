@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/ui/Button';
@@ -51,7 +51,7 @@ export default function RegisterPage() {
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
             className="mx-auto w-16 h-16 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-2xl flex items-center justify-center mb-4"
           >
             <span className="text-white font-bold text-2xl">P</span>
@@ -104,16 +104,13 @@ export default function RegisterPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm your password"
-              error={confirmPassword && password !== confirmPassword ? 'Passwords do not match' : ''}
+              error={
+                confirmPassword && password !== confirmPassword ? 'Passwords do not match' : ''
+              }
               required
             />
 
-            <Button
-              type="submit"
-              loading={loading}
-              fullWidth
-              size="lg"
-            >
+            <Button type="submit" loading={loading} fullWidth size="lg">
               {loading ? 'Creating account...' : 'Create account'}
             </Button>
           </form>
@@ -129,12 +126,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="mt-6">
-              <Button
-                to="/login"
-                variant="outline"
-                fullWidth
-                size="lg"
-              >
+              <Button to="/login" variant="outline" fullWidth size="lg">
                 Sign in instead
               </Button>
             </div>
@@ -143,4 +135,4 @@ export default function RegisterPage() {
       </motion.div>
     </div>
   );
-} 
+}
