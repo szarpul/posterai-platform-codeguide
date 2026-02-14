@@ -65,7 +65,11 @@ function App() {
                     path="/orders"
                     element={
                       <PrivateRoute>
-                        <OrdersPage />
+                        {enableStripeCheckout ? (
+                          <OrdersPage />
+                        ) : (
+                          <Navigate to="/questionnaire" replace />
+                        )}
                       </PrivateRoute>
                     }
                   />
@@ -85,7 +89,11 @@ function App() {
                     path="/checkout/:orderId"
                     element={
                       <PrivateRoute>
-                        <CheckoutPage />
+                        {enableStripeCheckout ? (
+                          <CheckoutPage />
+                        ) : (
+                          <Navigate to="/questionnaire" replace />
+                        )}
                       </PrivateRoute>
                     }
                   />

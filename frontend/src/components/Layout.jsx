@@ -25,8 +25,8 @@ export default function Layout({ children }) {
     { name: 'Drafts', href: '/drafts', protected: true },
     { name: 'Orders', href: '/orders', protected: true },
   ].filter((item) => {
-    if (item.href !== '/drafts') return true;
-    return FEATURES.enableStripeCheckout;
+    if (FEATURES.enableStripeCheckout) return true;
+    return item.href !== '/drafts' && item.href !== '/orders';
   });
 
   const isActive = (path) => location.pathname === path;

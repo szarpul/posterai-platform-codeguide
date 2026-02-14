@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import FEATURES from '../config/features';
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -35,7 +36,7 @@ const Header = () => {
                 PosterAI
               </Link>
             </div>
-            
+
             {user && (
               <nav className="hidden sm:ml-6 sm:flex sm:space-x-4">
                 <Link
@@ -48,26 +49,30 @@ const Header = () => {
                 >
                   Create Poster
                 </Link>
-                <Link
-                  to="/drafts"
-                  className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                    isActive('/drafts')
-                      ? 'text-primary bg-primary/10'
-                      : 'text-gray-600 hover:text-primary hover:bg-primary/5'
-                  }`}
-                >
-                  My Drafts
-                </Link>
-                <Link
-                  to="/orders"
-                  className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                    isActive('/orders')
-                      ? 'text-primary bg-primary/10'
-                      : 'text-gray-600 hover:text-primary hover:bg-primary/5'
-                  }`}
-                >
-                  My Orders
-                </Link>
+                {FEATURES.enableStripeCheckout && (
+                  <>
+                    <Link
+                      to="/drafts"
+                      className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                        isActive('/drafts')
+                          ? 'text-primary bg-primary/10'
+                          : 'text-gray-600 hover:text-primary hover:bg-primary/5'
+                      }`}
+                    >
+                      My Drafts
+                    </Link>
+                    <Link
+                      to="/orders"
+                      className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                        isActive('/orders')
+                          ? 'text-primary bg-primary/10'
+                          : 'text-gray-600 hover:text-primary hover:bg-primary/5'
+                      }`}
+                    >
+                      My Orders
+                    </Link>
+                  </>
+                )}
               </nav>
             )}
           </div>
@@ -76,9 +81,7 @@ const Header = () => {
           <div className="flex items-center">
             {user ? (
               <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-600">
-                  {user.email}
-                </span>
+                <span className="text-sm text-gray-600">{user.email}</span>
                 <button
                   onClick={handleSignOut}
                   className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-primary hover:bg-primary/5 rounded-md"
@@ -113,4 +116,4 @@ const Header = () => {
   );
 };
 
-export default Header; 
+export default Header;
