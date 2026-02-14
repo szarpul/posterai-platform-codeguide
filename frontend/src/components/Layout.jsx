@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import Button from './ui/Button';
+import FEATURES from '../config/features';
 
 export default function Layout({ children }) {
   const { user, signOut } = useAuth();
@@ -23,7 +24,10 @@ export default function Layout({ children }) {
     { name: 'Create', href: '/questionnaire', protected: true },
     { name: 'Drafts', href: '/drafts', protected: true },
     { name: 'Orders', href: '/orders', protected: true },
-  ];
+  ].filter((item) => {
+    if (item.href !== '/drafts') return true;
+    return FEATURES.enableStripeCheckout;
+  });
 
   const isActive = (path) => location.pathname === path;
 

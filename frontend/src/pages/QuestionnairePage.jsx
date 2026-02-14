@@ -579,9 +579,11 @@ function GeneratedResult({
         <Button onClick={onRegenerate} variant="outline" size="lg" loading={loading}>
           Regenerate
         </Button>
-        <Button onClick={onSave} variant="secondary" size="lg">
-          Save as Draft
-        </Button>
+        {enableStripeCheckout && (
+          <Button onClick={onSave} variant="secondary" size="lg">
+            Save as Draft
+          </Button>
+        )}
         {enableStripeCheckout && (
           <Button onClick={onCheckout} size="lg">
             Proceed to Checkout
