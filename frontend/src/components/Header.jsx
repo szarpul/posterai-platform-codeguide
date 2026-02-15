@@ -39,18 +39,18 @@ const Header = () => {
 
             {user && (
               <nav className="hidden sm:ml-6 sm:flex sm:space-x-4">
-                <Link
-                  to="/questionnaire"
-                  className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                    isActive('/questionnaire')
-                      ? 'text-primary bg-primary/10'
-                      : 'text-gray-600 hover:text-primary hover:bg-primary/5'
-                  }`}
-                >
-                  Create Poster
-                </Link>
                 {FEATURES.enableStripeCheckout && (
                   <>
+                    <Link
+                      to="/questionnaire"
+                      className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                        isActive('/questionnaire')
+                          ? 'text-primary bg-primary/10'
+                          : 'text-gray-600 hover:text-primary hover:bg-primary/5'
+                      }`}
+                    >
+                      Create Poster
+                    </Link>
                     <Link
                       to="/drafts"
                       className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${

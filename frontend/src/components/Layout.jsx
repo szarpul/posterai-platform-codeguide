@@ -26,7 +26,7 @@ export default function Layout({ children }) {
     { name: 'Orders', href: '/orders', protected: true },
   ].filter((item) => {
     if (FEATURES.enableStripeCheckout) return true;
-    return item.href !== '/drafts' && item.href !== '/orders';
+    return false;
   });
 
   const isActive = (path) => location.pathname === path;
@@ -53,7 +53,7 @@ export default function Layout({ children }) {
               </Link>
 
               {/* Desktop Navigation */}
-              {user && (
+              {user && navigation.length > 0 && (
                 <div className="hidden md:ml-10 md:flex md:items-center md:space-x-1">
                   {navigation.map((item) => (
                     <Link
