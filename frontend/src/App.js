@@ -15,6 +15,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
 import OrdersPage from './pages/OrdersPage';
+import FEATURES from './config/features';
 
 // Protected route wrapper
 function PrivateRoute({ children }) {
@@ -23,6 +24,8 @@ function PrivateRoute({ children }) {
 }
 
 function App() {
+  const enableStripeCheckout = FEATURES.enableStripeCheckout;
+
   return (
     <ErrorBoundary>
       <ToastProvider>
@@ -36,7 +39,7 @@ function App() {
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                  
+
                   {/* Protected routes */}
                   <Route
                     path="/questionnaire"
@@ -50,7 +53,11 @@ function App() {
                     path="/drafts"
                     element={
                       <PrivateRoute>
-                        <DraftsPage />
+                        {enableStripeCheckout ? (
+                          <DraftsPage />
+                        ) : (
+                          <Navigate to="/questionnaire" replace />
+                        )}
                       </PrivateRoute>
                     }
                   />
@@ -58,7 +65,11 @@ function App() {
                     path="/orders"
                     element={
                       <PrivateRoute>
-                        <OrdersPage />
+                        {enableStripeCheckout ? (
+                          <OrdersPage />
+                        ) : (
+                          <Navigate to="/questionnaire" replace />
+                        )}
                       </PrivateRoute>
                     }
                   />
@@ -66,7 +77,11 @@ function App() {
                     path="/poster/:id"
                     element={
                       <PrivateRoute>
-                        <PosterDetailPage />
+                        {enableStripeCheckout ? (
+                          <PosterDetailPage />
+                        ) : (
+                          <Navigate to="/questionnaire" replace />
+                        )}
                       </PrivateRoute>
                     }
                   />
@@ -74,7 +89,11 @@ function App() {
                     path="/checkout/:orderId"
                     element={
                       <PrivateRoute>
-                        <CheckoutPage />
+                        {enableStripeCheckout ? (
+                          <CheckoutPage />
+                        ) : (
+                          <Navigate to="/questionnaire" replace />
+                        )}
                       </PrivateRoute>
                     }
                   />
@@ -96,4 +115,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;

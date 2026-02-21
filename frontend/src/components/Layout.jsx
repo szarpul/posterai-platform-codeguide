@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import Button from './ui/Button';
+import FEATURES from '../config/features';
 
 export default function Layout({ children }) {
   const { user, signOut } = useAuth();
@@ -23,7 +24,10 @@ export default function Layout({ children }) {
     { name: 'Create', href: '/questionnaire', protected: true },
     { name: 'Drafts', href: '/drafts', protected: true },
     { name: 'Orders', href: '/orders', protected: true },
-  ];
+  ].filter((item) => {
+    if (FEATURES.enableStripeCheckout) return true;
+    return false;
+  });
 
   const isActive = (path) => location.pathname === path;
 
@@ -49,7 +53,7 @@ export default function Layout({ children }) {
               </Link>
 
               {/* Desktop Navigation */}
-              {user && (
+              {user && navigation.length > 0 && (
                 <div className="hidden md:ml-10 md:flex md:items-center md:space-x-1">
                   {navigation.map((item) => (
                     <Link

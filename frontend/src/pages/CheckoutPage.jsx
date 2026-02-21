@@ -4,6 +4,7 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 import { useAuth } from '../contexts/AuthContext';
 import paymentService from '../services/paymentService';
 import stripePromise from '../lib/stripe';
+import FEATURES from '../config/features';
 
 const CheckoutForm = ({ order, clientSecret }) => {
   const stripe = useStripe();
@@ -85,12 +86,18 @@ const CheckoutPage = () => {
   const [clientSecret, setClientSecret] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const enableStripeCheckout = FEATURES.enableStripeCheckout;
 
   useEffect(() => {
     const initializeCheckout = async () => {
       try {
         if (!user) {
           navigate('/login');
+          return;
+        }
+
+        if (!enableStripeCheckout) {
+          setLoading(false);
           return;
         }
 
@@ -110,7 +117,24 @@ const CheckoutPage = () => {
     };
 
     initializeCheckout();
-  }, [orderId, user, navigate]);
+  }, [orderId, user, navigate, enableStripeCheckout]);
+
+  if (!enableStripeCheckout) {
+    return (
+      <div className="min-h-screen bg-neutral-light p-6 flex items-center justify-center">
+        <div className="text-center max-w-lg">
+          <h2 className="text-2xl font-semibold mb-3">Checkout is currently disabled</h2>
+          <p className="text-charcoal-light mb-6">
+            Payment is temporarily unavailable. Please return to your drafts or request print
+            instructions from the generated poster screen.
+          </p>
+          <button onClick={() => navigate('/drafts')} className="btn-secondary">
+            Back to Drafts
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

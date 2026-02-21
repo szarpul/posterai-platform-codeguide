@@ -134,6 +134,39 @@ class ResendVendor extends EmailVendor {
   }
 
   /**
+   * Send print instructions email via Resend
+   * @param {string} customerEmail - Customer email address
+   * @param {Object} instructionData - Instruction data
+   * @returns {Promise<Object>} Email sending result
+   */
+  async sendPrintInstructions(customerEmail, instructionData = {}) {
+    try {
+      EmailUtils.logEmailAttempt('print_instructions', customerEmail, this.getVendorName());
+
+      const html = EmailTemplates.createPrintInstructionsHTML(instructionData);
+      const text = EmailTemplates.createPrintInstructionsText(instructionData);
+
+      const result = await this.resend.emails.send({
+        from: this.fromEmail,
+        to: customerEmail,
+        subject: 'Instrukcje wydruku plakatu',
+        html,
+        text,
+      });
+
+      console.log('✅ Resend print instructions sent:', result.data?.id);
+      return {
+        success: true,
+        messageId: result.data?.id,
+        customerEmail,
+      };
+    } catch (error) {
+      console.error('❌ Resend print instructions failed:', error.message);
+      throw error;
+    }
+  }
+
+  /**
    * Test the Resend connection
    * @returns {Promise<boolean>} Connection test result
    */

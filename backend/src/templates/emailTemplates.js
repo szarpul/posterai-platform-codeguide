@@ -243,6 +243,110 @@ PosterAI Platform
   }
 
   /**
+   * Create HTML template for print instructions email
+   * @param {Object} data - Instruction email data
+   * @returns {string} HTML template
+   */
+  static createPrintInstructionsHTML(data) {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instrukcje wydruku plakatu</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #0D9488; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }
+        .section { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .poster-preview { text-align: center; margin: 20px 0; }
+        .poster-preview img { max-width: 260px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .info-row { display: flex; justify-content: space-between; margin: 10px 0; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .info-label { font-weight: bold; }
+        .button { background: #1E3A8A; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 10px 0; }
+        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖼️ Instrukcje wydruku plakatu</h1>
+            <p>Dziękujemy za zainteresowanie wydrukiem</p>
+        </div>
+
+        <div class="content">
+            <p>Cześć!</p>
+            <p>Otrzymaliśmy Twoją prośbę o instrukcje wydruku. Poniżej znajdziesz podsumowanie plakatu i kolejne kroki.</p>
+
+            ${data.imageUrl ? `
+            <div class="poster-preview">
+                <img src="${data.imageUrl}" alt="Podgląd plakatu" />
+            </div>
+            ` : ''}
+
+            <div class="section">
+                <h3>🎨 Wybrane ustawienia</h3>
+                ${data.selections?.length ? data.selections.map((item) => `
+                  <div class="info-row">
+                      <span class="info-label">${item.label}:</span>
+                      <span>${item.value}</span>
+                  </div>
+                `).join('') : '<p>Brak dodatkowych szczegółów.</p>'}
+            </div>
+
+            <div class="section">
+                <h3>✅ Co dalej?</h3>
+                <ol>
+                    <li>Odpisz na ten email z preferowanym rozmiarem (A4, A3, A2) oraz wykończeniem (matowe lub błyszczące).</li>
+                    <li>Podaj adres dostawy w Polsce.</li>
+                    <li>Otrzymasz potwierdzenie oraz instrukcję płatności.</li>
+                </ol>
+                <p>Jeśli wolisz, możesz też skontaktować się z nami bezpośrednio:</p>
+                <a href="mailto:support@posterai.pl" class="button">Skontaktuj się z nami</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>PosterAI Platform</p>
+        </div>
+    </div>
+</body>
+</html>`;
+  }
+
+  /**
+   * Create text version for print instructions email
+   * @param {Object} data - Instruction email data
+   * @returns {string} Text version
+   */
+  static createPrintInstructionsText(data) {
+    const selectionsText = data.selections?.length
+      ? data.selections.map((item) => `- ${item.label}: ${item.value}`).join('\n')
+      : 'Brak dodatkowych szczegółów.';
+
+    return `
+Instrukcje wydruku plakatu
+
+Dziękujemy za zainteresowanie wydrukiem!
+
+Wybrane ustawienia:
+${selectionsText}
+
+Podgląd plakatu: ${data.imageUrl || 'Brak podglądu'}
+
+Co dalej?
+1) Odpisz na ten email z preferowanym rozmiarem (A4, A3, A2) i wykończeniem (matowe/błyszczące).
+2) Podaj adres dostawy w Polsce.
+3) Otrzymasz potwierdzenie oraz instrukcję płatności.
+
+Kontakt: support@posterai.pl
+PosterAI Platform
+`;
+  }
+
+  /**
    * Get status text in Polish
    * @param {string} status - Status code
    * @returns {string} Status text

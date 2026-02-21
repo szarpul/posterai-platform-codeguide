@@ -39,6 +39,21 @@ class EmailService {
   }
 
   /**
+   * Send print instructions email
+   * @param {string} customerEmail - Customer email address
+   * @param {Object} instructionData - Instruction data
+   * @returns {Promise<Object>} Email sending result
+   */
+  async sendPrintInstructions(customerEmail, instructionData) {
+    try {
+      return await this.vendor.sendPrintInstructions(customerEmail, instructionData);
+    } catch (error) {
+      console.error('EmailService.sendPrintInstructions failed:', error.message);
+      throw error;
+    }
+  }
+
+  /**
    * Test email service connection
    * @returns {Promise<boolean>} True if connection is successful
    */
