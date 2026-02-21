@@ -15,34 +15,46 @@ export const useToast = () => {
 const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
-  const addToast = useCallback(({ message, type = 'info', duration = 5000 }) => {
-    const id = Date.now();
-    const newToast = { id, message, type, duration };
-    
-    setToasts(prev => [...prev, newToast]);
-    
-    if (duration > 0) {
-      setTimeout(() => {
-        removeToast(id);
-      }, duration);
-    }
-  }, []);
-
   const removeToast = useCallback((id) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
-  const success = useCallback((message, duration) => {
-    addToast({ message, type: 'success', duration });
-  }, [addToast]);
+  const addToast = useCallback(
+    ({ message, type = 'info', duration = 5000 }) => {
+      const id = Date.now();
+      const newToast = { id, message, type, duration };
 
-  const error = useCallback((message, duration) => {
-    addToast({ message, type: 'error', duration });
-  }, [addToast]);
+      setToasts((prev) => [...prev, newToast]);
 
-  const info = useCallback((message, duration) => {
-    addToast({ message, type: 'info', duration });
-  }, [addToast]);
+      if (duration > 0) {
+        setTimeout(() => {
+          removeToast(id);
+        }, duration);
+      }
+    },
+    [removeToast]
+  );
+
+  const success = useCallback(
+    (message, duration) => {
+      addToast({ message, type: 'success', duration });
+    },
+    [addToast]
+  );
+
+  const error = useCallback(
+    (message, duration) => {
+      addToast({ message, type: 'error', duration });
+    },
+    [addToast]
+  );
+
+  const info = useCallback(
+    (message, duration) => {
+      addToast({ message, type: 'info', duration });
+    },
+    [addToast]
+  );
 
   return (
     <ToastContext.Provider value={{ addToast, success, error, info, removeToast }}>
@@ -84,7 +96,7 @@ const Toast = ({ toast, onClose }) => {
           border: 'border-success-200',
           text: 'text-success-800',
           icon: '✓',
-          iconBg: 'bg-success-500'
+          iconBg: 'bg-success-500',
         };
       case 'error':
         return {
@@ -92,7 +104,7 @@ const Toast = ({ toast, onClose }) => {
           border: 'border-error-200',
           text: 'text-error-800',
           icon: '✕',
-          iconBg: 'bg-error-500'
+          iconBg: 'bg-error-500',
         };
       case 'info':
       default:
@@ -101,7 +113,7 @@ const Toast = ({ toast, onClose }) => {
           border: 'border-primary-200',
           text: 'text-primary-800',
           icon: 'ℹ',
-          iconBg: 'bg-primary-500'
+          iconBg: 'bg-primary-500',
         };
     }
   };
@@ -111,13 +123,13 @@ const Toast = ({ toast, onClose }) => {
   return (
     <div className={`${styles.bg} ${styles.border} border rounded-lg shadow-medium p-4`}>
       <div className="flex items-start">
-        <div className={`${styles.iconBg} rounded-full w-6 h-6 flex items-center justify-center text-white text-sm font-bold mr-3 mt-0.5`}>
+        <div
+          className={`${styles.iconBg} rounded-full w-6 h-6 flex items-center justify-center text-white text-sm font-bold mr-3 mt-0.5`}
+        >
           {styles.icon}
         </div>
         <div className="flex-1">
-          <p className={`${styles.text} text-sm font-medium`}>
-            {message}
-          </p>
+          <p className={`${styles.text} text-sm font-medium`}>{message}</p>
         </div>
         <button
           onClick={onClose}
@@ -125,7 +137,12 @@ const Toast = ({ toast, onClose }) => {
         >
           <span className="sr-only">Close</span>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>

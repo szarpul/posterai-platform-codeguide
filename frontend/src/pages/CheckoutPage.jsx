@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useAuth } from '../contexts/AuthContext';
 import paymentService from '../services/paymentService';
@@ -79,7 +79,6 @@ const CheckoutForm = ({ order, clientSecret }) => {
 
 const CheckoutPage = () => {
   const { orderId } = useParams();
-  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [order, setOrder] = useState(null);
