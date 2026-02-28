@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { API_ENDPOINTS } from '../config/api';
+import FEATURES from '../config/features';
 
 // Helper function for default subject options (fallback)
 function getDefaultSubjectOptions(artStyle) {
@@ -69,6 +70,21 @@ export function QuestionnaireProvider({ children }) {
   const [error, setError] = useState('');
   const [questionnaireOptions, setQuestionnaireOptions] = useState(null);
   const [subjectOptions, setSubjectOptions] = useState([]);
+
+  // Restore preserved state when returning from login (e.g. after Save/Checkout redirect)
+  useEffect(() => {
+    const preserved = sessionStorage.getItem('questionnaire_preserved_state');
+    if (preserved) {
+      try {
+        const { generatedImage: savedImage, responses: savedResponses } = JSON.parse(preserved);
+        if (savedImage) setGeneratedImage(savedImage);
+        if (savedResponses) setResponses(savedResponses);
+      } catch (e) {
+        console.warn('Failed to restore questionnaire state:', e);
+      }
+      sessionStorage.removeItem('questionnaire_preserved_state');
+    }
+  }, []);
 
   // Load questionnaire options on mount
   useEffect(() => {
@@ -164,7 +180,7 @@ export function QuestionnaireProvider({ children }) {
 
   const generateImage = async (overrideResponses) => {
     try {
-      if (!user || !session?.access_token) {
+      if (!FEATURES.enableAnonymousImageGeneration && (!user || !session?.access_token)) {
         setError('Please log in to generate images');
         return;
       }
@@ -180,12 +196,14 @@ export function QuestionnaireProvider({ children }) {
         subject: payload.subject,
       };
 
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(session?.access_token && { Authorization: `Bearer ${session.access_token}` }),
+      };
+
       const response = await fetch(API_ENDPOINTS.GENERATE_IMAGE, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers,
         body: JSON.stringify(requestPayload),
       });
 

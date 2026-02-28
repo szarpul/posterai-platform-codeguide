@@ -25,6 +25,7 @@ function PrivateRoute({ children }) {
 
 function App() {
   const enableStripeCheckout = FEATURES.enableStripeCheckout;
+  const enableAnonymousImageGeneration = FEATURES.enableAnonymousImageGeneration;
 
   return (
     <ErrorBoundary>
@@ -40,13 +41,17 @@ function App() {
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-                  {/* Protected routes */}
+                  {/* Questionnaire: public when anonymous generation enabled, otherwise protected */}
                   <Route
                     path="/questionnaire"
                     element={
-                      <PrivateRoute>
+                      enableAnonymousImageGeneration ? (
                         <QuestionnairePage />
-                      </PrivateRoute>
+                      ) : (
+                        <PrivateRoute>
+                          <QuestionnairePage />
+                        </PrivateRoute>
+                      )
                     }
                   />
                   <Route

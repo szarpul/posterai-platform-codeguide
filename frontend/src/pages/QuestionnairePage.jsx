@@ -673,6 +673,7 @@ export default function QuestionnairePage() {
   const [instructionStatus, setInstructionStatus] = useState(null);
   const [instructionSubmitting, setInstructionSubmitting] = useState(false);
   const enableStripeCheckout = FEATURES.enableStripeCheckout;
+  const enableAnonymousImageGeneration = FEATURES.enableAnonymousImageGeneration;
 
   useEffect(() => {
     if (user?.email && !instructionEmail) {
@@ -694,7 +695,7 @@ export default function QuestionnairePage() {
     updateResponse('subject', value);
 
     setTimeout(async () => {
-      if (!user) {
+      if (!enableAnonymousImageGeneration && !user) {
         sessionStorage.setItem(
           'questionnaire_responses',
           JSON.stringify({ ...responses, subject: value })
@@ -707,6 +708,15 @@ export default function QuestionnairePage() {
   };
 
   const handleSaveAsDraft = async () => {
+    if (enableAnonymousImageGeneration && !user) {
+      sessionStorage.setItem(
+        'questionnaire_preserved_state',
+        JSON.stringify({ generatedImage, responses })
+      );
+      navigate('/login', { state: { returnTo: '/questionnaire' } });
+      return;
+    }
+
     try {
       const response = await fetch(API_ENDPOINTS.DRAFTS, {
         method: 'POST',
@@ -874,7 +884,17 @@ export default function QuestionnairePage() {
             onStartOver={handleStartOver}
             onRegenerate={handleRegenerate}
             onSave={handleSaveAsDraft}
-            onCheckout={() => navigate('/customize')}
+            onCheckout={() => {
+              if (enableAnonymousImageGeneration && !user) {
+                sessionStorage.setItem(
+                  'questionnaire_preserved_state',
+                  JSON.stringify({ generatedImage, responses })
+                );
+                navigate('/login', { state: { returnTo: '/questionnaire' } });
+                return;
+              }
+              navigate('/customize');
+            }}
             loading={loading}
             enableStripeCheckout={enableStripeCheckout}
             instructionEmail={instructionEmail}

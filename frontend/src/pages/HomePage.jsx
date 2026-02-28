@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import FEATURES from '../config/features';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
@@ -43,6 +44,7 @@ function Blob({ className, color = 'terracotta' }) {
 
 export default function HomePage() {
   const { user } = useAuth();
+  const enableAnonymousImageGeneration = FEATURES.enableAnonymousImageGeneration;
 
   const features = [
     {
@@ -193,6 +195,28 @@ export default function HomePage() {
                     />
                   </svg>
                 </Button>
+              ) : enableAnonymousImageGeneration ? (
+                <>
+                  <Button to="/questionnaire" size="xl">
+                    Start Creating
+                    <svg
+                      className="w-5 h-5 ml-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 8l4 4m0 0l-4 4m4-4H3"
+                      />
+                    </svg>
+                  </Button>
+                  <Button to="/login" variant="outline" size="xl">
+                    Sign In
+                  </Button>
+                </>
               ) : (
                 <>
                   <Button to="/register" size="xl">
@@ -356,8 +380,12 @@ export default function HomePage() {
               <p className="text-xl text-white/80 mb-8 max-w-xl mx-auto">
                 Join thousands of creators who have transformed their ideas into stunning wall art.
               </p>
-              <Button to={user ? '/questionnaire' : '/register'} variant="white" size="xl">
-                {user ? 'Start Creating' : 'Get Started Free'}
+              <Button
+                to={user || enableAnonymousImageGeneration ? '/questionnaire' : '/register'}
+                variant="white"
+                size="xl"
+              >
+                {user || enableAnonymousImageGeneration ? 'Start Creating' : 'Get Started Free'}
                 <svg className="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
