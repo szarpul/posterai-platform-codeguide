@@ -1,7 +1,11 @@
 const request = require('supertest');
 const express = require('express');
-const imageRoutes = require('../../src/routes/images');
 const { mockAuthMiddleware } = require('../helpers');
+
+// Use stub image generation to avoid calling real APIs
+process.env.IMAGE_GENERATION_PROVIDER = 'stub';
+
+const imageRoutes = require('../../src/routes/images');
 
 // Mock token for testing
 const validToken = 'mock-jwt-token';

@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, optionalAuth } = require('../middleware/auth');
 const ImageGeneratorService = require('../services/imageGenerator');
 const supabase = require('../lib/supabase');
+const features = require('../config/features');
 
 // Generate image from questionnaire options
 // Supports both new 3-step format (artStyle, colorPalette, subject) and old format (theme, palette, style, emotion)
-router.post('/generate', requireAuth, async (req, res) => {
+// When ENABLE_ANONYMOUS_IMAGE_GENERATION=true, accepts anonymous requests; otherwise requires auth
+router.post('/generate', features.enableAnonymousImageGeneration ? optionalAuth : requireAuth, async (req, res) => {
   try {
     const { 
       // New 3-step format

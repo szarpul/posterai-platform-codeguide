@@ -157,6 +157,7 @@ jest.mock('stripe', () => jest.fn(() => mockStripe));
 jest.mock('../src/lib/printingService', () => mockPrintingService);
 jest.mock('../src/middleware/auth', () => ({
   requireAuth: mockAuthMiddleware,
+  optionalAuth: mockAuthMiddleware,
 }));
 
 module.exports = {
