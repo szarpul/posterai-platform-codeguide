@@ -6,44 +6,25 @@ import FEATURES from '../config/features';
 // Helper function for default subject options (fallback)
 function getDefaultSubjectOptions(artStyle) {
   const mappings = {
-    abstract_geometric: [
-      { value: 'organic_shapes', label: 'Organic Shapes' },
-      { value: 'geometric_patterns', label: 'Geometric Patterns' },
-      { value: 'fluid_forms', label: 'Fluid Forms' },
+    painterly_minimalism: [
+      { value: 'landscape_horizon', label: 'Landscape (Horizon)' },
+      { value: 'silhouette', label: 'Silhouette' },
+      { value: 'abstract_form', label: 'Abstract Form' },
     ],
-    minimalist: [
-      { value: 'lines', label: 'Lines' },
-      { value: 'shapes', label: 'Shapes' },
-      { value: 'negative_space', label: 'Negative Space' },
-      { value: 'simple_forms', label: 'Simple Forms' },
+    organic_abstraction: [
+      { value: 'landscape_emotion', label: 'Landscape (Emotion)' },
+      { value: 'organic_form', label: 'Organic Form' },
+      { value: 'deconstructed_portrait', label: 'Deconstructed Portrait' },
     ],
-    botanical: [
-      { value: 'flowers', label: 'Flowers' },
-      { value: 'leaves', label: 'Leaves' },
-      { value: 'trees', label: 'Trees' },
-      { value: 'abstract_plants', label: 'Abstract Plants' },
+    contemporary_impressionism: [
+      { value: 'landscape', label: 'Landscape' },
+      { value: 'nature', label: 'Nature' },
+      { value: 'architecture', label: 'Architecture' },
     ],
-    landscape: [
-      { value: 'mountains', label: 'Mountains' },
-      { value: 'ocean', label: 'Ocean' },
-      { value: 'forest', label: 'Forest' },
-      { value: 'desert', label: 'Desert' },
-    ],
-    surreal: [
-      { value: 'dreamscapes', label: 'Dreamscapes' },
-      { value: 'abstract_forms', label: 'Abstract Forms' },
-      { value: 'unexpected_combinations', label: 'Unexpected Combinations' },
-    ],
-    retro_vintage: [
+    mid_century_modern: [
       { value: 'travel_poster', label: 'Travel Poster' },
-      { value: 'mid_century_modern', label: 'Mid-Century Modern' },
-      { value: 'psychedelic', label: 'Psychedelic' },
-    ],
-    cosmic_space: [
-      { value: 'planets', label: 'Planets' },
-      { value: 'nebulas', label: 'Nebulas' },
-      { value: 'stars', label: 'Stars' },
-      { value: 'galaxies', label: 'Galaxies' },
+      { value: 'atomic_age_graphics', label: 'Atomic-Age Graphics' },
+      { value: 'geometric_patterns', label: 'Geometric Patterns' },
     ],
   };
   return mappings[artStyle] || [];
