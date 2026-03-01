@@ -30,15 +30,12 @@ class ImageGeneratorService {
   }
 
   static buildPromptNewFormat({ artStyle, colorPalette, subject }) {
-    // Art Style mappings for new 3-step visual questionnaire
+    // Art Style mappings for 4-style visual questionnaire
     const artStyleMappings = {
-      'abstract_geometric': 'abstract geometric composition, clean lines, geometric patterns, modern design',
-      'minimalist': 'minimalist design, simple forms, strong use of negative space, clean aesthetic',
-      'botanical': 'botanical art, organic forms, plant-based imagery, natural elements',
-      'landscape': 'landscape art, scenic views, natural environments, atmospheric perspective',
-      'surreal': 'surreal art, dreamlike imagery, unexpected combinations, ethereal atmosphere',
-      'retro_vintage': 'retro vintage style, mid-century modern aesthetic, nostalgic design, classic poster art',
-      'cosmic_space': 'cosmic space art, celestial imagery, nebulas, galaxies, astronomical themes'
+      'painterly_minimalism': 'painterly minimalism, simple forms, clean lines, strong use of negative space, calm compositions, minimal silhouettes, sparse and serene aesthetic',
+      'organic_abstraction': 'organic abstraction, flowing shapes, natural forms, soft curves, harmonious colors, organic forms inspired by nature, biomorphic shapes',
+      'contemporary_impressionism': 'contemporary impressionism, painterly brushstrokes, light and shadow interplay, atmospheric scenes, vivid color impressions, loose expressive technique',
+      'mid_century_modern': 'mid-century modern style, vintage travel poster aesthetic, atomic-age graphics, retro 1950s-1960s design, bold flat shapes, nostalgic illustration'
     };
 
     // Color Palette mappings
@@ -54,44 +51,25 @@ class ImageGeneratorService {
 
     // Subject mappings (dynamic based on art style)
     const subjectMappings = {
-      'abstract_geometric': {
-        'organic_shapes': 'organic shapes, flowing forms, natural curves',
-        'geometric_patterns': 'geometric patterns, repeating shapes, structured design',
-        'fluid_forms': 'fluid forms, dynamic movement, abstract composition'
+      'painterly_minimalism': {
+        'landscape_horizon': 'minimal landscape with a serene horizon line, vast sky, calm simplicity',
+        'silhouette': 'minimal silhouette, single figure or object reduced to essential form, strong contrast',
+        'abstract_form': 'abstract geometric or organic form, minimal composition, balanced negative space'
       },
-      'minimalist': {
-        'lines': 'simple lines, linear elements, geometric lines',
-        'shapes': 'basic shapes, geometric forms, simple compositions',
-        'negative_space': 'strong negative space, balanced composition, clean design',
-        'simple_forms': 'simple forms, reduced elements, essential shapes'
+      'organic_abstraction': {
+        'landscape_emotion': 'abstract landscape evoking emotion, flowing terrain forms, expressive natural shapes',
+        'organic_form': 'organic abstract form, biomorphic shapes, flowing natural curves, nature-inspired abstraction',
+        'deconstructed_portrait': 'deconstructed portrait, abstract facial features, flowing organic lines, expressive and fluid'
       },
-      'botanical': {
-        'flowers': 'flowers, floral elements, botanical illustrations',
-        'leaves': 'leaves, foliage, plant details, natural textures',
-        'trees': 'trees, branches, natural growth patterns',
-        'abstract_plants': 'abstract plant forms, stylized botanical elements'
+      'contemporary_impressionism': {
+        'landscape': 'impressionist landscape, scenic vista, atmospheric depth, painterly sky and terrain',
+        'nature': 'impressionist nature scene, flowers, trees, or garden, dappled light, lush color',
+        'architecture': 'impressionist architectural scene, buildings or streetscape, light reflections, urban atmosphere'
       },
-      'landscape': {
-        'mountains': 'mountain landscapes, peaks, scenic vistas',
-        'ocean': 'ocean scenes, seascapes, coastal views',
-        'forest': 'forest scenes, woodland, natural environments',
-        'desert': 'desert landscapes, arid scenes, vast horizons'
-      },
-      'surreal': {
-        'dreamscapes': 'dreamlike landscapes, surreal environments, fantastical scenes',
-        'abstract_forms': 'abstract forms, non-representational elements, conceptual imagery',
-        'unexpected_combinations': 'unexpected combinations, juxtaposed elements, surreal compositions'
-      },
-      'retro_vintage': {
-        'travel_poster': 'travel poster style, vintage tourism, classic destinations',
-        'mid_century_modern': 'mid-century modern design, retro aesthetic, 1950s-60s style',
-        'psychedelic': 'psychedelic art, vibrant patterns, 1960s-70s aesthetic'
-      },
-      'cosmic_space': {
-        'planets': 'planets, celestial bodies, astronomical objects',
-        'nebulas': 'nebulas, cosmic clouds, stellar formations',
-        'stars': 'stars, starfields, celestial patterns',
-        'galaxies': 'galaxies, spiral formations, cosmic structures'
+      'mid_century_modern': {
+        'travel_poster': 'vintage travel poster, classic destination illustration, bold typography area, retro tourism art',
+        'atomic_age_graphics': 'atomic-age graphics, starburst patterns, boomerang shapes, space-age optimism, 1950s futurism',
+        'geometric_patterns': 'mid-century geometric patterns, repeating shapes, bold color blocks, retro textile-inspired design'
       }
     };
 

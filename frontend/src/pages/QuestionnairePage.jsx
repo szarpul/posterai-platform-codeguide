@@ -13,53 +13,32 @@ import Input from '../components/ui/Input';
 // Art Style definitions with visual metadata
 const ART_STYLES = [
   {
-    value: 'abstract_geometric',
-    label: 'Abstract Geometric',
-    description: 'Bold shapes and mathematical precision',
-    gradient: 'from-rose-400 via-fuchsia-500 to-indigo-500',
-    icon: '◆',
-  },
-  {
-    value: 'minimalist',
-    label: 'Minimalist',
-    description: 'Clean lines, essential forms',
-    gradient: 'from-stone-300 via-stone-400 to-stone-500',
+    value: 'painterly_minimalism',
+    label: 'Painterly Minimalism',
+    description: 'Simple forms, clean lines, negative space. Calm compositions with horizons, geometric shapes, and minimal silhouettes.',
+    gradient: 'from-stone-200 via-stone-300 to-stone-400',
     icon: '○',
   },
   {
-    value: 'botanical',
-    label: 'Botanical',
-    description: "Nature's intricate beauty",
-    gradient: 'from-emerald-400 via-green-500 to-teal-500',
-    icon: '❀',
+    value: 'organic_abstraction',
+    label: 'Organic Abstraction',
+    description: 'Flowing shapes, natural forms, soft curves. Harmonious colors with organic forms inspired by nature.',
+    gradient: 'from-emerald-400 via-teal-500 to-cyan-500',
+    icon: '◎',
   },
   {
-    value: 'landscape',
-    label: 'Landscape',
-    description: 'Horizons that inspire',
+    value: 'contemporary_impressionism',
+    label: 'Contemporary Impressionism',
+    description: 'Painterly brushstrokes, light and shadow interplay. Atmospheric scenes with landscapes, nature, and colorful impressions.',
     gradient: 'from-sky-400 via-blue-500 to-indigo-500',
     icon: '▲',
   },
   {
-    value: 'surreal',
-    label: 'Surreal',
-    description: 'Dreams made visible',
-    gradient: 'from-violet-400 via-purple-500 to-fuchsia-500',
-    icon: '◎',
-  },
-  {
-    value: 'retro_vintage',
-    label: 'Retro Vintage',
-    description: 'Nostalgic charm',
+    value: 'mid_century_modern',
+    label: 'Mid-Century Modern',
+    description: 'Vintage travel posters, atomic-age graphics. Retro 50s-60s aesthetic with geometric patterns and nostalgic charm.',
     gradient: 'from-amber-400 via-orange-500 to-red-500',
     icon: '✦',
-  },
-  {
-    value: 'cosmic_space',
-    label: 'Cosmic Space',
-    description: 'The infinite beyond',
-    gradient: 'from-indigo-500 via-purple-600 to-slate-800',
-    icon: '★',
   },
 ];
 
@@ -165,7 +144,7 @@ function ProgressSteps({ currentStep }) {
   );
 }
 
-// Art Style Card
+// Art Style Card — larger format for 2x2 grid
 function StyleCard({ style, isSelected, onClick, index, imageUrl }) {
   return (
     <motion.button
@@ -173,40 +152,33 @@ function StyleCard({ style, isSelected, onClick, index, imageUrl }) {
       className="group relative w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded-2xl"
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.08, duration: 0.4 }}
-      whileHover={{ y: -6 }}
+      transition={{ delay: index * 0.1, duration: 0.4 }}
+      whileHover={{ y: -8 }}
       whileTap={{ scale: 0.98 }}
     >
       <div
         className={`relative overflow-hidden rounded-2xl transition-all duration-300 ${
           isSelected
-            ? 'ring-4 ring-primary-500 ring-offset-2 ring-offset-cream'
-            : 'ring-1 ring-charcoal/10 hover:ring-2 hover:ring-primary-300'
+            ? 'ring-4 ring-primary-500 ring-offset-2 ring-offset-cream shadow-large'
+            : 'ring-1 ring-charcoal/10 hover:ring-2 hover:ring-primary-300 hover:shadow-medium'
         }`}
       >
-        {/* Gradient Background */}
+        {/* Image / Gradient area */}
         <div className={`aspect-[4/3] bg-gradient-to-br ${style.gradient} relative`}>
-          {imageUrl && (
+          {imageUrl ? (
             <img
               src={imageUrl}
               alt={style.label}
-              className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50"
+              className="absolute inset-0 w-full h-full object-cover"
             />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-white/15 text-9xl font-light select-none">{style.icon}</span>
+            </div>
           )}
 
-          {/* Decorative Icon */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-white/20 text-8xl font-light select-none">{style.icon}</span>
-          </div>
-
-          {/* Overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-
-          {/* Content */}
-          <div className="absolute bottom-0 left-0 right-0 p-5">
-            <h3 className="text-xl font-display font-semibold text-white mb-1">{style.label}</h3>
-            <p className="text-white/70 text-sm">{style.description}</p>
-          </div>
+          {/* Overlay gradient for readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
           {/* Selection Indicator */}
           <AnimatePresence>
@@ -215,10 +187,10 @@ function StyleCard({ style, isSelected, onClick, index, imageUrl }) {
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.5 }}
-                className="absolute top-4 right-4 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-large"
+                className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-large"
               >
                 <svg
-                  className="w-5 h-5 text-primary-500"
+                  className="w-6 h-6 text-primary-500"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -229,6 +201,14 @@ function StyleCard({ style, isSelected, onClick, index, imageUrl }) {
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+
+        {/* Text area */}
+        <div className={`p-5 transition-colors duration-300 ${isSelected ? 'bg-primary-50' : 'bg-white'}`}>
+          <h3 className={`text-lg font-display font-semibold mb-1.5 transition-colors ${isSelected ? 'text-primary-700' : 'text-charcoal'}`}>
+            {style.label}
+          </h3>
+          <p className="text-charcoal-light text-sm leading-relaxed">{style.description}</p>
         </div>
       </div>
     </motion.button>
@@ -317,8 +297,8 @@ function PaletteCard({ palette, isSelected, onClick, index, apiColors }) {
   );
 }
 
-// Subject Card
-function SubjectCard({ option, isSelected, onClick, index }) {
+// Subject Card — with image/gradient support for 3-col layout
+function SubjectCard({ option, isSelected, onClick, index, styleGradient }) {
   const label =
     option.label || option.value.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 
@@ -328,48 +308,70 @@ function SubjectCard({ option, isSelected, onClick, index }) {
       className="group relative w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded-2xl"
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05, duration: 0.3 }}
-      whileHover={{ y: -4 }}
+      transition={{ delay: index * 0.08, duration: 0.35 }}
+      whileHover={{ y: -6 }}
       whileTap={{ scale: 0.98 }}
     >
-      <Card
-        hover={false}
-        className={`text-center transition-all duration-300 ${
+      <div
+        className={`relative overflow-hidden rounded-2xl transition-all duration-300 ${
           isSelected
-            ? 'ring-4 ring-primary-500 ring-offset-2 ring-offset-cream bg-primary-50'
-            : 'ring-1 ring-charcoal/10 hover:ring-2 hover:ring-primary-300'
+            ? 'ring-4 ring-primary-500 ring-offset-2 ring-offset-cream shadow-large'
+            : 'ring-1 ring-charcoal/10 hover:ring-2 hover:ring-primary-300 hover:shadow-medium'
         }`}
       >
-        <h3
-          className={`font-display font-medium transition-colors ${
-            isSelected ? 'text-primary-700' : 'text-charcoal group-hover:text-primary-600'
-          }`}
-        >
-          {label}
-        </h3>
-
-        <AnimatePresence>
-          {isSelected && (
-            <motion.div
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 5 }}
-              className="mt-2 text-primary-600 text-sm font-medium flex items-center justify-center"
-            >
-              <svg
-                className="w-4 h-4 mr-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              Selected
-            </motion.div>
+        {/* Image / Gradient area */}
+        <div className={`aspect-[4/3] bg-gradient-to-br ${styleGradient || 'from-stone-200 to-stone-300'} relative`}>
+          {option.image_url ? (
+            <img
+              src={option.image_url}
+              alt={label}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-white/20 text-6xl font-light select-none">
+                {option.icon || '◇'}
+              </span>
+            </div>
           )}
-        </AnimatePresence>
-      </Card>
+
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
+          {/* Selection Indicator */}
+          <AnimatePresence>
+            {isSelected && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-large"
+              >
+                <svg
+                  className="w-5 h-5 text-primary-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Text area */}
+        <div className={`px-4 py-3 text-center transition-colors duration-300 ${isSelected ? 'bg-primary-50' : 'bg-white'}`}>
+          <h3
+            className={`font-display font-semibold transition-colors ${
+              isSelected ? 'text-primary-700' : 'text-charcoal group-hover:text-primary-600'
+            }`}
+          >
+            {label}
+          </h3>
+        </div>
+      </div>
     </motion.button>
   );
 }
@@ -387,7 +389,7 @@ function ArtStyleStep({ selectedStyle, onSelect, options }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
         {ART_STYLES.map((style, index) => {
           const optionData = options?.art_style?.find((opt) => opt.value === style.value) || {};
           return (
@@ -438,7 +440,9 @@ function ColorPaletteStep({ selectedPalette, onSelect, options }) {
   );
 }
 
-function SubjectStep({ selectedSubject, onSelect, subjectOptions, artStyle }) {
+function SubjectStep({ selectedSubject, onSelect, subjectOptions, artStyle, artStyleValue }) {
+  const styleData = ART_STYLES.find((s) => s.value === artStyleValue);
+
   if (!artStyle) {
     return (
       <div className="text-center py-20">
@@ -467,7 +471,7 @@ function SubjectStep({ selectedSubject, onSelect, subjectOptions, artStyle }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
         {subjectOptions.map((option, index) => (
           <SubjectCard
             key={option.value}
@@ -475,6 +479,7 @@ function SubjectStep({ selectedSubject, onSelect, subjectOptions, artStyle }) {
             isSelected={selectedSubject === option.value}
             onClick={() => onSelect(option.value)}
             index={index}
+            styleGradient={styleData?.gradient}
           />
         ))}
       </div>
@@ -855,6 +860,7 @@ export default function QuestionnairePage() {
                       selectedSubject={responses.subject}
                       onSelect={handleSubjectSelect}
                       subjectOptions={subjectOptions}
+                      artStyleValue={responses.artStyle}
                       artStyle={
                         responses.artStyle
                           ? ART_STYLES.find((s) => s.value === responses.artStyle)?.label ||
